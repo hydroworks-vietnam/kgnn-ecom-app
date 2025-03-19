@@ -1,0 +1,13 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import Meta from '@/components/Meta/metadata.astro';
+import ProductList from '@/screens/ProducList.tsx';
+---
+
+<!doctype html>
+<html lang='en'>
+  <Layout>
+    <Meta slot='meta' title='Danh sách sản phẩm' />
+    <ProductList client:only slot='content' />
+  </Layout>
+</html>

@@ -1,0 +1,13 @@
+---
+import Meta from '@/components/Meta/metadata.astro';
+import Blog from '@/screens/Blog';
+import Layout from '@/layouts/Layout.astro';
+---
+
+<!doctype html>
+<html lang='en'>
+  <Layout>
+    <Meta slot='meta' title='Blog - Không gian nhà nông' />
+    <Blog slot='content' client:load />
+  </Layout>
+</html>
