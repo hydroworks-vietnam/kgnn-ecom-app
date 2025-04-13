@@ -1,0 +1,89 @@
+---
+import { Facebook, Twitter, Instagram } from 'lucide-react';
+
+// Sample data for the footer links
+const categories = [
+  { name: 'Thiết bị thuỷ canh', href: '#' },
+  { name: 'Thiết bị nhà kính', href: '#' },
+  { name: 'Công trình nhà kính', href: '#' },
+  { name: 'Hệ thống quản lí nhà kính', href: '#' },
+];
+
+const customerCare = [
+  { name: 'Liên hệ hỗ trợ', href: '#' },
+  { name: 'Khiếu nại đơn hàng', href: '#' },
+  { name: 'Dịch vụ hậu mãi', href: '#' },
+];
+
+const pages = [
+  { name: 'Blog', href: '#' },
+  { name: 'Browse the Shop', href: '#' },
+  { name: 'Category', href: '#' },
+  { name: 'Pre-Built Pages', href: '#' },
+  { name: 'Visual Composer Elements', href: '#' },
+  { name: 'WooCommerce Pages', href: '#' },
+];
+---
+
+<footer class='bg-gray-100 py-10 overflow-x-hidden'>
+  <div class='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
+    <div class='grid grid-cols-1 md:grid-cols-4 gap-8'>
+      {/* Logo and Subscription Form */}
+      <div>
+        <h2 class='text-2xl font-bold text-gray-900'>Không gian nhà nông</h2>
+        <div class='mt-4 text-gray-600'>
+          <div class="'text-lg font-bold text-gray-700">Thông tin liên hệ</div>
+          <div>Q9, TPHCM</div>
+        </div>
+      </div>
+
+      {/* Categories */}
+      <div>
+        <h3 class='text-lg font-semibold text-gray-900'>Danh mục</h3>
+        <ul class='mt-4 space-y-2'>
+          {
+            categories.map((item) => (
+              <li>
+                <a href={item.href} class='text-gray-600 hover:text-pink-500'>
+                  {item.name}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      {/* Customer Care */}
+      <div>
+        <h3 class='text-lg font-semibold text-gray-900'>Chăm sóc khách hàng</h3>
+        <ul class='mt-4 space-y-2'>
+          {
+            customerCare.map((item) => (
+              <li>
+                <a href={item.href} class='text-gray-600 hover:text-pink-500'>
+                  {item.name}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+      {/* Copyright and Social Media */}
+      <div class='mt-16'>
+        <div class='text-gray-600'>Bản quyền - ©Không gian nhà nông</div>
+        <div class="mt-2">Đã báo cáo bộ công thuơng</div>
+        <div class='flex space-x-4 mt-4'>
+          <a href='#' class='text-gray-600 hover:text-blue-500'>
+            <Facebook className='w-5 h-5' />
+          </a>
+          <a href='#' class='text-gray-600 hover:text-pink-500'>
+            <Instagram className='w-5 h-5' />
+          </a>
+          <a href='#' class='text-gray-600 hover:text-black'>
+            <Twitter className='w-5 h-5' />
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>

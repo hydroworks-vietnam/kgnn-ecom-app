@@ -1,0 +1,27 @@
+---
+// import { getLocaleFromUrl, useTranslations } from '../../utils/i18n';
+import { author as packageAuthor } from '../../../package.json';
+
+type Props = {
+  title?: string;
+  author?: string;
+  description?: string;
+  keywords?: string;
+};
+
+// const locale = getLocaleFromUrl(Astro.url);
+const props = Astro.props;
+// const t = useTranslations(locale);
+
+const title = props.title ? props.title : 'Không gian nhà nông';
+const author = props.author || packageAuthor;
+const description = props.description || 'description';
+const keywords = props.keywords;
+---
+
+<meta charset='UTF-8' />
+<meta name='viewport' content='width=device-width, initial-scale=1.0' />
+<title>{title}</title>
+<meta name='author' content={author} />
+<meta name='description' content={description} />
+{keywords && <meta name='keywords' content={keywords} />}

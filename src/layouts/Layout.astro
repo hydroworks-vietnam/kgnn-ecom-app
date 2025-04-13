@@ -1,22 +1,23 @@
-<!doctype html>
-<html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro Basics</title>
-	</head>
-	<body>
-		<slot />
-	</body>
-</html>
+---
+import Header from '@/components/Header/index.astro';
+import Footer from '@/components/Footer/PageFooter.astro';
+import '@/styles/global.css';
+---
 
-<style>
-	html,
-	body {
-		margin: 0;
-		width: 100%;
-		height: 100%;
-	}
-</style>
+<!doctype html>
+<html lang='en'>
+  <head>
+    <slot name='meta' />
+  </head>
+  <body class='max-w-full overflow-x-hidden'>
+    <Header />
+    <main class='px-4 md:px-8 lg:px-[10rem] max-w-full pb-20 overflow-x-hidden'>
+      <slot name='content' />
+      <slot name='modal' />
+      <slot name='dialog' />
+      <slot name='snack' />
+      <slot name='menu-drawer' />
+    </main>
+    <Footer />
+  </body>
+</html>
