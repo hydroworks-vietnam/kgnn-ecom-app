@@ -1,6 +1,7 @@
 import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
 import tailwind from '@astrojs/tailwind';
+import netlify from '@astrojs/netlify';
 
 export default defineConfig({
   integrations: [
@@ -22,11 +23,10 @@ export default defineConfig({
     }
   },
 
-  // Keep the Netlify adapter but customize its configuration
-  // adapter: netlify({
-  //   edgeMiddleware: true  // Use Netlify edge functions to preserve URLs
-  // }),
   output: 'server',
+
   // Ensure proper handling of dynamic routes
-  trailingSlash: 'never'
+  trailingSlash: 'never',
+
+  adapter: netlify()
 });
