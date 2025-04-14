@@ -4,8 +4,9 @@
   "author": "Jimmy Huynh",
   "version": "0.0.1",
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
+    "dev": "astro dev --mode local",
+    "build": "astro build --mode dev",
+    "live": "astro build --mode prod",
     "preview": "astro preview",
     "astro": "astro"
   },
