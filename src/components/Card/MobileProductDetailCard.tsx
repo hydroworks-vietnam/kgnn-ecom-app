@@ -303,7 +303,7 @@ export default function MobileProductDetailCard({ product, onClose, renderStars,
                 )}
               </div>
 
-              <div className="p-4 pb-6 mb-2 flex gap-3 flex-shrink-0 border-t">
+              <div className="p-4 mb-6 flex gap-3 flex-shrink-0 border-t">
                 <button
                   onClick={toggleVariantSelector}
                   className="flex-1 py-3 bg-white border border-primary text-primary rounded-lg flex items-center justify-center gap-2"

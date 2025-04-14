@@ -4,107 +4,9 @@ import ProductSlider from '@/components/Slider/ProductSlider';
 import BannerSlider from '@/components/Slider/BannerSlider';
 import BlogSection from '@/components/ui/BlogSection.astro';
 import { ChevronRight } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { getLatestProducts } from '@/services/productService';
 
-const featuredProducts = [
-  {
-    id: 1,
-    name: 'Cantilever chair',
-    code: 'Y523201',
-    price: '$42.00',
-    image: 'https://c.animaapp.com/m8dwba22KFnkpc/img/image-1.png',
-    isHighlighted: true,
-    colors: ['#FB2E86', '#05E6B7', '#FFA454'],
-  },
-  {
-    id: 2,
-    name: 'Cantilever chair',
-    code: 'Y523201',
-    price: '$42.00',
-    image: 'https://c.animaapp.com/m8dwba22KFnkpc/img/image-1168-2.png',
-    colors: ['#FB2E86', '#05E6B7', '#2B2BF5'],
-  },
-  {
-    id: 3,
-    name: 'Cantilever chair',
-    code: 'Y523201',
-    price: '$42.00',
-    image: 'https://c.animaapp.com/m8dwba22KFnkpc/img/image-1168.png',
-    colors: ['#FB2E86', '#05E6B7', '#2B2BF5'],
-  },
-  {
-    id: 4,
-    name: 'Cantilever chair',
-    code: 'Y523201',
-    price: '$42.00',
-    image: 'https://c.animaapp.com/m8dwba22KFnkpc/img/image-1168-1.png',
-    colors: ['#FB2E86', '#05E6B7', '#2B2BF5'],
-  },
-  {
-    id: 5,
-    name: 'Wooden Shelf',
-    code: 'Y724509',
-    price: '$49.00',
-    image: 'https://c.animaapp.com/m8dwba22KFnkpc/img/image-1168-3.png',
-    colors: ['#FB2E86', '#05E6B7', '#2B2BF5'],
-  },
-  {
-    id: 6,
-    name: 'Velvet Sofa',
-    code: 'Y935687',
-    price: '$120.00',
-    image: 'https://c.animaapp.com/m8dwba22KFnkpc/img/image-1168-4.png',
-    colors: ['#FB2E86', '#05E6B7', '#2B2BF5'],
-  },
-  {
-    id: 7,
-    name: 'Modern Lamp',
-    code: 'Y823469',
-    price: '$35.00',
-    image: 'https://c.animaapp.com/m8dwba22KFnkpc/img/image-32@2x.png',
-    colors: ['#FB2E86', '#05E6B7', '#2B2BF5'],
-  },
-  {
-    id: 8,
-    name: 'Office Chair',
-    code: 'Y754120',
-    price: '$68.00',
-    image: 'https://c.animaapp.com/m8dwba22KFnkpc/img/image-33@2x.png',
-    colors: ['#FB2E86', '#05E6B7', '#2B2BF5'],
-  },
-];
-
-const supportFeatures = [
-  {
-    id: 1,
-    title: '24/7 Support',
-    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-    icon: 'https://c.animaapp.com/m8dwba22KFnkpc/img/group-1.png',
-  },
-  {
-    id: 2,
-    title: '24/7 Support',
-    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-    icon: 'https://c.animaapp.com/m8dwba22KFnkpc/img/cashback-1.svg',
-  },
-];
-
-const highlights = [
-  {
-    id: 1,
-    text: 'All frames constructed with hardwood solids and laminates',
-    color: '#f52b70',
-  },
-  {
-    id: 2,
-    text: 'Reinforced with double wood dowels, glue, screw - nails corner blocks and machine nails',
-    color: '#2b2bf5',
-  },
-  {
-    id: 3,
-    text: 'Arms, backs and seats are structurally reinforced',
-    color: '#2bf5cc',
-  },
-];
 ---
 
 <Fragment>
@@ -128,17 +30,11 @@ const highlights = [
           </button>
         </div>
       </div>
-      <ProductSlider client:load products={featuredProducts}>
-        {
-          featuredProducts.map((product) => (
-            <ProductCardSlider {...product} client:load slidesPerView={2} />
-          ))
-        }
-      </ProductSlider>
+      <ProductSlider client:load />
     </div>
   </div>
 
-  <div class='text-center mb-4 px-4 md:px-0'>
+  <div class='text-center mb-2'>
     <h3 class='text-2xl md:text-4xl font-bold text-[#151875]'>
       Bài viết mới nhất
     </h3>

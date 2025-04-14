@@ -1,95 +1,68 @@
-import React from 'react';
-import { Card, CardContent } from "./index";
+import type { IProduct } from "@/types/product";
+import { formatCurrency } from "@/utils/helpers";
 import { ShoppingCartIcon, Heart, Search } from "lucide-react";
 
-interface ProductCardSliderProps {
-  id: number;
-  name: string;
-  code: string;
-  price: string;
-  image: string;
-  isHighlighted?: boolean;
-  colors: string[];
-  slidesPerView: number;
-}
+const ProductCardSlider = ({
+  id,
+  name,
+  sku,
+  unit_price,
+  discount_price,
+  images,
+  slidesPerView,
+}: IProduct & { slidesPerView: number }) => {
+  // Calculate width: 3 slides for mobile (w-1/3), 6 slides for desktop (w-1/6)
+  const widthClass = slidesPerView === 3 ? "w-1/3" : "w-1/6";
 
-const ProductCardSlider = ({ 
-  id, 
-  name, 
-  code, 
-  price, 
-  image, 
-  isHighlighted, 
-  colors,
-  slidesPerView 
-}: ProductCardSliderProps) => {
-  // Calculate width based on slides per view (2 for mobile, 4 for desktop)
-  const widthClass = slidesPerView === 2 ? 'w-1/2' : 'w-1/4';
-  
   return (
-    <div className={`${widthClass}`}>
-      <div className='rounded-lg transition-shadow h-full relative'>
-        {/* Product Image */}
-        <div className="flex justify-center mb-4 h-[180px] items-center">
+    <div className={`${widthClass} px-1 sm:px-2 mb-4 sm:mb-6 min-w-0 flex-shrink-0`}>
+      <div className="relative h-fit border border-gray-200 rounded-lg shadow-md bg-white transition-shadow hover:shadow-lg">
+        {/* Product Image Container */}
+        <div className="bg-gray-50 rounded-lg flex justify-center items-center mb-2 sm:mb-3 overflow-hidden">
           <img
-            src={image}
+            src={images[0]}
             alt={name}
-            className="max-h-[160px] object-contain transition-transform hover:scale-105"
+            className="w-full h-36 sm:h-48 object-contain transition-transform group-hover:scale-105"
           />
-        </div>
-        
-        {/* Action buttons that appear on hover */}
-        <div className="absolute top-6 left-6 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button className="bg-white rounded p-1 hover:bg-gray-100">
-            <ShoppingCartIcon className="w-4 h-4 text-blue-950" />
-          </button>
-          <button className="bg-white rounded p-1 hover:bg-gray-100">
-            <Heart className="w-4 h-4 text-blue-950" />
-          </button>
-          <button className="bg-white rounded p-1 hover:bg-gray-100">
-            <Search className="w-4 h-4 text-blue-950" />
-          </button>
-        </div>
-        
-        {/* View Details Button (conditionally rendered) */}
-        {isHighlighted && (
-          <div className="absolute bottom-[70px] left-0 right-0 flex justify-center">
-            <button className="bg-[#08D15F] text-white text-xs py-1 px-3 rounded">
-              View Details
+
+          {/* Quick action buttons that appear on hover */}
+          <div className="absolute top-1 sm:top-2 right-1 sm:right-2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button className="bg-white rounded-full p-1 hover:bg-gray-100 shadow-md">
+              <ShoppingCartIcon className="w-4 h-4 text-blue-950" />
+            </button>
+            <button className="bg-white rounded-full p-1 hover:bg-gray-100 shadow-md">
+              <Heart className="w-4 h-4 text-blue-950" />
+            </button>
+            <button className="bg-white rounded-full p-1 hover:bg-gray-100 shadow-md">
+              <Search className="w-4 h-4 text-blue-950" />
             </button>
           </div>
-        )}
-        
-        {/* Product Information */}
-        <div className="text-center">
-          <h3 className={`font-bold text-sm ${isHighlighted ? 'text-white' : 'text-[#151875]'}`}>
-            {name}
-          </h3>
-          
-          {/* Color Options */}
-          <div className="flex justify-center gap-1 my-2">
-            {colors.map((color, index) => (
-              <div
-                key={index}
-                className="w-2 h-2 rounded-full"
-                style={{ backgroundColor: color }}
-              />
-            ))}
+
+          {/* Sale tag */}
+          {discount_price > 0 && (
+            <div className="absolute top-1 sm:top-2 left-1 sm:left-2 bg-primary text-white text-xs font-semibold py-0.5 px-1 sm:px-2 rounded">
+              SALE
+            </div>
+          )}
+        </div>
+
+        <div className="text-primary text-center mb-1 sm:mb-2 text-sm sm:text-base">{name}</div>
+        {/* Product Info */}
+        <div className="text-center text-xs sm:text-sm pb-3 sm:pb-4">
+          <div className="flex justify-center items-center gap-1 sm:gap-2">
+            <p className="font-semibold text-blue-900">
+              {formatCurrency(unit_price)}
+            </p>
+            {discount_price > 0 && (
+              <p className="text-red-500 line-through">
+                {formatCurrency(unit_price - discount_price)}
+              </p>
+            )}
           </div>
-          
-          {/* Product Code */}
-          <p className={`text-xs font-medium mt-1 ${isHighlighted ? 'text-white' : 'text-[#151875]'}`}>
-            Code · {code}
-          </p>
-          
-          {/* Price */}
-          <p className={`text-sm font-semibold mt-1 ${isHighlighted ? 'text-white' : 'text-[#151875]'}`}>
-            {price}
-          </p>
         </div>
       </div>
     </div>
   );
 };
 
-export default ProductCardSlider; 
+export default ProductCardSlider;

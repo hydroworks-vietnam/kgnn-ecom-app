@@ -14,7 +14,7 @@ export const getProducts = (queryString: string): Promise<IProduct[]> => {
         reject({
           success: false,
           error: { 
-            message: res.data.message || 'No data returned', 
+            message: res.data.message || 'Không có dữ liệu', 
             code: res.data.statusCode || 500 
           },
         });
@@ -23,7 +23,29 @@ export const getProducts = (queryString: string): Promise<IProduct[]> => {
   });
 };
 
-export const getProductsBySearch = (message: any): Promise<IProduct[]> => {
+// export const getProductsBySearch = (message: any): Promise<IProduct[]> => {
+//   return new Promise((resolve, reject) => {
+//     apiCall<{ data: IProduct[] }>(message, (res) => {
+//       if (res.data.statusCode === 200 && res.data.message?.data) {
+//         resolve(res.data.message.data);
+//       } else {
+//         reject({
+//           success: false,
+//           error: { 
+//             message: res.data.message || 'No search results', 
+//             code: res.data.statusCode || 500 
+//           },
+//         });
+//       }
+//     });
+//   });
+// };
+
+export const getLatestProducts = (limit: number): Promise<IProduct[]> => {
+  const message = {
+    url: `/v1/products/latest?limit=${limit}`,
+    method: 'GET' as HttpAllowMethod,
+  };
   return new Promise((resolve, reject) => {
     apiCall<{ data: IProduct[] }>(message, (res) => {
       if (res.data.statusCode === 200 && res.data.message?.data) {
@@ -31,10 +53,7 @@ export const getProductsBySearch = (message: any): Promise<IProduct[]> => {
       } else {
         reject({
           success: false,
-          error: { 
-            message: res.data.message || 'No search results', 
-            code: res.data.statusCode || 500 
-          },
+          error: { message: res.data.message || 'Không có dữ liệu', code: res.data.statusCode || 500 },
         });
       }
     });

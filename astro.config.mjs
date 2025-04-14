@@ -25,7 +25,6 @@ export default defineConfig({
 
   output: 'server',
 
-  // Ensure proper handling of dynamic routes
   trailingSlash: 'never',
 
   adapter: netlify()
