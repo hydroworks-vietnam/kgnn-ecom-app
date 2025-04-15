@@ -4,20 +4,20 @@
   "author": "Jimmy Huynh",
   "version": "0.0.1",
   "scripts": {
-    "dev": "astro dev --mode local",
+    "dev": "astro dev",
     "build": "astro build --mode dev",
     "live": "astro build --mode prod",
     "preview": "astro preview",
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/netlify": "^6.2.5",
+    "@astrojs/netlify": "^6.3.0",
     "@nanostores/react": "^0.8.4",
     "@radix-ui/react-separator": "^1.1.2",
     "@types/dompurify": "^3.2.0",
     "@types/react": "^19.0.12",
     "@types/react-dom": "^19.0.4",
-    "astro": "5.6.1",
+    "astro": "5.7.0",
     "axios": "^1.8.4",
     "class-variance-authority": "^0.7.1",
     "date-fns": "^4.1.0",

@@ -1,5 +1,1 @@
-# Handle ID-only URLs
-/blog/* /blog/:splat 200
-
-# Redirect any slug-id URLs to ID-only format
-/blog/*-* /blog/:splat 301 
+/*  /.netlify/functions/render  200
