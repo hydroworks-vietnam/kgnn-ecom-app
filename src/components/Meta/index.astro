@@ -6,7 +6,6 @@ type Props = {
   title?: string;
   author?: string;
   description?: string;
-  keywords?: string;
 };
 
 // const locale = getLocaleFromUrl(Astro.url);
@@ -16,7 +15,6 @@ const props = Astro.props;
 const title = props.title ? props.title : 'Không gian nhà nông';
 const author = props.author || packageAuthor;
 const description = props.description || 'description';
-const keywords = props.keywords;
 ---
 
 <meta charset='UTF-8' />
@@ -24,4 +22,8 @@ const keywords = props.keywords;
 <title>{title}</title>
 <meta name='author' content={author} />
 <meta name='description' content={description} />
-{keywords && <meta name='keywords' content={keywords} />}
+<link
+  rel='icon'
+  type='image/png'
+  href='https://atm267252-s3user.vcos.cloudstorage.com.vn/LOCAL/product/logo_1739620073944.png'
+/>
