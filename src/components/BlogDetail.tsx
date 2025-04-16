@@ -7,6 +7,14 @@ interface BlogDetailProps {
 }
 
 export default function BlogDetail({ post }: BlogDetailProps) {
+  if(!post) {
+    return (
+      <article className="max-w-4xl mx-auto px-4 py-8">
+        <h3>Không tìm thấy bài viết</h3>
+      </article>
+    );
+  }
+
   // Format the date
   const date = new Date(post.created_at);
   const formattedDate = date.toLocaleDateString('vi-VN', {

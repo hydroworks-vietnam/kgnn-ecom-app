@@ -1,18 +1,23 @@
 ---
 import Layout from '@/layouts/Layout.astro';
+import Meta from '@/components/Meta/index.astro';
 ---
 
-<Layout title='404 - Page Not Found'>
-  <div class='text-center p-6' slot='content'>
-    <h1 class='text-6xl font-bold text-gray-800 mb-4'>Oops!</h1>
-    <p class='text-2xl text-gray-600 mb-6'>
-      Trang bạn đang tìm kiếm không tồn tại.
-    </p>
-    <a
-      href='/'
-      class='inline-block bg-blue-600 text-white font-semibold py-2 px-4 rounded hover:bg-blue-700 transition'
-    >
-      Quay lại trang chủ
-    </a>
-  </div>
-</Layout>
+<!doctype html>
+<html lang='en'>
+  <Layout title='404 - Page Not Found'>
+    <Meta slot='meta' title='Không gian nhà nông' />
+    <div class='text-center p-6' slot='content'>
+      <h1 class='text-6xl font-bold text-gray-800 mb-4'>Oops!</h1>
+      <p class='text-2xl text-gray-600 mb-6'>
+        Trang bạn đang tìm kiếm không tồn tại.
+      </p>
+      <a
+        href='/'
+        class='inline-block bg-gradient text-white font-semibold p-4 rounded-2xl hover:bg-blue-700 transition'
+      >
+        Quay lại trang chủ
+      </a>
+    </div>
+  </Layout>
+</html>

@@ -9,20 +9,17 @@ export const prerender = false;
 
 const { slug } = Astro.params;
 
-let post;
+let post = null;
 
 try {
   post = await postService.getPostBySlug(slug);
 
   if (!post) {
-    return Astro.redirect('/404', 302);
+    // return Astro.redirect('/404', 302);
   }
-
-  // Get related posts
-  // relatedPosts = await postService.getRelatedPosts(post.id, 3);
 } catch (error) {
   console.error('Error loading post:', error);
-  return Astro.redirect('/404', 302);
+  // return Astro.redirect('/404', 302);
 }
 ---
 
