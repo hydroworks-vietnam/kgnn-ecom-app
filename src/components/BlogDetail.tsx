@@ -2,12 +2,12 @@
 import type { Post } from '@/types/post';
 
 interface BlogDetailProps {
-  post: Post;
+  post: Post | null;
   // relatedPosts: Post[];
 }
 
 export default function BlogDetail({ post }: BlogDetailProps) {
-  if(!post) {
+  if (!post) {
     return (
       <article className="max-w-4xl mx-auto px-4 py-8">
         <h3>Không tìm thấy bài viết</h3>

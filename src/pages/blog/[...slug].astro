@@ -3,27 +3,26 @@ import { postService } from '@/services/postService';
 import BlogDetail from '@/components/BlogDetail';
 import Layout from '@/layouts/Layout.astro';
 import Meta from '@/components/Meta/index.astro';
+import type { Post } from '@/types/post';
 
 // Tell Astro this is a dynamic route
 export const prerender = false;
 
 const { slug } = Astro.params;
 
-let post = null;
+let post: Post | null = null;
+let error = ''
 
-try {
-  post = await postService.getPostBySlug(slug);
-
-  if (!post) {
-    // return Astro.redirect('/404', 302);
-  }
-} catch (error) {
-  console.error('Error loading post:', error);
-  // return Astro.redirect('/404', 302);
-}
+await postService.getPostBySlug(slug)
+.then((result) => {
+  post = result;
+}).catch((error) => {
+  error = JSON.stringify(error);
+});
 ---
 
 <Layout>
   <Meta slot='meta' title={post.title} />
   <BlogDetail slot='content' client:load post={post} />
+  <div slot='error'>{error}</div>
 </Layout>
