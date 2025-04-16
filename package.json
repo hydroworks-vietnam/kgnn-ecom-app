@@ -5,8 +5,7 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build --mode dev && cp ./src/assets/_redirects dist/_redirects",
-    "live": "astro build --mode prod && cp ./src/assets/_redirects dist/_redirects",
+    "build": "astro build",
     "preview": "astro preview",
     "astro": "astro"
   },
