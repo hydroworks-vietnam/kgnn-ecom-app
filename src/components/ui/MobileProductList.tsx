@@ -40,7 +40,7 @@ const ProductCardSkeleton = () => {
 
 const skeletonArray = Array(6).fill(0);
 
-const MobileProductList: React.FC = () => {
+const MobileProductList: React.FC<{ handleAddToCart: (product: IProduct, quantity: number) => void }> = ({ handleAddToCart }) => {
   const [products, setProducts] = useState<IProduct[]>([]);
   const [productsLoading, setProductsLoading] = useState<boolean>(true);
   const [productsError, setProductsError] = useState<string | null>(null);
@@ -157,7 +157,7 @@ const MobileProductList: React.FC = () => {
           <div className="w-full grid grid-cols-2 gap-4">
             {products.map((product) => (
               <div key={product.id} className="w-full">
-                <ProductCardFull product={product} />
+                <ProductCardFull product={product} onAddToCart={handleAddToCart} />
               </div>
             ))}
           </div>

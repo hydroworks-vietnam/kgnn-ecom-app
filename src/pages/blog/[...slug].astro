@@ -11,7 +11,6 @@ export const prerender = false;
 const { slug } = Astro.params;
 
 let post: Post | null = null;
-let error = ''
 
 await postService.getPostBySlug(slug)
 .then((result) => {
@@ -24,5 +23,4 @@ await postService.getPostBySlug(slug)
 <Layout>
   <Meta slot='meta' title={post.title} />
   <BlogDetail slot='content' client:load post={post} />
-  <div slot='error'>{error}</div>
 </Layout>

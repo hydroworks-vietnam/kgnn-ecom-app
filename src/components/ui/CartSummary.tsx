@@ -13,12 +13,12 @@ const CartSummary = () => {
   return (
     <div className="py-4 space-y-2">
       <div className="flex justify-between text-sm">
-        <span className="text-gray-600">Subtotal</span>
+        <span className="text-gray-600">Tổng đơn hàng</span>
         <span className="text-gray-900">{formatCurrency(subtotal)}</span>
       </div>
       {discount > 0 && (
         <div className="flex justify-between text-sm">
-          <span className="text-gray-600">Discount</span>
+          <span className="text-gray-600">Giảm giá</span>
           <span className="text-gray-900">
             ({$discountRate}%) -{formatCurrency(discount)}
           </span>
@@ -31,7 +31,7 @@ const CartSummary = () => {
         <span className="text-gray-900">+{formatCurrency(tax)}</span>
       </div>
       <div className="flex justify-between text-base font-semibold">
-        <span className="text-gray-900">Total</span>
+        <span className="text-gray-900">Tổng cộng</span>
         <span className="text-gray-900">{formatCurrency(total)}</span>
       </div>
     </div>

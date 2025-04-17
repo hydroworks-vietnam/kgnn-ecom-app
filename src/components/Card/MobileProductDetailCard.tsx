@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, type JSX } from 'react';
+import { useState, useEffect, useRef, type JSX } from 'react';
 import {
   ShoppingCartIcon,
   X,
@@ -11,16 +11,18 @@ import {
 import { cn, formatCurrency } from '@/utils/helpers';
 import SafetyImage from '../Image/SafetyImage';
 import type { IProduct } from '@/types/product';
+import ReviewStar from '../Review/Star';
+import { isAddCartAnimationFinished } from '@/store/cart';
 
 type ProductDetailCardProps = {
   product: IProduct,
   onClose: () => void;
-  renderStars: (rating: number) => JSX.Element[];
   handleAddToCart: (product: IProduct, quantity: number) => void;
+  handleBuyItNow: (product: IProduct, quantity: number) => void;
 }
 
 // Mobile bottom sheet product detail component
-export default function MobileProductDetailCard({ product, onClose, renderStars, handleAddToCart }: ProductDetailCardProps) {
+export default function MobileProductDetailCard({ product, onClose, handleAddToCart, handleBuyItNow }: ProductDetailCardProps) {
   const [quantity, setQuantity] = useState(1);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [activeTab, setActiveTab] = useState('description');
@@ -126,7 +128,13 @@ export default function MobileProductDetailCard({ product, onClose, renderStars,
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex flex-col justify-end">
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex flex-col justify-end"
+      style={{
+        backgroundColor: 'rgba(0, 0, 0, 0.4)', // Semi-transparent black
+        zIndex: 40 // Lower than floating elements
+      }}
+      onClick={onClose}
+    >
       <div
         ref={sheetRef}
         className={`relative bg-white rounded-t-xl w-full overflow-hidden transition-all duration-300 ${getSheetStyle()}`}
@@ -135,6 +143,7 @@ export default function MobileProductDetailCard({ product, onClose, renderStars,
         <div
           className="w-full flex justify-center py-2 cursor-grab"
           onTouchStart={handleTouchStart}
+          onClick={(e) => e.stopPropagation()}
         >
           <div className="w-10 h-1 bg-gray-300 rounded-full"></div>
         </div>
@@ -207,7 +216,7 @@ export default function MobileProductDetailCard({ product, onClose, renderStars,
               </div>
               <div className="flex items-center gap-2">
                 <div className="flex text-yellow-400 text-sm">
-                  {renderStars ? renderStars(5) : '★★★★★'}
+                  <ReviewStar rating={5} />
                 </div>
                 <span className="text-gray-500 text-xs">({5})</span>
               </div>
@@ -362,12 +371,17 @@ export default function MobileProductDetailCard({ product, onClose, renderStars,
             </div>
 
             <button
-              onClick={() => {
-                handleAddToCart(product, quantity);
-              }}
+              onClick={() => handleAddToCart(product, quantity)}
               className="w-full py-3 bg-gradient text-white rounded-lg"
+                disabled={isAddCartAnimationFinished.get()}
             >
               Thêm vào giỏ hàng
+            </button>
+            <button
+              onClick={() => handleBuyItNow(product, quantity)}
+              className="w-full py-3 bg-gradient text-white rounded-lg"
+            >
+              Mua ngay
             </button>
           </div>
         </div>

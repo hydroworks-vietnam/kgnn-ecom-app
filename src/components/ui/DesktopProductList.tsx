@@ -40,7 +40,7 @@ const ProductCardSkeleton = () => {
 
 const skeletonArray = Array(6).fill(0);
 
-const DesktopProductList: React.FC = () => {
+const DesktopProductList: React.FC<{ handleAddToCart: (product: IProduct, quantity: number) => void }> = ({ handleAddToCart }) => {
   const [products, setProducts] = useState<IProduct[]>([]);
   const [productsLoading, setProductsLoading] = useState<boolean>(true);
   const [productsError, setProductsError] = useState<string | null>(null);
@@ -98,7 +98,7 @@ const DesktopProductList: React.FC = () => {
       <nav className="text-sm text-gray-500 mb-4">
         <a href="/" className="hover:underline">Trang chủ</a>
         <span> / </span>
-        <span className="text-purple-600">Danh sách sản phẩm</span>
+      <span className="text-purple-600">Danh sách sản phẩm</span>
       </nav>
 
       {/* Page Title */}
@@ -108,42 +108,6 @@ const DesktopProductList: React.FC = () => {
       <div className="flex flex-col md:flex-row gap-8">
         {/* Sidebar */}
         <aside className="w-full md:w-1/4 bg-white shadow-lg rounded-lg p-6 border border-gray-200">
-          {/* Product Brand */}
-          {/* <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">Product Brand</h3>
-            <ul className="space-y-2">
-              {[
-                'Coaster Furniture',
-                'Fusion Dot High Fashion',
-                'Unique Furniture Restorer',
-                'Dream Furniture Flipping',
-                'Young Repurposed',
-                'Green DIY Furniture',
-              ].map((brand) => (
-                <li key={brand}>
-                  <label className="flex items-center">
-                    <input type="checkbox" className="mr-2" />
-                    <span className="text-gray-600">{brand}</span>
-                  </label>
-                </li>
-              ))}
-            </ul>
-          </div> */}
-
-          {/* Discount Offer */}
-          {/* <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">Discount Offer</h3>
-            <ul className="space-y-2">
-              {['20% Cashback', '5% Cashback Offer', '25% Discount Offer'].map((offer) => (
-                <li key={offer}>
-                  <label className="flex items-center">
-                    <input type="checkbox" className="mr-2" />
-                    <span className="text-gray-600">{offer}</span>
-                  </label>
-                </li>
-              ))}
-            </ul>
-          </div> */}
 
           <CategorySidebar onCategorySelect={handleCategorySelect} />
 
@@ -285,7 +249,7 @@ const DesktopProductList: React.FC = () => {
                 }
               >
                 {products.map((product) => (
-                  <ProductCardFull key={product.id} product={product} viewMode={viewMode} />
+                  <ProductCardFull key={product.id} product={product} viewMode={viewMode} onAddToCart={handleAddToCart} />
                 ))}
               </div>
             )}

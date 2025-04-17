@@ -1,6 +1,7 @@
 ---
 import Layout from '@/layouts/Layout.astro';
 import Meta from '@/components/Meta/index.astro';
+import { Button } from '@/components/Button/Rounded';
 ---
 
 <!doctype html>
@@ -11,13 +12,12 @@ import Meta from '@/components/Meta/index.astro';
       <h1 class='text-6xl font-bold text-gray-800 mb-4'>Oops!</h1>
       <p class='text-2xl text-gray-600 mb-6'>
         Trang bạn đang tìm kiếm không tồn tại.
-      </p>
-      <a
-        href='/'
-        class='inline-block bg-gradient text-white font-semibold p-4 rounded-2xl hover:bg-blue-700 transition'
+      <Button
+        variant='default'
+        size='lg'
       >
         Quay lại trang chủ
-      </a>
+      </Button>
     </div>
   </Layout>
 </html>

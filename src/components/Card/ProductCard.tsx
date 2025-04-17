@@ -7,11 +7,10 @@ interface ProductCardProps {
   code: string;
   price: string;
   image: string;
-  isHighlighted?: boolean;
   colors: string[];
 }
 
-const ProductCard = ({ id, name, code, price, image, isHighlighted, colors }: ProductCardProps) => {
+const ProductCard = ({ id, name, code, price, image, colors }: ProductCardProps) => {
   return (
     <div className="flex justify-center gap-6 mt-6 mb-16">
       <Card
@@ -31,8 +30,7 @@ const ProductCard = ({ id, name, code, price, image, isHighlighted, colors }: Pr
             <HeartIcon className="w-[17px] h-[17px]" />
             <SearchIcon className="w-[15px] h-[15px]" />
           </div>
-        </div>
-        
+        </div>        
         <CardContent className="pt-4 pb-6 flex flex-col items-center">
           <h3
             className={`text-lg font-bold`}

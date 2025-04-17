@@ -1,38 +1,13 @@
 ---
-import ProductCardSlider from '@/components/Card/ProductCardSlider';
-import ProductSlider from '@/components/Slider/ProductSlider';
 import BannerSlider from '@/components/Slider/BannerSlider';
 import BlogSection from '@/components/ui/BlogSection.astro';
-import { ChevronRight } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { getLatestProducts } from '@/services/productService';
-
+import HomeProductSection from '@/components/ui/HomeProductSection';
 ---
 
 <Fragment>
   <BannerSlider client:load />
 
-  <div class='my-8 md:my-16'>
-    <div class='mx-auto'>
-      <div class='px-4 md:px-0 mb-8'>
-        <div class='flex items-center justify-center gap-4 relative'>
-          <h3 class='text-2xl md:text-4xl font-bold text-[#151875]'>
-            Sản phẩm nổi bật
-          </h3>
-          <button
-            class='bg-black text-white px-4 md:px-6 py-2 rounded-full transition-colors flex items-center gap-2 group hover:shadow-xl hover:bg-black/80 whitespace-nowrap text-sm md:text-base'
-            onclick="window.location.href='/products'"
-          >
-            <span>Xem tất cả</span>
-            <ChevronRight
-              className='w-4 h-4 transition-transform group-hover:translate-x-1'
-            />
-          </button>
-        </div>
-      </div>
-      <ProductSlider client:load />
-    </div>
-  </div>
+  <HomeProductSection client:load />
 
   <div class='text-center mb-2'>
     <h3 class='text-2xl md:text-4xl font-bold text-[#151875]'>
@@ -40,25 +15,6 @@ import { getLatestProducts } from '@/services/productService';
     </h3>
     <BlogSection />
   </div>
-
-  <script>
-    function updateSlidesPerView() {
-      const isMobile = window.innerWidth < 768;
-      const slidesPerView = isMobile ? 2 : 4;
-
-      document
-        .querySelectorAll('[data-component="product-card-slider"]')
-        .forEach((card: any) => {
-          if (card.__svelte && card.__svelte.slidesPerView) {
-            card.__svelte.slidesPerView = slidesPerView;
-          }
-        });
-    }
-
-    // Run on load and window resize
-    window.addEventListener('load', updateSlidesPerView);
-    window.addEventListener('resize', updateSlidesPerView);
-  </script>
 
   <style>
     @keyframes bounce {

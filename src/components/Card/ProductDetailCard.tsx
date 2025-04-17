@@ -1,21 +1,42 @@
-import { useState, type JSX } from 'react';
+import { useEffect, useMemo, useState, type JSX } from 'react';
 import SafetyImage from '../Image/SafetyImage';
 import { ShoppingCartIcon, X, History, ShieldCheck, Truck, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { IProduct } from '@/types/product';
 import { cn, formatCurrency } from '@/utils/helpers';
+import useCartStore, { isAddCartAnimationFinished } from '@/store/cart';
+import ReviewStar from '../Review/Star';
 
 type ProductDetailCardProps = {
   product: IProduct,
   onClose: () => void;
-  renderStars: (rating: number) => JSX.Element[];
   handleAddToCart: (product: IProduct, quantity: number) => void;
+  handleBuyItNow: (product: IProduct, quantity: number) => void;
 }
 
 export default function ProductDetailCard(props: ProductDetailCardProps) {
-  const { product, onClose, renderStars, handleAddToCart } = props;
+  const { product, onClose, handleAddToCart, handleBuyItNow } = props;
+  const { getCartItemQuantity } = useCartStore();
   const [quantity, setQuantity] = useState(1);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [activeTab, setActiveTab] = useState<'features' | 'specs' | 'reviews'>('features');
+
+  const videoFrame = useMemo(() => {
+    if (!product.video_link) return null;
+
+    return (
+      <iframe
+        width="100%"
+        height={window.innerWidth >= 960 ? 300 : 120}
+        src={product.video_link}
+        title="Lounge Sofa Demo"
+        referrerPolicy="strict-origin-when-cross-origin"
+        frameBorder="0"
+        allowFullScreen
+        className="rounded-lg"
+      />
+    );
+  }, [product.video_link]);
+
 
   // Functions to handle sliding
   const nextImage = () => {
@@ -30,22 +51,42 @@ export default function ProductDetailCard(props: ProductDetailCardProps) {
     );
   };
 
+  // Find this product in cart to get its quantity
+  useEffect(() => {
+    const cartItem = getCartItemQuantity(product.id);
+    if (cartItem) {
+      setQuantity(cartItem);
+    } else {
+      setQuantity(1);
+    }
+  }, [product.id, getCartItemQuantity]);
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-[60%] h-[90%] relative shadow-xl overflow-y-scroll scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
+    <div
+      className="fixed inset-0 flex items-center justify-center"
+      style={{
+        backgroundColor: 'rgba(0, 0, 0, 0.4)',
+        zIndex: 40,
+        pointerEvents: 'auto'
+      }}
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-lg p-6 w-full max-w-[50%] h-[90%] relative shadow-xl overflow-y-scroll scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100"
+        onClick={(e) => e.stopPropagation()} // Prevent closing when clicking modal content
+      >
         <button
           onClick={(e) => {
             e.stopPropagation();
             onClose();
           }}
-          className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+          className="absolute top-1 right-0 border-2 border-red-500 hover:text-red-700  hover:border-red-700 rounded-full p-1"
         >
-          <X />
+          <X className="w-5 h-5 text-red-500" />
         </button>
 
-        {/* Product Name and "New" Badge */}
-        <div className="flex items-center justify-between my-3 pl-3">
-          <h2 className="text-xl font-bold text-blue-900 uppercase">
+        <div className="flex items-center justify-between my-4">
+          <h2 className="text-xl font-bold text-blue-900 uppercase ml-3">
             {product.name}
           </h2>
           <span className="bg-orange-500 text-white text-xs font-semibold px-2 py-1 rounded">
@@ -53,9 +94,7 @@ export default function ProductDetailCard(props: ProductDetailCardProps) {
           </span>
         </div>
 
-        {/* Product Image and Details */}
         <div className="flex gap-10">
-          {/* Image Section with Sliding Gallery */}
           <div className="w-1/2 relative">
             <SafetyImage
               clazz="rounded-lg w-full h-96 object-cover"
@@ -110,33 +149,43 @@ export default function ProductDetailCard(props: ProductDetailCardProps) {
 
             {/* Rating and Price */}
             <div className="flex items-center gap-2 mb-4">
-              <div className="flex">{renderStars(5)}</div>
+              <div className="flex">
+                <ReviewStar rating={5} />
+              </div>
               <span className="text-sm text-gray-500">
                 ({124} đánh giá)
               </span>
             </div>
 
             {/* Quantity Selector and Add to Cart */}
-            <div className="flex items-center gap-4 mb-4">
+            <div className="flex items-center gap-3 mb-4">
               <button
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                className="border border-gray-300 rounded-full w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-100"
+                className="border border-gray-300 rounded-full w-6 h-6 flex items-center justify-center text-gray-600 hover:bg-gray-100"
               >
                 -
               </button>
               <span className="text-gray-700">{quantity}</span>
               <button
                 onClick={() => setQuantity(quantity + 1)}
-                className="border border-gray-300 rounded-full w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-100"
+                className="border border-gray-300 rounded-full w-6 h-6 flex items-center justify-center text-gray-600 hover:bg-gray-100"
               >
                 +
               </button>
               <button
                 onClick={() => handleAddToCart(product, quantity)}
-                className="bg-gradient text-white px-4 py-2 ml-8 rounded-lg flex items-center gap-2 hover:bg-orange-600"
+                disabled={!isAddCartAnimationFinished.get()}
+                className={`text-white p-3 rounded-lg gap-2 flex items-center hover:shadow-xl ${!isAddCartAnimationFinished.get() ? 'cursor-not-allowed bg-gray-300' : 'bg-gradient text-white'}`}
               >
                 <ShoppingCartIcon className="w-4 h-4" />
-                Thêm vào giỏ
+                <span className='text-sm'>Thêm vào giỏ</span>
+              </button>
+              <button
+                onClick={() => handleBuyItNow(product, quantity)}
+                className="text-primary border border-primary p-3 rounded-lg gap-2 flex items-center hover:shadow-xl"
+              >
+                <ShoppingCartIcon className="w-4 h-4" />
+                <span className='text-sm'>Mua ngay</span>
               </button>
             </div>
 
@@ -204,19 +253,10 @@ export default function ProductDetailCard(props: ProductDetailCardProps) {
                 <p className="text-gray-600 mt-2">
                   {product.description}
                 </p>
-                  <div className="relative rounded-lg overflow-hidden mt-8">
-                  <iframe
-                    width="100%"
-                    height={window.innerWidth >= 960 ? 300 : 120}
-                    src={product.video_link || "https://www.youtube.com/embed/z8QLP0vTyyE?si=hb6kiXe31P4NhvGz"}
-                    title="Lounge Sofa Demo"
-                    referrerPolicy="strict-origin-when-cross-origin"
-                    frameBorder="0"
-                    allowFullScreen
-                    className="rounded-lg"
-                  />
+                <div className="relative rounded-lg overflow-hidden mt-8">
+                  {videoFrame}
                 </div>
-            </div>
+              </div>
             )}
             {activeTab === 'specs' && (
               <div>

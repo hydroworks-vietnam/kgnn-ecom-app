@@ -1,30 +1,52 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/utils/helpers';
 import { getLatestProducts } from '@/services/productService';
 import ProductCardSlider from '@/components/Card/ProductCardSlider';
+import type { IProduct } from '@/types/product';
+import ProductDetailCard from '../Card/ProductDetailCard';
+import MobileProductDetailCard from '../Card/MobileProductDetailCard';
+import useCartStore from '@/store/cart';
 
-const Productslider = () => {
+const ProductSlider = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [slidesPerView, setSlidesPerView] = useState(6);
-  const sliderRef = useRef<HTMLDivElement>(null);
-
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<IProduct | null>(null);
+  const { addCartItem } = useCartStore();
   const [latestProducts, setLatestProducts] = useState([]);
+
   useEffect(() => {
     fetchLatestlatestProducts();
   }, []);
 
-  const fetchLatestlatestProducts = async () => {
-    try {
-      const res = await getLatestProducts(6);
+  const fetchLatestlatestProducts = () => {
+    getLatestProducts(6).then((res) => {
       setLatestProducts(res);
-    } catch (err) {
+    }).catch((err) => {
       console.log("🚀 ~ fetchLatestlatestProducts ~ err:", err);
-    }
+    });
   };
 
+  const onAddToCart = (product: IProduct, quantity: number) => {
+    addCartItem({
+      product,
+      quantity,
+      options: {},
+    });
+  };
+
+  const onBuyItNow = (product: IProduct, quantity: number) => {
+    addCartItem({
+      product,
+      quantity,
+      options: {},
+    });
+    setIsPopupOpen(false);
+  };
+  
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 768) {
@@ -40,10 +62,6 @@ const Productslider = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-
-  if (!latestProducts || latestProducts.length === 0) {
-    return <div className="w-full mx-auto">Tiếc quá, chưa có sản phẩm phù hợp</div>;
-  }
 
   const maxIndex = Math.max(0, Math.ceil((latestProducts.length - slidesPerView) / slidesPerView));
   const shouldShowNavigation = latestProducts.length > slidesPerView;
@@ -77,14 +95,19 @@ const Productslider = () => {
             transform: `translateX(-${currentIndex * (100 / slidesPerView)}%)`,
           }}
         >
-          {latestProducts.map((product) => (
+          {latestProducts.length > 0 ? latestProducts.map((product) => (
             <ProductCardSlider
               key={product.id}
-              {...product}
+              item={product}
               slidesPerView={slidesPerView}
-              client:load
+              openDetail={(item) => {
+                setSelectedProduct(item);
+                setIsPopupOpen(true);
+              }}
             />
-          ))}
+          )) : (
+            <div className="w-full py-2 text-center text-gray-500">Tiếc quá, chưa có sản phẩm phù hợp</div>
+          )}
         </div>
       </div>
 
@@ -117,8 +140,27 @@ const Productslider = () => {
           </div>
         </>
       )}
+      {isPopupOpen && selectedProduct && (
+        (isMobile ? (
+          <MobileProductDetailCard
+            product={selectedProduct}
+            key={selectedProduct.id}
+            onClose={() => setIsPopupOpen(false)}
+            handleAddToCart={onAddToCart}
+            handleBuyItNow={onBuyItNow}
+          />
+        ) : (
+          <ProductDetailCard
+            product={selectedProduct}
+            key={selectedProduct?.id}
+            onClose={() => setIsPopupOpen(false)}
+            handleAddToCart={onAddToCart}
+            handleBuyItNow={onBuyItNow}
+          />
+        ))
+      )}
     </div>
   );
 };
 
-export default Productslider;
+export default ProductSlider;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { getCategories } from '@/services/categoryService'; // Adjust import path
 import type { ICategory, ISubcategory } from '@/types/product';
 
@@ -7,26 +7,16 @@ interface CategorySidebarProps {
 }
 
 const CategorySidebarSkeleton: React.FC = () => {
-  // Generate dummy arrays for skeleton UI
-  const categoryCount = 5;
-  const subcategoryCount = 4;
-
   return (
     <div className="mb-6">
-      {/* Title skeleton */}
       <div className="h-6 bg-gray-200 rounded w-3/4 mb-4 animate-pulse"></div>
-
-      {/* Categories skeleton */}
       <div className="space-y-4">
-        {Array(categoryCount).fill(0).map((_, index) => (
+        {Array(5).fill(0).map((_, index) => (
           <div key={`cat-skeleton-${index}`}>
-            {/* Category button skeleton */}
             <div className="w-full h-10 bg-gray-200 rounded animate-pulse mb-2"></div>
-
-            {/* Show subcategories for the first category to mimic expanded state */}
             {index === 0 && (
               <div className="pl-4 mt-2 space-y-2">
-                {Array(subcategoryCount).fill(0).map((_, subIndex) => (
+                {Array(4).fill(0).map((_, subIndex) => (
                   <div
                     key={`subcat-skeleton-${subIndex}`}
                     className="w-3/4 h-6 bg-gray-200 rounded animate-pulse"
@@ -47,6 +37,7 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({ onCategorySelect }) =
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<ICategory | null>(null);
   const [selectedSubcategory, setSelectedSubcategory] = useState<ISubcategory | null>(null);
+  const sidebarRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -55,7 +46,6 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({ onCategorySelect }) =
         const response = await getCategories();
 
         if (response && Array.isArray(response)) {
-          // Add 'All' subcategory to each category
           const processedCategories = response.map((category) => ({
             ...category,
             sub_categories: [
@@ -69,16 +59,9 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({ onCategorySelect }) =
           }));
 
           setCategories(processedCategories);
-
-          // Set initial selection
-          if (processedCategories.length > 0) {
-            const firstCategory = processedCategories[0];
-            setSelectedCategory(firstCategory);
-            setSelectedSubcategory(firstCategory.sub_categories[0]);
-
-            // Trigger initial category selection
-            onCategorySelect(firstCategory, firstCategory.sub_categories[0]);
-          }
+          setSelectedCategory(processedCategories[0]);
+          setSelectedSubcategory(processedCategories[0].sub_categories[0]);
+          onCategorySelect(processedCategories[0], processedCategories[0].sub_categories[0]);
 
           setIsLoading(false);
         } else {
@@ -107,58 +90,77 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({ onCategorySelect }) =
     fetchCategories();
   }, []);
 
-  // Handle category selection
+  useEffect(() => {
+    const handleScroll = () => {
+      if (sidebarRef.current) {
+        sidebarRef.current.style.top = `${window.scrollY}px`;
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
   const handleCategorySelect = (category: ICategory) => {
     setSelectedCategory(category);
     setSelectedSubcategory(category.sub_categories[0]);
     onCategorySelect(category, category.sub_categories[0]);
   };
 
-  // Handle subcategory selection
   const handleSubcategorySelect = (subcategory: ISubcategory) => {
     setSelectedSubcategory(subcategory);
     onCategorySelect(selectedCategory!, subcategory);
   };
 
   return (
-    <div className="mb-6">
-      <h3 className="text-lg font-semibold text-gray-800 mb-4">Danh mục</h3>
-      {categories.length < 1 ? <CategorySidebarSkeleton /> :
-        (<div className="space-y-2">
-          {categories.map(category => (
-            <div key={category.id}>
-              <button
-                onClick={() => handleCategorySelect(category)}
-                className={`w-full text-left px-3 py-2 rounded text-gray-800 font-medium ${selectedCategory?.id === category.id && selectedSubcategory?.id === 'all'
-                  ? 'bg-purple-100 text-purple-700'
-                  : 'hover:bg-gray-100'
-                  }`}
-              >
-                {category.name}
-              </button>
+    <div
+      ref={sidebarRef}
+      className="sticky z-10 transition-all duration-300 overflow-y-auto custom-scrollbar h-screen"
+    >
+      <div className="p-4">
+        <h3 className="text-lg font-semibold text-gray-800 mb-4">Danh mục</h3>
+        {categories.length < 1 ? (
+          <CategorySidebarSkeleton />
+        ) : (
+          <div>
+            {categories.map((category) => (
+              <div key={category.id} className="mb-1">
+                <button
+                  onClick={() => handleCategorySelect(category)}
+                  className={`w-full text-left px-3 py-2 rounded text-gray-800 text-lg ${selectedCategory?.id === category.id && selectedSubcategory?.id === 'all'
+                      ? 'bg-purple-100 text-purple-700'
+                      : 'hover:bg-gray-100'
+                    }`}
+                >
+                  {category.name}
+                </button>
 
-              {selectedCategory?.id === category.id && (
-                <div className="pl-4 mt-2 space-y-1">
-                  {category.sub_categories.map((subcategory) => (
-                    <button
-                      key={subcategory.id}
-                      onClick={() => handleSubcategorySelect(subcategory)}
-                      className={`w-full text-left px-3 py-1 text-sm rounded transition-colors duration-200 ${selectedSubcategory?.id === subcategory.id
-                        ? subcategory.id === 'all'
-                          ? 'bg-purple-100 text-purple-700'
-                          : 'bg-purple-500 text-white font-semibold'
-                        : 'text-gray-600 hover:bg-gray-50'
-                        }`}
-                    >
-                      {subcategory.name}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>)
-      }
+                {selectedCategory?.id === category.id && (
+                  <div className="pl-4 mt-2 space-y-1 mb-2">
+                    {category.sub_categories.map((subcategory) => (
+                      <button
+                        key={subcategory.id}
+                        onClick={() => handleSubcategorySelect(subcategory)}
+                        className={`w-full text-left px-3 py-1 text-md rounded transition-colors duration-200 ${selectedSubcategory?.id === subcategory.id
+                            ? subcategory.id === 'all'
+                              ? 'bg-purple-100 text-purple-700'
+                              : 'bg-purple-500 text-white font-semibold'
+                            : 'text-gray-600 hover:bg-gray-50'
+                          }`}
+                      >
+                        {subcategory.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

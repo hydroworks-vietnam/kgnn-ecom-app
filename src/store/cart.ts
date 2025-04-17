@@ -6,6 +6,7 @@ export const isCartOpen = atom(false)
 export const promoCodeStore = atom<string>('');
 export const discountRateStore = atom<number>(0);
 export const taxRateStore = atom<number>(4);
+export const isAddCartAnimationFinished = atom(true);
 
 /**
  * Adds or updates a cart item based on whether it already exists in the cart.
@@ -50,6 +51,10 @@ function updateExistingItemQuantity(
         }
       : item
   );
+}
+
+function getCartItemQuantity(productId: string): number {
+  return cartItemsStore.get().find(item => item.product.id === productId)?.quantity || 0;
 }
 
 // function determineNewQuantity(currentQuantity: number, newQuantity: number): number {
@@ -160,6 +165,7 @@ export const useCartStore = () => {
     calculateDiscount,
     calculateTax,
     calculateTotal,
+    getCartItemQuantity,
   };
 };
 

@@ -44,8 +44,8 @@ const TopBar = () => {
             <div className="relative" onClick={toggleCart}>
               <ShoppingCartIcon className="w-4 h-4 sm:w-5 sm:h-5 cursor-pointer hover:text-black" />
               {$totalQuantity > 0 && (
-                <span className="absolute -top-2 -right-2 bg-primary text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                  {$totalQuantity}
+                <span className="absolute -top-2 -right-2 bg-primary text-white text-[10px] rounded-full h-4 w-4 flex items-center justify-center">
+                  {$totalQuantity > 99 ? '99+' : $totalQuantity}
                 </span>
               )}
             </div>
