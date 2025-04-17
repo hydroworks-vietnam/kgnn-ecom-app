@@ -21,13 +21,13 @@ export default function ProductDetailCard(props: ProductDetailCardProps) {
   const [activeTab, setActiveTab] = useState<'features' | 'specs' | 'reviews'>('features');
 
   const videoFrame = useMemo(() => {
-    if (!product.video_link) return null;
+    if (!product.video_link || !getEmbedLink(product.video_link)) return null;
 
     return (
       <iframe
         width="100%"
         height={window.innerWidth >= 960 ? 300 : 120}
-        src={product.video_link}
+        src={getEmbedLink(product.video_link)}
         title="Lounge Sofa Demo"
         referrerPolicy="strict-origin-when-cross-origin"
         frameBorder="0"
@@ -37,6 +37,10 @@ export default function ProductDetailCard(props: ProductDetailCardProps) {
     );
   }, [product.video_link]);
 
+  const getEmbedLink = (link: string): string => {
+    const match = link.match(/(?:youtu\.be\/|v=)([a-zA-Z0-9_-]{11})/);
+    return match ? `https://www.youtube.com/embed/${match[1]}` : '';
+  }
 
   // Functions to handle sliding
   const nextImage = () => {
@@ -253,9 +257,9 @@ export default function ProductDetailCard(props: ProductDetailCardProps) {
                 <p className="text-gray-600 mt-2">
                   {product.description}
                 </p>
-                <div className="relative rounded-lg overflow-hidden mt-8">
+                {videoFrame && <div className="relative rounded-lg overflow-hidden mt-8">
                   {videoFrame}
-                </div>
+                </div>}
               </div>
             )}
             {activeTab === 'specs' && (
