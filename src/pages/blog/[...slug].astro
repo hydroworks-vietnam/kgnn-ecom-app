@@ -2,7 +2,7 @@
 import { postService } from '@/services/postService';
 import BlogDetail from '@/components/BlogDetail';
 import Layout from '@/layouts/Layout.astro';
-import Meta from '@/components/Meta/index.astro';
+import Meta from '@/components/Meta/metadata.astro';
 import type { Post } from '@/types/post';
 
 // Tell Astro this is a dynamic route
@@ -12,12 +12,14 @@ const { slug } = Astro.params;
 
 let post: Post | null = null;
 
-await postService.getPostBySlug(slug)
-.then((result) => {
-  post = result;
-}).catch((error) => {
-  error = JSON.stringify(error);
-});
+await postService
+  .getPostBySlug(slug)
+  .then((result) => {
+    post = result;
+  })
+  .catch((error) => {
+    error = JSON.stringify(error);
+  });
 ---
 
 <Layout>

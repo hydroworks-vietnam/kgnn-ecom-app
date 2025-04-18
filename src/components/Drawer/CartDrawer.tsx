@@ -1,9 +1,9 @@
-import useCartStore, { cartItemsStore, promoCodeStore, totalCartQuantity } from "@/store/cart";
+import { cartItemsStore } from "@/store/cart";
 import { useStore } from "@nanostores/react";
-import { useState } from "react";
-import CartItem from "../ui/CartItem";
-import CartSummary from "../ui/CartSummary";
+import CartItem from "@/components/ui/CartItem";
+import CartSummary from "@/components/ui/CartSummary";
 import type { ICartItem } from "@/types/cart";
+import PromoCodeInput from "@/components/ui/PromoCodeInput";
 
 interface CartDrawerProps {
   open: boolean;
@@ -14,37 +14,6 @@ interface CartDrawerProps {
 
 const CartDrawer = ({ open, onClose, callPayment, onContinueShopping }: CartDrawerProps) => {
   const cart = useStore(cartItemsStore);
-  const $totalQuantity = useStore(totalCartQuantity);
-
-  const PromoCodeInput = () => {
-    const [$promoCode, setPromoCode] = useState(useStore(promoCodeStore));
-    const { applyPromoCode } = useCartStore()
-
-    const handleApply = () => {
-      applyPromoCode($promoCode);
-    };
-
-    return (
-      <div className="flex items-center gap-2 py-4">
-        <input
-          type="text"
-          value={$promoCode}
-          onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
-          placeholder="Nhập mã giảm giá"
-          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <button
-          onClick={handleApply}
-          className="px-4 py-2 bg-gradient rounded-lg text-sm text-white hover:shadow-lg transition-colors"
-        >
-          Áp dụng
-        </button>
-        {$promoCode && (
-          <span className="text-xs text-green-600">20% off discount applied!</span>
-        )}
-      </div>
-    );
-  };
 
   return (
     <>

@@ -25,7 +25,7 @@ const CartSummary = () => {
           </div>
         </div>
         <div className="text-right">
-          <span className="text-gray-500">{formatCurrency(shippingFee)}</span>
+          <span className="text-gray-500">{subtotal > 0 ? formatCurrency(shippingFee) : '0 đ'}</span>
         </div>
       </div>
       <div className="flex justify-between text-sm">
@@ -42,7 +42,7 @@ const CartSummary = () => {
       </div>
       <div className="flex justify-between font-semibold text-base pt-2 border-t">
         <span className="text-gray-900">Tổng giá trị đơn hàng</span>
-        <span className="text-primary">{formatCurrency(total)}</span>
+        <span className="text-primary">{subtotal > 0 ? formatCurrency(total) : '0 đ'}</span>
       </div>
     </div>
   );

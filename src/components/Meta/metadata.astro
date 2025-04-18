@@ -12,7 +12,7 @@ type Props = {
 const props = Astro.props;
 // const t = useTranslations(locale);
 
-const title = props.title ? props.title : 'Không gian nhà nông';
+const title = props.title ? `${props.title} - Không gian nhà nông` : 'Không gian nhà nông';
 const author = props.author || packageAuthor;
 const description = props.description || 'description';
 ---

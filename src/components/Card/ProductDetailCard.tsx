@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState, useCallback, type JSX } from 'react';
-import SafetyImage from '../Image/SafetyImage';
+import SafetyImage from '@/components/Image/SafetyImage';
 import { ShoppingCartIcon, X, History, ShieldCheck, Truck, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { IProduct } from '@/types/product';
 import { cn, formatCurrency } from '@/utils/helpers';
 import useCartStore from '@/store/cart';
-import ReviewStar from '../Review/Star';
+import ReviewStar from '@/components/Review/Star';
+import YoutubeVideo from '@/components/ui/YoutubeVideo';
+import { useVideoSource } from '@/hooks/useVideoSource';
 
 type ProductDetailCardProps = {
   product: IProduct,
@@ -29,28 +31,7 @@ export default function ProductDetailCard(props: ProductDetailCardProps) {
   };
 
   const textSizeClass = useMemo(() => getTextSizeClass(quantity), [quantity]);
-
-  const getEmbedLink = (link: string): string => {
-    const match = link.match(/(?:youtu\.be\/|v=)([a-zA-Z0-9_-]{11})/);
-    return match ? link : '';
-  }
-
-  const videoFrame = useMemo(() => {
-    if (!product.video_link || !getEmbedLink(product.video_link)) return null;
-
-    return (
-      <iframe
-        width="100%"
-        height={window.innerWidth >= 960 ? 300 : 120}
-        src={getEmbedLink(product.video_link)}
-        title="Lounge Sofa Demo"
-        referrerPolicy="strict-origin-when-cross-origin"
-        frameBorder="0"
-        allowFullScreen
-        className="rounded-lg"
-      />
-    );
-  }, [product.video_link]);
+  const videoSrc = useVideoSource(product.video_link);
 
   // Functions to handle sliding
   const nextImage = () => {
@@ -310,9 +291,11 @@ export default function ProductDetailCard(props: ProductDetailCardProps) {
                 <p className="text-gray-600 mt-2">
                   {product.description}
                 </p>
-                {videoFrame && <div className="relative rounded-lg overflow-hidden mt-8">
-                  {videoFrame}
-                </div>}
+                {videoSrc && (
+                  <div className="relative rounded-lg overflow-hidden mt-8">
+                    <YoutubeVideo src={videoSrc} />
+                  </div>
+                )}
               </div>
             )}
             {activeTab === 'specs' && (

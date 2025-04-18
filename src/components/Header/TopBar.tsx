@@ -21,6 +21,7 @@ const TopBar = () => {
 
   const handleProceedToCheckout = () => {
     isCartOpen.set(false);
+    window.location.href = '/checkout';
   };
 
   return (
