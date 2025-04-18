@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState, type JSX } from 'react';
+import { useEffect, useMemo, useState, useCallback, type JSX } from 'react';
 import SafetyImage from '../Image/SafetyImage';
 import { ShoppingCartIcon, X, History, ShieldCheck, Truck, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { IProduct } from '@/types/product';
 import { cn, formatCurrency } from '@/utils/helpers';
-import useCartStore, { isAddCartAnimationFinished } from '@/store/cart';
+import useCartStore from '@/store/cart';
 import ReviewStar from '../Review/Star';
 
 type ProductDetailCardProps = {
@@ -19,6 +19,16 @@ export default function ProductDetailCard(props: ProductDetailCardProps) {
   const [quantity, setQuantity] = useState(1);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [activeTab, setActiveTab] = useState<'features' | 'specs' | 'reviews'>('features');
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+
+  const getTextSizeClass = (num: number): string => {
+    const length = num.toString().length;
+    if (length > 6) return 'text-xs';
+    if (length > 4) return 'text-sm';
+    return 'text-md';
+  };
+
+  const textSizeClass = useMemo(() => getTextSizeClass(quantity), [quantity]);
 
   const videoFrame = useMemo(() => {
     if (!product.video_link || !getEmbedLink(product.video_link)) return null;
@@ -39,7 +49,7 @@ export default function ProductDetailCard(props: ProductDetailCardProps) {
 
   const getEmbedLink = (link: string): string => {
     const match = link.match(/(?:youtu\.be\/|v=)([a-zA-Z0-9_-]{11})/);
-    return match ? `https://www.youtube.com/embed/${match[1]}` : '';
+    return match ? link : '';
   }
 
   // Functions to handle sliding
@@ -55,7 +65,59 @@ export default function ProductDetailCard(props: ProductDetailCardProps) {
     );
   };
 
-  // Find this product in cart to get its quantity
+  const handleQuantityDecrease = useCallback(() => {
+    setQuantity(prev => Math.max(1, prev - 1));
+  }, []);
+
+  const handleQuantityIncrease = useCallback(() => {
+    setQuantity(prev => prev + 1);
+  }, []);
+
+  const handleAddToCartClick = useCallback(async () => {
+    if (isAddingToCart) return;
+    setIsAddingToCart(true);
+    await handleAddToCart(product, quantity);
+    setTimeout(() => {
+      setIsAddingToCart(false);
+    }, 1000);
+  }, [isAddingToCart, product, quantity, handleAddToCart]);
+
+  const handleBuyNowClick = useCallback(() => {
+    handleBuyItNow(product, quantity);
+  }, [product, quantity, handleBuyItNow]);
+
+  // Memoize the quantity display
+  const quantityDisplay = useMemo(() => {
+    return (
+      <div className="flex items-center">
+        <button
+          onClick={handleQuantityDecrease}
+          disabled={isAddingToCart}
+          className={`border border-gray-300 rounded-full w-6 h-6 flex items-center justify-center text-gray-600 ${
+            isAddingToCart ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'
+          }`}
+        >
+          -
+        </button>
+        <div className="w-12 text-center overflow-hidden">
+          <span className={`text-gray-700 ${textSizeClass} transition-all`}>
+            {quantity}
+          </span>
+        </div>
+        <button
+          onClick={handleQuantityIncrease}
+          disabled={isAddingToCart}
+          className={`border border-gray-300 rounded-full w-6 h-6 flex items-center justify-center text-gray-600 ${
+            isAddingToCart ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'
+          }`}
+        >
+          +
+        </button>
+      </div>
+    );
+  }, [quantity, handleQuantityDecrease, handleQuantityIncrease, isAddingToCart, textSizeClass]);
+
+  // Find this product in cart to get its initial quantity
   useEffect(() => {
     const cartItem = getCartItemQuantity(product.id);
     if (cartItem) {
@@ -63,7 +125,7 @@ export default function ProductDetailCard(props: ProductDetailCardProps) {
     } else {
       setQuantity(1);
     }
-  }, [product.id, getCartItemQuantity]);
+  }, [product.id]);
 
   return (
     <div
@@ -163,33 +225,24 @@ export default function ProductDetailCard(props: ProductDetailCardProps) {
 
             {/* Quantity Selector and Add to Cart */}
             <div className="flex items-center gap-3 mb-4">
+              {quantityDisplay}
               <button
-                onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                className="border border-gray-300 rounded-full w-6 h-6 flex items-center justify-center text-gray-600 hover:bg-gray-100"
-              >
-                -
-              </button>
-              <span className="text-gray-700">{quantity}</span>
-              <button
-                onClick={() => setQuantity(quantity + 1)}
-                className="border border-gray-300 rounded-full w-6 h-6 flex items-center justify-center text-gray-600 hover:bg-gray-100"
-              >
-                +
-              </button>
-              <button
-                onClick={() => handleAddToCart(product, quantity)}
-                disabled={!isAddCartAnimationFinished.get()}
-                className={`text-white p-3 rounded-lg gap-2 flex items-center hover:shadow-xl ${!isAddCartAnimationFinished.get() ? 'cursor-not-allowed bg-gray-300' : 'bg-gradient text-white'}`}
+                onClick={handleAddToCartClick}
+                disabled={isAddingToCart}
+                className={`min-w-[140px] text-white p-3 rounded-lg gap-2 flex items-center justify-center hover:shadow-xl transition-all ${
+                  isAddingToCart ? 'bg-gray-400 cursor-not-allowed' : 'bg-gradient'
+                }`}
               >
                 <ShoppingCartIcon className="w-4 h-4" />
-                <span className='text-sm'>Thêm vào giỏ</span>
+                <span className='text-sm whitespace-nowrap'>Thêm vào giỏ</span>
               </button>
               <button
-                onClick={() => handleBuyItNow(product, quantity)}
-                className="text-primary border border-primary p-3 rounded-lg gap-2 flex items-center hover:shadow-xl"
+                onClick={handleBuyNowClick}
+                disabled={isAddingToCart}
+                className="min-w-[120px] text-primary border border-primary p-3 rounded-lg gap-2 flex items-center justify-center hover:shadow-xl"
               >
                 <ShoppingCartIcon className="w-4 h-4" />
-                <span className='text-sm'>Mua ngay</span>
+                <span className='text-sm whitespace-nowrap'>Mua ngay</span>
               </button>
             </div>
 

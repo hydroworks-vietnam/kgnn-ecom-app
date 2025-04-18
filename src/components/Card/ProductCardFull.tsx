@@ -2,11 +2,12 @@ import { EyeIcon, HeartIcon, ShoppingCartIcon } from 'lucide-react';
 import type { IProduct } from '@/types/product';
 import SafetyImage from '@/components/Image/SafetyImage';
 import { formatCurrency } from '@/utils/helpers';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import ProductDetailCard from './ProductDetailCard';
 import MobileProductDetailCard from './MobileProductDetailCard';
 import ReviewStar from '../Review/Star';
-import useCartStore, { isAddCartAnimationFinished } from '@/store/cart';
+import useCartStore, { isAddCartAnimationFinished, isCartOpen } from '@/store/cart';
+import { useStore } from '@nanostores/react';
 
 interface ProductCardFullProps {
   product: IProduct;
@@ -18,6 +19,27 @@ const ProductCardFull = ({ product, viewMode = 'grid', onAddToCart }: ProductCar
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const { addCartItem } = useCartStore();
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const isAnimationFinished = useStore(isAddCartAnimationFinished);
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!isAnimationFinished) return;
+    
+    // Get button position for animation start point
+    const buttonRect = buttonRef.current?.getBoundingClientRect();
+    if (buttonRect) {
+      const event = new CustomEvent('add-to-cart-animation', {
+        detail: {
+          x: buttonRect.right,
+          y: buttonRect.top + buttonRect.height / 2
+        }
+      });
+      window.dispatchEvent(event);
+    }
+    
+    onAddToCart(product, 1);
+  };
 
   const onBuyItNow = (product: IProduct, quantity: number) => {
     addCartItem({
@@ -26,6 +48,7 @@ const ProductCardFull = ({ product, viewMode = 'grid', onAddToCart }: ProductCar
       options: {},
     });
     setIsPopupOpen(false);
+    isCartOpen.set(true);
   };
 
   useEffect(() => {
@@ -78,12 +101,14 @@ const ProductCardFull = ({ product, viewMode = 'grid', onAddToCart }: ProductCar
               )}
             </div>
             <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onAddToCart(product, 1);
-              }}
-              className={`flex items-center gap-1 px-3 py-2 bg-gradient text-white rounded-lg hover:bg-orange-600 text-xs ${!isAddCartAnimationFinished.get() ? 'cursor-not-allowed bg-gray-300' : ''}`}
-              disabled={!isAddCartAnimationFinished.get()}
+              ref={buttonRef}
+              onClick={handleAddToCart}
+              className={`flex items-center gap-1 px-3 py-2 rounded-lg text-xs transition-all ${
+                !isAnimationFinished 
+                  ? 'cursor-not-allowed bg-gray-300 text-gray-500'
+                  : 'bg-gradient text-white hover:bg-orange-600'
+              }`}
+              disabled={!isAnimationFinished}
             >
               <ShoppingCartIcon className="w-4 h-4" />
               <span className="hidden sm:inline">Thêm vào giỏ</span>

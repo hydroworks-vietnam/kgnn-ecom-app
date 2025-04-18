@@ -5,8 +5,9 @@ export const cartItemsStore = atom<ICart>([])
 export const isCartOpen = atom(false)
 export const promoCodeStore = atom<string>('');
 export const discountRateStore = atom<number>(0);
-export const taxRateStore = atom<number>(4);
+export const taxRateStore = atom<number>(8);
 export const isAddCartAnimationFinished = atom(true);
+export const shippingFeeStore = atom<number>(30000);
 
 /**
  * Adds or updates a cart item based on whether it already exists in the cart.
@@ -83,11 +84,10 @@ function increaseQuantity(productId: string) {
       item.product.id === productId
         ? {
             ...item,
-            quantity: item.quantity || item.quantity++,
+            quantity: item.quantity + 1,
           }
         : item
-    )
-    .filter(item => item.quantity);
+    );
   cartItemsStore.set(updatedCart);
 }
 
@@ -96,17 +96,16 @@ function increaseQuantity(productId: string) {
  * Removes the item if the quantity reaches 0.
  * @param productId - The ID of the product to decrease
  */
-function decreaseQuantity(productId: string): void {
+function decreaseQuantity(productId: string) {
   const updatedCart = cartItemsStore.get()
     .map((item) =>
-      item.product.id === productId
+      item.product.id === productId && item.quantity > 1
         ? {
             ...item,
-            quantity: item.quantity - 1 || 0,
+            quantity: item.quantity - 1,
           }
         : item
-    )
-    .filter(item => item.quantity);
+    );
   cartItemsStore.set(updatedCart);
 }
 
@@ -129,6 +128,11 @@ function calculateSubtotal(): number {
   );
 }
 
+function calculateShippingFee(): number {
+  const subtotal = calculateSubtotal();
+  return subtotal >= 2000000 ? 0 : shippingFeeStore.get();
+}
+
 function calculateDiscount(): number {
   const subtotal = calculateSubtotal();
   const discountRate = discountRateStore.get();
@@ -138,15 +142,17 @@ function calculateDiscount(): number {
 function calculateTax(): number {
   const subtotal = calculateSubtotal();
   const discount = calculateDiscount();
-  const taxRate = taxRateStore.get();
-  return ((subtotal - discount) * taxRate) / 100;
+  // Fixed 8% tax rate
+  const TAX_RATE = 8;
+  return ((subtotal - discount) * TAX_RATE) / 100;
 }
 
 function calculateTotal(): number {
   const subtotal = calculateSubtotal();
   const discount = calculateDiscount();
   const tax = calculateTax();
-  return subtotal - discount + tax;
+  const shippingFee = calculateShippingFee();
+  return subtotal - discount + tax + shippingFee;
 }
 
 export const totalCartQuantity = computed(cartItemsStore, (cartItems) =>
@@ -165,6 +171,7 @@ export const useCartStore = () => {
     calculateDiscount,
     calculateTax,
     calculateTotal,
+    calculateShippingFee,
     getCartItemQuantity,
   };
 };

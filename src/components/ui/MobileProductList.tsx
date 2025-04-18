@@ -40,14 +40,25 @@ const ProductCardSkeleton = () => {
 
 const skeletonArray = Array(6).fill(0);
 
-const MobileProductList: React.FC<{ handleAddToCart: (product: IProduct, quantity: number) => void }> = ({ handleAddToCart }) => {
+interface MobileProductListProps {
+  handleAddToCart: (product: IProduct, quantity: number) => void;
+  initialCategory?: { catId: string; subCatId: string } | null;
+}
+
+const MobileProductList: React.FC<MobileProductListProps> = ({ handleAddToCart, initialCategory }) => {
   const [products, setProducts] = useState<IProduct[]>([]);
   const [productsLoading, setProductsLoading] = useState<boolean>(true);
   const [productsError, setProductsError] = useState<string | null>(null);
   const [sortOption, setSortOption] = useState<string>('best-match');
   const [itemsPerPage, setItemsPerPage] = useState<number>(10);
   const [filterOpen, setFilterOpen] = useState<boolean>(false);
-  const [selectedCategory, setSelectedCategory] = useState<{ catId: string; subCatId: string } | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<{ catId: string; subCatId: string } | null>(initialCategory || null);
+
+  useEffect(() => {
+    if (initialCategory) {
+      setSelectedCategory(initialCategory);
+    }
+  }, [initialCategory]);
 
   const fetchProductList = async ({ catId, subCatId }: { catId: string; subCatId: string }) => {
     if (!catId || catId === 'all') return;
@@ -74,6 +85,11 @@ const MobileProductList: React.FC<{ handleAddToCart: (product: IProduct, quantit
 
   const handleCategorySelect = (category: ICategory, subcategory?: ISubcategory) => {
     setSelectedCategory({ catId: category.id, subCatId: subcategory?.id || 'all' });
+  };
+
+  const handleLatestProductsSelect = (latestProducts: IProduct[]) => {
+    setProducts(latestProducts);
+    setSelectedCategory(null);
   };
 
   const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => setSortOption(e.target.value);
@@ -129,7 +145,10 @@ const MobileProductList: React.FC<{ handleAddToCart: (product: IProduct, quantit
                 <option value={50}>50</option>
               </select>
             </div>
-            <CategorySidebar onCategorySelect={handleCategorySelect} />
+            <CategorySidebar 
+              onCategorySelect={handleCategorySelect} 
+              onLatestProductsSelect={handleLatestProductsSelect}
+            />
             <button className="w-full bg-blue-600 text-white py-2 rounded-md mt-4" onClick={toggleFilter}>Áp dụng</button>
           </div>
         </div>

@@ -3,36 +3,46 @@ import { formatCurrency } from "@/utils/helpers";
 import { useStore } from "@nanostores/react";
 
 const CartSummary = () => {
-  const { calculateSubtotal, calculateDiscount, calculateTax, calculateTotal } = useCartStore();
+  const { calculateSubtotal, calculateDiscount, calculateTax, calculateTotal, calculateShippingFee } = useCartStore();
   const subtotal = calculateSubtotal();
   const discount = calculateDiscount();
   const tax = calculateTax();
   const total = calculateTotal();
-  const $discountRate = useStore(discountRateStore)
+  const shippingFee = calculateShippingFee();
+  const $discountRate = useStore(discountRateStore);
 
   return (
     <div className="py-4 space-y-2">
       <div className="flex justify-between text-sm">
-        <span className="text-gray-600">Tổng đơn hàng</span>
-        <span className="text-gray-900">{formatCurrency(subtotal)}</span>
+        <span className="text-gray-600">Tổng giá trị sản phẩm</span>
+        <span className="text-gray-600">{formatCurrency(subtotal)}</span>
       </div>
-      {discount > 0 && (
-        <div className="flex justify-between text-sm">
-          <span className="text-gray-600">Giảm giá</span>
-          <span className="text-gray-900">
-            ({$discountRate}%) -{formatCurrency(discount)}
-          </span>
+      <div className="flex justify-between items-center text-sm">
+        <div className="flex flex-col items-start gap-1 my-1">
+          <div className="text-gray-600">Phí vận chuyển</div>
+          <div className="text-green-600 text-xs">
+            Miễn phí cho đơn hàng từ {formatCurrency(2000000)}
+          </div>
         </div>
-      )}
+        <div className="text-right">
+          <span className="text-gray-500">{formatCurrency(shippingFee)}</span>
+        </div>
+      </div>
+      <div className="flex justify-between text-sm">
+        <span className="text-gray-600">Giảm giá ({$discountRate}%)</span>
+        <span className="text-orange-400">
+          {discount > 0 ? `- ${formatCurrency(discount)}` : '0 đ'}
+        </span>
+      </div>
       <div className="flex justify-between text-sm">
         <span className="text-gray-600">
-          Tax <span className="text-gray-400">ⓘ</span>
+          Thuế GTGT <span className="text-gray-400">ⓘ</span>
         </span>
-        <span className="text-gray-900">+{formatCurrency(tax)}</span>
+        <span className="text-gray-600">{formatCurrency(tax)}</span>
       </div>
-      <div className="flex justify-between text-base font-semibold">
-        <span className="text-gray-900">Tổng cộng</span>
-        <span className="text-gray-900">{formatCurrency(total)}</span>
+      <div className="flex justify-between font-semibold text-base pt-2 border-t">
+        <span className="text-gray-900">Tổng giá trị đơn hàng</span>
+        <span className="text-primary">{formatCurrency(total)}</span>
       </div>
     </div>
   );

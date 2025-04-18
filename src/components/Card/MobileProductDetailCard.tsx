@@ -12,7 +12,7 @@ import { cn, formatCurrency } from '@/utils/helpers';
 import SafetyImage from '../Image/SafetyImage';
 import type { IProduct } from '@/types/product';
 import ReviewStar from '../Review/Star';
-import { isAddCartAnimationFinished } from '@/store/cart';
+import { isAddCartAnimationFinished, isCartOpen } from '@/store/cart';
 
 type ProductDetailCardProps = {
   product: IProduct,
@@ -125,6 +125,12 @@ export default function MobileProductDetailCard({ product, onClose, handleAddToC
       default:
         return 'h-2/3';
     }
+  };
+
+  const handleBuyNowClick = (product: IProduct, quantity: number) => {
+    handleBuyItNow(product, quantity);
+    isCartOpen.set(true);
+    onClose();
   };
 
   return (
@@ -373,12 +379,12 @@ export default function MobileProductDetailCard({ product, onClose, handleAddToC
             <button
               onClick={() => handleAddToCart(product, quantity)}
               className="w-full py-3 bg-gradient text-white rounded-lg"
-                disabled={isAddCartAnimationFinished.get()}
+              disabled={!isAddCartAnimationFinished.get()}
             >
               Thêm vào giỏ hàng
             </button>
             <button
-              onClick={() => handleBuyItNow(product, quantity)}
+              onClick={() => handleBuyNowClick(product, quantity)}
               className="w-full py-3 bg-gradient text-white rounded-lg"
             >
               Mua ngay

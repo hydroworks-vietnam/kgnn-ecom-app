@@ -1,5 +1,4 @@
-import { useCartStore, totalCartQuantity, isAddCartAnimationFinished } from "@/store/cart";
-import type { IProduct } from "@/types/product";
+import { totalCartQuantity, isAddCartAnimationFinished } from "@/store/cart";
 import { useStore } from "@nanostores/react";
 import { Package, ShoppingCartIcon } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
@@ -58,17 +57,6 @@ const FloatingCart = ({
       isFinishAnimation();
     }, 1000);
   };
-
-  useEffect(() => {
-    if (showAnimation && animationRef.current) {
-      console.log("[FloatingCart] Animation element rendered, trigger:", animationTrigger);
-      if (!animationRef.current.classList.contains("animate-fly-to-cart")) {
-        console.warn("[FloatingCart] animate-fly-to-cart class missing");
-      }
-    } else if (showAnimation) {
-      console.warn("[FloatingCart] Animation element not rendered, trigger:", animationTrigger);
-    }
-  }, [showAnimation, animationTrigger]);
 
   return (
     <>

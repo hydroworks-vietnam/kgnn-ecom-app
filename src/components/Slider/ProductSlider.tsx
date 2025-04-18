@@ -4,19 +4,14 @@ import { cn } from '@/utils/helpers';
 import { getLatestProducts } from '@/services/productService';
 import ProductCardSlider from '@/components/Card/ProductCardSlider';
 import type { IProduct } from '@/types/product';
-import ProductDetailCard from '../Card/ProductDetailCard';
-import MobileProductDetailCard from '../Card/MobileProductDetailCard';
-import useCartStore from '@/store/cart';
 
 const ProductSlider = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [slidesPerView, setSlidesPerView] = useState(6);
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<IProduct | null>(null);
-  const { addCartItem } = useCartStore();
   const [latestProducts, setLatestProducts] = useState([]);
+  const [selectedProduct, setSelectedProduct] = useState<IProduct | null>(null);
 
   useEffect(() => {
     fetchLatestlatestProducts();
@@ -30,21 +25,10 @@ const ProductSlider = () => {
     });
   };
 
-  const onAddToCart = (product: IProduct, quantity: number) => {
-    addCartItem({
-      product,
-      quantity,
-      options: {},
-    });
-  };
-
-  const onBuyItNow = (product: IProduct, quantity: number) => {
-    addCartItem({
-      product,
-      quantity,
-      options: {},
-    });
-    setIsPopupOpen(false);
+  const handleProductClick = (product: IProduct) => {
+    setSelectedProduct(product);
+    // Navigate to product list page with product id
+    window.location.href = `/products?productId=${product.id}`;
   };
   
   useEffect(() => {
@@ -63,7 +47,7 @@ const ProductSlider = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const maxIndex = Math.max(0, Math.ceil((latestProducts.length - slidesPerView) / slidesPerView));
+  const maxIndex = Math.max(0, latestProducts.length - slidesPerView);
   const shouldShowNavigation = latestProducts.length > slidesPerView;
 
   const nextSlide = () => {
@@ -100,10 +84,7 @@ const ProductSlider = () => {
               key={product.id}
               item={product}
               slidesPerView={slidesPerView}
-              openDetail={(item) => {
-                setSelectedProduct(item);
-                setIsPopupOpen(true);
-              }}
+              openDetail={handleProductClick}
             />
           )) : (
             <div className="w-full py-2 text-center text-gray-500">Tiếc quá, chưa có sản phẩm phù hợp</div>
@@ -139,25 +120,6 @@ const ProductSlider = () => {
             </button>
           </div>
         </>
-      )}
-      {isPopupOpen && selectedProduct && (
-        (isMobile ? (
-          <MobileProductDetailCard
-            product={selectedProduct}
-            key={selectedProduct.id}
-            onClose={() => setIsPopupOpen(false)}
-            handleAddToCart={onAddToCart}
-            handleBuyItNow={onBuyItNow}
-          />
-        ) : (
-          <ProductDetailCard
-            product={selectedProduct}
-            key={selectedProduct?.id}
-            onClose={() => setIsPopupOpen(false)}
-            handleAddToCart={onAddToCart}
-            handleBuyItNow={onBuyItNow}
-          />
-        ))
       )}
     </div>
   );

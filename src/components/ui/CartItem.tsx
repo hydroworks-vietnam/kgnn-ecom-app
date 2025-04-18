@@ -3,6 +3,7 @@ import useCartStore from '@/store/cart';
 import type { ICartItem } from '@/types/cart';
 import { formatCurrency } from '@/utils/helpers';
 import SafetyImage from '@/components/Image/SafetyImage';
+import { X } from 'lucide-react';
 
 interface CartItemProps {
   item: ICartItem;
@@ -22,18 +23,18 @@ const CartItem = ({ item }: CartItemProps) => {
   };
 
   return (
-    <div className="flex items-center gap-4 py-4 border-b border-gray-200">
-      {/* Product Image */}
-      <SafetyImage
-        src={images?.[0]}
-        alt={name}
-        height={64}
-        width={64}
-        clazz="rounded-lg w-16 h-16 object-contain bg-gray-50 p-2"
-      />
+    <div className="flex items-start gap-4 p-2 border border-gray-100 rounded-lg">
+      <div className="relative w-24 h-24">
+        <SafetyImage
+          clazz="w-full h-full rounded-md object-cover"
+          src={images?.[0]}
+          height={96}
+          width={96}
+        />
+      </div>
 
       {/* Product Details */}
-      <div className="flex-1">
+      <div className="flex-1 flex flex-col justify-between gap-2">
         <p className="text-sm font-medium text-gray-900">{name}</p>
         {/* <p className="text-xs text-gray-500">
           {color} {storage && `| ${storage}`} {connectivity && `| ${connectivity}`}
@@ -61,27 +62,14 @@ const CartItem = ({ item }: CartItemProps) => {
       <div className="flex flex-col items-end gap-2">
         <button
           onClick={() => removeFromCart(product.id)}
-          className="text-gray-400 hover:text-red-500 transition-colors"
+          className="text-gray-400 hover:text-red-500"
           aria-label="Remove item"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
+          <X className="w-4 h-4 text-red-500" />
         </button>
-        <span className="text-sm font-medium text-gray-900">
+        <div className="text-sm py-2 text-gray-600">
           {formatCurrency(unit_price * quantity)}
-        </span>
+        </div>
       </div>
     </div>
   );

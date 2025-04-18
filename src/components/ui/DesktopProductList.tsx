@@ -40,7 +40,12 @@ const ProductCardSkeleton = () => {
 
 const skeletonArray = Array(6).fill(0);
 
-const DesktopProductList: React.FC<{ handleAddToCart: (product: IProduct, quantity: number) => void }> = ({ handleAddToCart }) => {
+interface DesktopProductListProps {
+  handleAddToCart: (product: IProduct, quantity: number) => void;
+  initialCategory?: { catId: string; subCatId: string } | null;
+}
+
+const DesktopProductList: React.FC<DesktopProductListProps> = ({ handleAddToCart, initialCategory }) => {
   const [products, setProducts] = useState<IProduct[]>([]);
   const [productsLoading, setProductsLoading] = useState<boolean>(true);
   const [productsError, setProductsError] = useState<string | null>(null);
@@ -48,7 +53,13 @@ const DesktopProductList: React.FC<{ handleAddToCart: (product: IProduct, quanti
   const [sortOption, setSortOption] = useState<string>('best-match');
   const [itemsPerPage, setItemsPerPage] = useState<number>(10);
   const [filterOpen, setFilterOpen] = useState<boolean>(false);
-  const [selectedCategory, setSelectedCategory] = useState<{ catId: string; subCatId: string } | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<{ catId: string; subCatId: string } | null>(initialCategory || null);
+
+  useEffect(() => {
+    if (initialCategory) {
+      setSelectedCategory(initialCategory);
+    }
+  }, [initialCategory]);
 
   const fetchProductList = async ({ catId, subCatId }: { catId: string; subCatId: string }) => {
     if (!catId || catId === 'all') return;
@@ -75,6 +86,11 @@ const DesktopProductList: React.FC<{ handleAddToCart: (product: IProduct, quanti
 
   const handleCategorySelect = (category: ICategory, subcategory?: ISubcategory) => {
     setSelectedCategory({ catId: category.id, subCatId: subcategory?.id || 'all' });
+  };
+
+  const handleLatestProductsSelect = (latestProducts: IProduct[]) => {
+    setProducts(latestProducts);
+    setSelectedCategory(null);
   };
 
   // Handle sort option change
@@ -108,8 +124,10 @@ const DesktopProductList: React.FC<{ handleAddToCart: (product: IProduct, quanti
       <div className="flex flex-col md:flex-row gap-8">
         {/* Sidebar */}
         <aside className="w-full md:w-1/4 bg-white shadow-lg rounded-lg p-6 border border-gray-200">
-
-          <CategorySidebar onCategorySelect={handleCategorySelect} />
+          <CategorySidebar 
+            onCategorySelect={handleCategorySelect} 
+            onLatestProductsSelect={handleLatestProductsSelect}
+          />
 
           {/* Price Filter */}
           {/* <div className="mb-6">

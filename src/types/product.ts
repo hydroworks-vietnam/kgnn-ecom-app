@@ -11,6 +11,7 @@ export interface IProduct {
   description?: string;
   images: string[];
   category_id: string;
+  sub_category_id?: string;
   video_link: string;
 }
 
