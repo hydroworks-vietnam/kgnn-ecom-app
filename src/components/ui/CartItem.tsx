@@ -59,17 +59,17 @@ const CartItem = ({ item }: CartItemProps) => {
       </div>
 
       {/* Price and Remove */}
-      <div className="flex flex-col items-end gap-2">
+      <div className="flex flex-col items-end justify-between h-24">
         <button
           onClick={() => removeFromCart(product.id)}
-          className="text-gray-400 hover:text-red-500"
+          className="text-gray-400 hover:text-red-500 transition-colors"
           aria-label="Remove item"
         >
           <X className="w-4 h-4 text-red-500" />
         </button>
-        <div className="text-sm py-2 text-gray-600">
+        <span className="text-sm font-medium text-gray-900">
           {formatCurrency(unit_price * quantity)}
-        </div>
+        </span>
       </div>
     </div>
   );

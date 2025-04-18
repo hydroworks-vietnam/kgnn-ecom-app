@@ -30,6 +30,11 @@ export default function ProductDetailCard(props: ProductDetailCardProps) {
 
   const textSizeClass = useMemo(() => getTextSizeClass(quantity), [quantity]);
 
+  const getEmbedLink = (link: string): string => {
+    const match = link.match(/(?:youtu\.be\/|v=)([a-zA-Z0-9_-]{11})/);
+    return match ? link : '';
+  }
+
   const videoFrame = useMemo(() => {
     if (!product.video_link || !getEmbedLink(product.video_link)) return null;
 
@@ -46,11 +51,6 @@ export default function ProductDetailCard(props: ProductDetailCardProps) {
       />
     );
   }, [product.video_link]);
-
-  const getEmbedLink = (link: string): string => {
-    const match = link.match(/(?:youtu\.be\/|v=)([a-zA-Z0-9_-]{11})/);
-    return match ? link : '';
-  }
 
   // Functions to handle sliding
   const nextImage = () => {
