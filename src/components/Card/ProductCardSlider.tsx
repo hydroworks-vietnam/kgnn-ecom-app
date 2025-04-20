@@ -15,13 +15,13 @@ const ProductCardSlider = ({
       <div className={`${widthClass} px-1 sm:px-2 mb-4 sm:mb-6 min-w-0 flex-shrink-0 cursor-pointer`}
         onClick={() => openDetail(item)}
       >
-        <div className="relative h-fit border border-gray-200 rounded-lg shadow-md bg-white transition-shadow hover:shadow-lg">
+        <div className="relative h-full border border-gray-200 rounded-lg shadow-md bg-white transition-shadow hover:shadow-lg">
           {/* Product Image Container */}
-          <div className="bg-gray-50 rounded-lg flex justify-center items-center mb-2 sm:mb-3 overflow-hidden">
+          <div className="relative aspect-square rounded-t-lg overflow-hidden">
             <img
               src={item.images[0]}
               alt={item.name}
-              className="w-full h-36 sm:h-48 object-contain transition-transform group-hover:scale-105"
+              className="w-full h-full object-cover"
             />
 
             {/* Quick action buttons that appear on hover */}
@@ -45,18 +45,20 @@ const ProductCardSlider = ({
             )}
           </div>
 
-          <div className="text-primary text-center mb-1 sm:mb-2 text-sm sm:text-base">{item.name}</div>
-          {/* Product Info */}
-          <div className="text-center text-xs sm:text-sm pb-3 sm:pb-4">
-            <div className="flex justify-center items-center gap-1 sm:gap-2">
-              <p className="font-semibold text-blue-900">
-                {formatCurrency(item.unit_price)}
-              </p>
-              {item.discount_price > 0 && (
-                <p className="text-red-500 line-through">
-                  {formatCurrency(item.unit_price - item.discount_price)}
+          <div className="p-2 sm:p-3 flex flex-col">
+            <div className="text-primary text-center mb-1 sm:mb-2 text-sm sm:text-base line-clamp-1">{item.name}</div>
+            {/* Product Info */}
+            <div className="text-center text-xs sm:text-sm">
+              <div className="flex justify-center items-center gap-1 sm:gap-2">
+                <p className="font-semibold text-blue-900">
+                  {formatCurrency(item.unit_price)}
                 </p>
-              )}
+                {item.discount_price > 0 && (
+                  <p className="text-red-500 line-through">
+                    {formatCurrency(item.unit_price - item.discount_price)}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         </div>

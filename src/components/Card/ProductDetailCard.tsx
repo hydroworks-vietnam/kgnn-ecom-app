@@ -242,7 +242,7 @@ export default function ProductDetailCard(props: ProductDetailCardProps) {
                   : 'text-gray-500 hover:text-gray-700'
               )}
             >
-              Công năng
+              Mô tả sản phẩm
             </button>
             <button
               onClick={() => setActiveTab('specs')}
@@ -272,10 +272,7 @@ export default function ProductDetailCard(props: ProductDetailCardProps) {
           <div className="mt-4">
             {activeTab === 'features' && (
               <div>
-                <h3 className="text-lg font-semibold text-blue-900">Đặc tính sản phẩm</h3>
-                <p className="text-gray-600 mt-2">
-                  {product.description}
-                </p>
+                <p className="text-gray-700 text-sm">{product.description}</p>
                 {videoSrc && (
                   <div className="relative rounded-lg overflow-hidden mt-8">
                     <YoutubeVideo src={videoSrc} />
@@ -284,15 +281,10 @@ export default function ProductDetailCard(props: ProductDetailCardProps) {
               </div>
             )}
             {activeTab === 'specs' && (
-              <div>
-                <h3 className="text-lg font-semibold text-blue-900">Thông số kỹ thuật</h3>
-              </div>
+              <p className="text-gray-700 text-sm">Chưa có thông số kĩ thuật</p>
             )}
             {activeTab === 'reviews' && (
-              <div>
-                <h3 className="text-lg font-semibold text-blue-900">Đánh giá sản phẩm</h3>
-                <p className="text-gray-600 mt-2">Chưa có đánh giá</p>
-              </div>
+              <p className="text-gray-700 text-sm">Chưa có đánh giá</p>
             )}
           </div>
         </div>

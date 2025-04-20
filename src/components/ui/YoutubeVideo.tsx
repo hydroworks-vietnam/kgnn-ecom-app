@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 const IframeVideo = ({ src }: { src: string }) => {
-  const [height, setHeight] = useState(window.innerWidth >= 960 ? 300 : 120);
+  const [height, setHeight] = useState(window.innerWidth >= 960 ? 300 : 180);
 
   useEffect(() => {
     const handleResize = () => {

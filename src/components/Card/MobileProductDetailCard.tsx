@@ -15,6 +15,8 @@ import ReviewStar from '../Review/Star';
 import { isAddCartAnimationFinished, isCartOpen } from '@/store/cart';
 import QuantityControl from '@/components/ui/QuantityControl';
 import { useStore } from '@nanostores/react';
+import YoutubeVideo from '@/components/ui/YoutubeVideo';
+import { useVideoSource } from '@/hooks/useVideoSource';
 
 type ProductDetailCardProps = {
   product: IProduct,
@@ -57,12 +59,10 @@ export default function MobileProductDetailCard({ product, onClose, handleAddToC
     );
   };
 
+  const videoSrc = useVideoSource(product.video_link);
+
   const toggleVariantSelector = () => {
     setShowVariantSelector(!showVariantSelector);
-  };
-
-  const expandSheet = () => {
-    setSheetPosition('full');
   };
 
   const handleClickOutside = (e) => {
@@ -117,10 +117,12 @@ export default function MobileProductDetailCard({ product, onClose, handleAddToC
     return () => clearTimeout(timer);
   }, []);
 
+  const toggleSheetHeight = () => {
+    setSheetPosition(prev => prev === 'full' ? 'half' : 'full');
+  };
+
   const getSheetStyle = () => {
     switch (sheetPosition) {
-      case 'peek':
-        return 'h-1/4';
       case 'half':
         return 'h-2/3';
       case 'full':
@@ -171,7 +173,10 @@ export default function MobileProductDetailCard({ product, onClose, handleAddToC
         <div
           className="w-full flex justify-center py-2 cursor-grab"
           onTouchStart={handleTouchStart}
-          onClick={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleSheetHeight();
+          }}
         >
           <div className="w-10 h-1 bg-gray-300 rounded-full"></div>
         </div>
@@ -259,42 +264,6 @@ export default function MobileProductDetailCard({ product, onClose, handleAddToC
                   <span>Trả hàng trong 7 ngày</span>
                 </div>
               </div>
-
-              <div className="border-t border-b py-3 flex justify-between items-center mb-4">
-                <span>Số lượng</span>
-                <QuantityControl
-                  quantity={quantity}
-                  onIncrease={handleIncrease}
-                  onDecrease={handleDecrease}
-                  size="md"
-                />
-              </div>
-
-              <div className="flex gap-3 mb-4">
-                <button
-                  onClick={() => {
-                    if (!isAnimationFinished) return;
-                    handleAddToCart(product, quantity);
-                    onClose();
-                  }}
-                  className="flex-1 py-3 bg-white border border-primary text-primary rounded-lg flex items-center justify-center gap-2"
-                  disabled={!isAnimationFinished}
-                >
-                  <ShoppingCartIcon className="w-5 h-5" />
-                  <span>Thêm vào giỏ hàng</span>
-                </button>
-                <button 
-                  onClick={() => {
-                    if (!isAnimationFinished) return;
-                    handleBuyItNow(product, quantity);
-                    onClose();
-                  }}
-                  className="bg-gradient text-white px-14 py-3 text-sm rounded-lg"
-                  disabled={!isAnimationFinished}
-                >
-                  Mua ngay
-                </button>
-              </div>
             </div>
           </div>
 
@@ -336,10 +305,15 @@ export default function MobileProductDetailCard({ product, onClose, handleAddToC
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto py-4">
             {activeTab === 'description' && (
               <div className="p-4">
                 <p className="text-gray-700 text-sm">{product.description}</p>
+                {videoSrc && (
+                  <div className="mt-4">
+                    <YoutubeVideo src={videoSrc} />
+                  </div>
+                )}
               </div>
             )}
             {activeTab === 'details' && (
@@ -352,6 +326,43 @@ export default function MobileProductDetailCard({ product, onClose, handleAddToC
                 <p className="text-gray-700 text-sm">Chưa có đánh giá</p>
               </div>
             )}
+          </div>
+
+          <div className="flex-shrink-0 border-t bg-white">
+            <div className="px-4 py-3 flex justify-between items-center border-b">
+              <span>Số lượng</span>
+              <QuantityControl
+                quantity={quantity}
+                onIncrease={handleIncrease}
+                onDecrease={handleDecrease}
+                size="md"
+              />
+            </div>
+            <div className="fixed bottom-0 left-0 right-0 p-4 pb-8 flex gap-3 bg-white border-t safe-area-bottom">
+              <button
+                onClick={() => {
+                  if (!isAnimationFinished) return;
+                  handleAddToCart(product, quantity);
+                  onClose();
+                }}
+                className="flex-1 py-3 bg-white border border-primary text-primary rounded-lg flex items-center justify-center gap-2"
+                disabled={!isAnimationFinished}
+              >
+                <ShoppingCartIcon className="w-5 h-5" />
+                <span>Thêm vào giỏ hàng</span>
+              </button>
+              <button 
+                onClick={() => {
+                  if (!isAnimationFinished) return;
+                  handleBuyItNow(product, quantity);
+                  onClose();
+                }}
+                className="flex-1 bg-gradient text-white py-3 text-sm rounded-lg flex items-center justify-center"
+                disabled={!isAnimationFinished}
+              >
+                Mua ngay
+              </button>
+            </div>
           </div>
         </div>
       </div>
