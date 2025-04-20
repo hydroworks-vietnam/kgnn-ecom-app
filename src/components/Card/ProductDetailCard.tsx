@@ -7,6 +7,7 @@ import useCartStore from '@/store/cart';
 import ReviewStar from '@/components/Review/Star';
 import YoutubeVideo from '@/components/ui/YoutubeVideo';
 import { useVideoSource } from '@/hooks/useVideoSource';
+import QuantityControl from '@/components/ui/QuantityControl';
 
 type ProductDetailCardProps = {
   product: IProduct,
@@ -60,43 +61,27 @@ export default function ProductDetailCard(props: ProductDetailCardProps) {
     await handleAddToCart(product, quantity);
     setTimeout(() => {
       setIsAddingToCart(false);
+      setQuantity(1); // Reset quantity after adding to cart
     }, 1000);
   }, [isAddingToCart, product, quantity, handleAddToCart]);
 
   const handleBuyNowClick = useCallback(() => {
     handleBuyItNow(product, quantity);
+    setQuantity(1); // Reset quantity after buying
   }, [product, quantity, handleBuyItNow]);
 
   // Memoize the quantity display
-  const quantityDisplay = useMemo(() => {
-    return (
-      <div className="flex items-center">
-        <button
-          onClick={handleQuantityDecrease}
-          disabled={isAddingToCart}
-          className={`border border-gray-300 rounded-full w-6 h-6 flex items-center justify-center text-gray-600 ${
-            isAddingToCart ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'
-          }`}
-        >
-          -
-        </button>
-        <div className="w-12 text-center overflow-hidden">
-          <span className={`text-gray-700 ${textSizeClass} transition-all`}>
-            {quantity}
-          </span>
-        </div>
-        <button
-          onClick={handleQuantityIncrease}
-          disabled={isAddingToCart}
-          className={`border border-gray-300 rounded-full w-6 h-6 flex items-center justify-center text-gray-600 ${
-            isAddingToCart ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'
-          }`}
-        >
-          +
-        </button>
-      </div>
-    );
-  }, [quantity, handleQuantityDecrease, handleQuantityIncrease, isAddingToCart, textSizeClass]);
+  const quantityDisplay = useMemo(() => (
+    <div className="flex items-center">
+      <QuantityControl
+        quantity={quantity}
+        onIncrease={handleQuantityIncrease}
+        onDecrease={handleQuantityDecrease}
+        size="md"
+        className={isAddingToCart ? 'opacity-50 cursor-not-allowed' : ''}
+      />
+    </div>
+  ), [quantity, handleQuantityDecrease, handleQuantityIncrease, isAddingToCart]);
 
   // Find this product in cart to get its initial quantity
   useEffect(() => {
@@ -106,7 +91,7 @@ export default function ProductDetailCard(props: ProductDetailCardProps) {
     } else {
       setQuantity(1);
     }
-  }, [product.id]);
+  }, [product.id, getCartItemQuantity]);
 
   return (
     <div

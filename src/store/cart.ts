@@ -8,6 +8,7 @@ export const discountRateStore = atom<number>(0);
 export const taxRateStore = atom<number>(8);
 export const isAddCartAnimationFinished = atom(true);
 export const shippingFeeStore = atom<number>(30000);
+export const isFloatingCartVisible = atom(true);
 
 /**
  * Adds or updates a cart item based on whether it already exists in the cart.

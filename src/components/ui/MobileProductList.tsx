@@ -18,16 +18,6 @@ const ProductCardSkeleton = () => {
         {/* Description skeleton */}
         <div className="h-3 bg-gray-200 rounded w-full mb-2"></div>
 
-        {/* Ratings skeleton */}
-        <div className="flex items-center mb-2">
-          <div className="flex space-x-1">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="w-3 h-3 bg-gray-200 rounded-full"></div>
-            ))}
-          </div>
-          <div className="w-8 h-3 bg-gray-200 rounded ml-2"></div>
-        </div>
-
         {/* Price and button skeleton */}
         <div className="flex items-center justify-between mt-2">
           <div className="w-16 h-4 bg-gray-200 rounded"></div>

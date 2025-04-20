@@ -1,4 +1,4 @@
-import { totalCartQuantity, isAddCartAnimationFinished } from "@/store/cart";
+import { totalCartQuantity, isAddCartAnimationFinished, isFloatingCartVisible } from "@/store/cart";
 import { useStore } from "@nanostores/react";
 import { Package, ShoppingCartIcon } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
@@ -19,6 +19,7 @@ const FloatingCart = ({
   const cartRef = useRef<HTMLButtonElement>(null);
   const animationRef = useRef<HTMLDivElement>(null);
   const $totalQuantity = useStore(totalCartQuantity);
+  const isVisible = useStore(isFloatingCartVisible);
   const animationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -79,19 +80,22 @@ const FloatingCart = ({
         </div>
       )}
 
-      <button
-        ref={cartRef}
-        onClick={onCartClick}
-        className={`fixed bottom-6 right-6 p-3 bg-gradient text-white rounded-full shadow-lg hover:scale-110 transition-transform duration-200 z-[10000] ${showAnimation ? "animate-cart-bounce" : ""
+      {isVisible && (
+        <button
+          ref={cartRef}
+          onClick={onCartClick}
+          className={`fixed bottom-6 right-6 p-3 bg-gradient text-white rounded-full shadow-lg hover:scale-110 transition-transform duration-200 z-[10000] ${
+            showAnimation ? "animate-cart-bounce" : ""
           }`}
-      >
-        <ShoppingCartIcon className="w-5 h-5" />
-        {$totalQuantity > 0 && (
-          <span className="absolute -top-2 -right-1 bg-red-500 text-white text-xs w-6 h-6 flex items-center justify-center rounded-full">
-            {$totalQuantity > 99 ? '99+' : $totalQuantity}
-          </span>
-        )}
-      </button>
+        >
+          <ShoppingCartIcon className="w-5 h-5" />
+          {$totalQuantity > 0 && (
+            <span className="absolute -top-2 -right-1 bg-red-500 text-white text-xs w-6 h-6 flex items-center justify-center rounded-full">
+              {$totalQuantity > 99 ? '99+' : $totalQuantity}
+            </span>
+          )}
+        </button>
+      )}
     </>
   );
 };

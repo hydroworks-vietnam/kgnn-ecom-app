@@ -13,6 +13,8 @@ import SafetyImage from '../Image/SafetyImage';
 import type { IProduct } from '@/types/product';
 import ReviewStar from '../Review/Star';
 import { isAddCartAnimationFinished, isCartOpen } from '@/store/cart';
+import QuantityControl from '@/components/ui/QuantityControl';
+import { useStore } from '@nanostores/react';
 
 type ProductDetailCardProps = {
   product: IProduct,
@@ -29,6 +31,7 @@ export default function MobileProductDetailCard({ product, onClose, handleAddToC
   const [showVariantSelector, setShowVariantSelector] = useState(false);
   const [selectedVariant, setSelectedVariant] = useState('3 in One');
   const [sheetPosition, setSheetPosition] = useState('peek');
+  const isAnimationFinished = useStore(isAddCartAnimationFinished);
 
   const sheetRef = useRef(null);
   const variantRef = useRef(null);
@@ -127,6 +130,21 @@ export default function MobileProductDetailCard({ product, onClose, handleAddToC
     }
   };
 
+  const handleQuantityChange = (newQuantity: number) => {
+    if (!isAnimationFinished) return;
+    setQuantity(newQuantity);
+  };
+
+  const handleIncrease = () => {
+    if (!isAnimationFinished) return;
+    handleQuantityChange(quantity + 1);
+  };
+
+  const handleDecrease = () => {
+    if (!isAnimationFinished) return;
+    handleQuantityChange(Math.max(1, quantity - 1));
+  };
+
   const handleBuyNowClick = (product: IProduct, quantity: number) => {
     handleBuyItNow(product, quantity);
     isCartOpen.set(true);
@@ -134,16 +152,20 @@ export default function MobileProductDetailCard({ product, onClose, handleAddToC
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex flex-col justify-end"
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-50 z-50 flex flex-col justify-end"
       style={{
-        backgroundColor: 'rgba(0, 0, 0, 0.4)', // Semi-transparent black
-        zIndex: 40 // Lower than floating elements
+        backgroundColor: 'rgba(0, 0, 0, 0.4)',
+        zIndex: 40
       }}
       onClick={onClose}
     >
       <div
         ref={sheetRef}
-        className={`relative bg-white rounded-t-xl w-full overflow-hidden transition-all duration-300 ${getSheetStyle()}`}
+        className={cn(
+          "relative bg-white rounded-t-xl w-full overflow-hidden transition-all duration-300",
+          getSheetStyle()
+        )}
         onClick={(e) => e.stopPropagation()}
       >
         <div
@@ -161,8 +183,8 @@ export default function MobileProductDetailCard({ product, onClose, handleAddToC
           <X className="w-6 h-6 text-white"/>
         </button>
 
-        <div className="h-full flex flex-col overflow-hidden mt-2">
-          <div className="relative p-4 flex-shrink-0">
+        <div className="flex flex-col h-[calc(100%-2rem)]">
+          <div className="flex-shrink-0 p-4">
             <div className="relative w-full">
               <div className="relative overflow-hidden">
                 <div className="relative w-full h-64 overflow-hidden rounded-md">
@@ -229,169 +251,115 @@ export default function MobileProductDetailCard({ product, onClose, handleAddToC
             </div>
           </div>
 
-          {sheetPosition === 'peek' && (
-            <div className="px-4 pb-4 flex gap-3">
+          <div className="border-t border-b flex-shrink-0">
+            <div className="flex">
               <button
-                onClick={expandSheet}
-                className="flex-1 py-3 px-4 bg-white border border-blue-600 text-blue-600 rounded-lg flex items-center justify-center gap-2"
+                onClick={() => setActiveTab('description')}
+                className={cn(
+                  "flex-1 py-3 text-sm font-medium",
+                  activeTab === 'description'
+                    ? "text-blue-600 border-b-2 border-blue-600"
+                    : "text-gray-500"
+                )}
               >
-                View Details
+                Description
               </button>
               <button
-                onClick={() => handleAddToCart(product, 1)}
-                className="flex-1 py-3 px-4 bg-gradient text-white rounded-lg flex items-center justify-center gap-2"
+                onClick={() => setActiveTab('details')}
+                className={cn(
+                  "flex-1 py-3 text-sm font-medium",
+                  activeTab === 'details'
+                    ? "text-blue-600 border-b-2 border-blue-600"
+                    : "text-gray-500"
+                )}
               >
-                <ShoppingCartIcon className="w-5 h-5" />
-                <span>Add to Cart</span>
+                Details
+              </button>
+              <button
+                onClick={() => setActiveTab('reviews')}
+                className={cn(
+                  "flex-1 py-3 text-sm font-medium",
+                  activeTab === 'reviews'
+                    ? "text-blue-600 border-b-2 border-blue-600"
+                    : "text-gray-500"
+                )}
+              >
+                Reviews
               </button>
             </div>
-          )}
+          </div>
 
-          {sheetPosition !== 'peek' && (
-            <>
-              <div className="border-t border-b flex-shrink-0">
-                <div className="flex">
-                  <button
-                    onClick={() => setActiveTab('description')}
-                    className={cn(
-                      "flex-1 py-3 text-sm font-medium",
-                      activeTab === 'description'
-                        ? "text-blue-600 border-b-2 border-blue-600"
-                        : "text-gray-500"
-                    )}
-                  >
-                    Description
-                  </button>
-                  <button
-                    onClick={() => setActiveTab('details')}
-                    className={cn(
-                      "flex-1 py-3 text-sm font-medium",
-                      activeTab === 'details'
-                        ? "text-blue-600 border-b-2 border-blue-600"
-                        : "text-gray-500"
-                    )}
-                  >
-                    Details
-                  </button>
-                  <button
-                    onClick={() => setActiveTab('reviews')}
-                    className={cn(
-                      "flex-1 py-3 text-sm font-medium",
-                      activeTab === 'reviews'
-                        ? "text-blue-600 border-b-2 border-blue-600"
-                        : "text-gray-500"
-                    )}
-                  >
-                    Reviews
-                  </button>
+          <div className="flex-1 overflow-y-auto">
+            <div className="p-4">
+              {activeTab === 'description' && (
+                <div>
+                  <p className="text-gray-700 text-sm">{product.description}</p>
                 </div>
-              </div>
-
-              <div className="p-4 flex-1 overflow-y-auto">
-                {activeTab === 'description' && (
-                  <div>
-                    <p className="text-gray-700 text-sm">{product.description}</p>
-                  </div>
-                )}
-                {activeTab === 'details' && (
-                  <div>
-                    <div className="text-sm text-gray-600 space-y-3">
-                      <div className="flex items-center gap-2">
-                        <Truck className="w-4 h-4 text-blue-500" />
-                        <span>Free shipping for orders over $100</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <ShieldCheck className="w-4 h-4 text-blue-500" />
-                        <span>1-year warranty</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <History className="w-4 h-4 text-blue-500" />
-                        <span>Returns accepted within 7 days</span>
-                      </div>
+              )}
+              {activeTab === 'details' && (
+                <div>
+                  <div className="text-sm text-gray-600 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Truck className="w-4 h-4 text-blue-500" />
+                      <span>Free shipping for orders over $100</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <ShieldCheck className="w-4 h-4 text-blue-500" />
+                      <span>1-year warranty</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <History className="w-4 h-4 text-blue-500" />
+                      <span>Returns accepted within 7 days</span>
                     </div>
                   </div>
-                )}
-                {activeTab === 'reviews' && (
-                  <div>
-                    <p className="text-gray-600">Customer reviews coming soon...</p>
-                  </div>
-                )}
-              </div>
+                </div>
+              )}
+              {activeTab === 'reviews' && (
+                <div>
+                  <p className="text-gray-600">Customer reviews coming soon...</p>
+                </div>
+              )}
+            </div>
+          </div>
 
-              <div className="p-4 mb-6 flex gap-3 flex-shrink-0 border-t">
-                <button
-                  onClick={toggleVariantSelector}
-                  className="flex-1 py-3 bg-white border border-primary text-primary rounded-lg flex items-center justify-center gap-2"
-                >
-                  <ShoppingCartIcon className="w-5 h-5" />
-                  <span>Thêm vào giỏ hàng</span>
-                </button>
-                <button className="bg-gradient text-white px-14 py-1 text-sm rounded-lg">Mua ngay</button>
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-
-      {showVariantSelector && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-end justify-center z-50">
-          <div className="bg-white rounded-t-xl w-full p-5 animate-slide-up"
-            ref={variantRef}
-          >
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Select Variant</h3>
-              <button onClick={toggleVariantSelector} className="text-gray-500">
-                <X className="w-5 h-5" />
+          <div className="flex-shrink-0 border-t mt-auto">
+            <div className="px-4 py-3 flex justify-between items-center border-b">
+              <span>Số lượng</span>
+              <QuantityControl
+                quantity={quantity}
+                onIncrease={handleIncrease}
+                onDecrease={handleDecrease}
+                size="md"
+              />
+            </div>
+            <div className="p-4 pb-20 flex gap-3">
+              <button
+                onClick={() => {
+                  if (!isAnimationFinished) return;
+                  handleAddToCart(product, quantity);
+                  onClose();
+                }}
+                className="flex-1 py-3 bg-white border border-primary text-primary rounded-lg flex items-center justify-center gap-2"
+                disabled={!isAnimationFinished}
+              >
+                <ShoppingCartIcon className="w-5 h-5" />
+                <span>Thêm vào giỏ hàng</span>
+              </button>
+              <button 
+                onClick={() => {
+                  if (!isAnimationFinished) return;
+                  handleBuyItNow(product, quantity);
+                  onClose();
+                }}
+                className="bg-gradient text-white px-14 py-3 text-sm rounded-lg"
+                disabled={!isAnimationFinished}
+              >
+                Mua ngay
               </button>
             </div>
-
-            <div className="flex gap-3 mb-4">
-              <img
-                src={product.images[0]}
-                alt="Product"
-                className="w-20 h-20 object-cover rounded-md border"
-              />
-              <div>
-                <div className="text-blue-600 font-bold">${product.unit_price - product.discount_price}</div>
-                <div className="text-sm text-gray-500">Stock: {product.stock}</div>
-              </div>
-            </div>
-
-            <div className="flex justify-between items-center border-t border-b py-4 mb-4">
-              <div className="text-gray-800">Total:</div>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center"
-                >
-                  -
-                </button>
-                <span className="w-8 text-center">{quantity}</span>
-                <button
-                  onClick={() => setQuantity(quantity + 1)}
-                  className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center"
-                >
-                  +
-                </button>
-              </div>
-            </div>
-
-            <button
-              onClick={() => handleAddToCart(product, quantity)}
-              className="w-full py-3 bg-gradient text-white rounded-lg"
-              disabled={!isAddCartAnimationFinished.get()}
-            >
-              Thêm vào giỏ hàng
-            </button>
-            <button
-              onClick={() => handleBuyNowClick(product, quantity)}
-              className="w-full py-3 bg-gradient text-white rounded-lg"
-            >
-              Mua ngay
-            </button>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

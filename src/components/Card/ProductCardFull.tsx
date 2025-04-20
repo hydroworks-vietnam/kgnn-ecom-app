@@ -8,6 +8,7 @@ import MobileProductDetailCard from './MobileProductDetailCard';
 import ReviewStar from '../Review/Star';
 import useCartStore, { isAddCartAnimationFinished, isCartOpen } from '@/store/cart';
 import { useStore } from '@nanostores/react';
+import QuantityControl from '@/components/ui/QuantityControl';
 
 interface ProductCardFullProps {
   product: IProduct;
@@ -18,9 +19,41 @@ interface ProductCardFullProps {
 const ProductCardFull = ({ product, viewMode = 'grid', onAddToCart }: ProductCardFullProps) => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const { addCartItem } = useCartStore();
+  const { addCartItem, getCartItemQuantity } = useCartStore();
   const buttonRef = useRef<HTMLButtonElement>(null);
   const isAnimationFinished = useStore(isAddCartAnimationFinished);
+  const cartQuantity = getCartItemQuantity(product.id);
+  const [quantity, setQuantity] = useState(0);
+
+  useEffect(() => {
+    if (isAnimationFinished) {
+      setQuantity(cartQuantity);
+    }
+  }, [cartQuantity, isAnimationFinished]);
+
+  const triggerAnimation = (buttonRect: DOMRect) => {
+    const event = new CustomEvent('add-to-cart-animation', {
+      detail: {
+        x: buttonRect.right,
+        y: buttonRect.top + buttonRect.height / 2
+      }
+    });
+    window.dispatchEvent(event);
+  };
+
+  const handleIncrease = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!isAnimationFinished) return;
+    onAddToCart(product, 1);
+  };
+
+  const handleDecrease = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!isAnimationFinished) return;
+    if (quantity >= 1) {
+      onAddToCart(product, -1);
+    }
+  };
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -29,16 +62,10 @@ const ProductCardFull = ({ product, viewMode = 'grid', onAddToCart }: ProductCar
     // Get button position for animation start point
     const buttonRect = buttonRef.current?.getBoundingClientRect();
     if (buttonRect) {
-      const event = new CustomEvent('add-to-cart-animation', {
-        detail: {
-          x: buttonRect.right,
-          y: buttonRect.top + buttonRect.height / 2
-        }
-      });
-      window.dispatchEvent(event);
+      triggerAnimation(buttonRect);
     }
     
-    onAddToCart(product, 1);
+    onAddToCart(product, quantity);
   };
 
   const onBuyItNow = (product: IProduct, quantity: number) => {
@@ -71,49 +98,63 @@ const ProductCardFull = ({ product, viewMode = 'grid', onAddToCart }: ProductCar
       onClick={() => setIsPopupOpen(true)}
     >
       <div className="rounded-lg shadow-md hover:shadow-lg cursor-pointer h-full flex flex-col">
-        <div className="relative w-full h-50">
+        <div className="relative w-full aspect-square">
           <SafetyImage
-            clazz="h-[180px] w-full md:h-full rounded-t-lg object-cover"
+            clazz="w-full h-full rounded-t-lg object-cover"
             src={product.images[0]}
-            height={200}
+            height={300}
             width={300}
           />
           {discount > 0 && (
-            <span className="absolute top-1 right-1 bg-red-500 text-white text-[11px] md:text-xs font-semibold p-1 rounded">
+            <span className="absolute top-1 right-1 bg-red-500 text-white text-[10px] md:text-xs font-semibold px-1.5 py-0.5 rounded">
               Giảm {discount}%
             </span>
           )}
         </div>
-        <div className="p-3 flex flex-col">
-          <h3 className="text-sm font-bold text-gray-900 mb-1 uppercase truncate">{product.name}</h3>
-          <p className="text-gray-500 text-xs mb-1 truncate">{product.description}</p>
-          <div className="flex items-center mb-1">
-            <div className="flex mr-1">
+        <div className="p-2 flex flex-col flex-1">
+          <h3 className="text-xs font-bold text-gray-900 mb-0.5">{product.name}</h3>
+          <p className="text-gray-500 text-[11px] mb-0.5 line-clamp-2">{product.description}</p>
+          {/* <div className="flex items-center gap-1 mb-1">
+            <div className="flex mr-0.5">
               <ReviewStar rating={rating} />
             </div>
-            <span className="text-gray-500 text-xs">({reviews})</span>
-          </div>
-          <div className="flex items-center justify-between mt-1">
-            <div className="flex items-center gap-1">
-              <span className="font-bold text-sm text-gray-900">{formatCurrency(product.unit_price - product.discount_price)}</span>
-              {discount > 0 && (
-                <span className="text-xs text-gray-400 line-through">{formatCurrency(product.unit_price)}</span>
-              )}
+            <span className="text-gray-500 text-[10px]">({reviews})</span>
+          </div> */}
+          {isMobile ? (
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-xs text-gray-900">{formatCurrency(product.unit_price - product.discount_price)}</span>
+                {discount > 0 && (
+                  <span className="text-xs text-primary line-through">{formatCurrency(product.unit_price)}</span>
+                )}
+              </div>
+              <div className="flex justify-end">
+                <QuantityControl
+                  quantity={quantity}
+                  onIncrease={(e) => handleIncrease(e)}
+                  onDecrease={(e) => handleDecrease(e)}
+                  size="sm"
+                  className="scale-90 origin-right"
+                />
+              </div>
             </div>
-            <button
-              ref={buttonRef}
-              onClick={handleAddToCart}
-              className={`flex items-center gap-1 px-3 py-2 rounded-lg text-xs transition-all ${
-                !isAnimationFinished 
-                  ? 'cursor-not-allowed bg-gray-300 text-gray-500'
-                  : 'bg-gradient text-white hover:bg-orange-600'
-              }`}
-              disabled={!isAnimationFinished}
-            >
-              <ShoppingCartIcon className="w-4 h-4" />
-              <span className="hidden sm:inline">Thêm vào giỏ</span>
-            </button>
-          </div>
+          ) : (
+            <div className="flex items-center justify-between mt-0.5">
+              <div className="flex items-center gap-1">
+                <span className="font-bold text-xs text-gray-900">{formatCurrency(product.unit_price - product.discount_price)}</span>
+                {discount > 0 && (
+                  <span className="text-[10px] text-gray-400 line-through">{formatCurrency(product.unit_price)}</span>
+                )}
+              </div>
+              <QuantityControl
+                quantity={quantity}
+                onIncrease={(e) => handleIncrease(e)}
+                onDecrease={(e) => handleDecrease(e)}
+                size="sm"
+                className="scale-90 origin-right"
+              />
+            </div>
+          )}
         </div>
         {isPopupOpen &&
           (isMobile ? (
@@ -155,11 +196,11 @@ const ProductCardFull = ({ product, viewMode = 'grid', onAddToCart }: ProductCar
             <span className="text-gray-400 line-through text-sm">{formatCurrency(product.unit_price)}</span>
           )}
         </div>
-        <div className="flex items-center gap-2 mb-2">
+        {/* <div className="flex items-center gap-2 mb-2">
           <div className="flex">
             <ReviewStar rating={rating} />
           </div>
-        </div>
+        </div> */}
         <p className="text-gray-500 text-sm truncate">{product.description}</p>
         <div className="flex justify-end gap-2 mt-2">
           <button className="text-blue-900 hover:text-primary cursor-pointer">
