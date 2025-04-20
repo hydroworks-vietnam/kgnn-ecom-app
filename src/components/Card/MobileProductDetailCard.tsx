@@ -238,15 +238,62 @@ export default function MobileProductDetailCard({ product, onClose, handleAddToC
             </div>
 
             <div className="mt-4">
-              <h1 className="text-lg text-primary font-bold truncate">{product.name}</h1>
-              <div className="text-slate-400 font-bold my-2">
-                {formatCurrency(product.unit_price - product.discount_price)}
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="flex text-yellow-400 text-sm">
-                  <ReviewStar rating={5} />
+              <div className="flex justify-between items-start mb-2">
+                <h1 className="text-lg text-primary font-bold truncate flex-1">{product.name}</h1>
+                <div className="text-slate-400 font-bold ml-4">
+                  {formatCurrency(product.unit_price - product.discount_price)}
                 </div>
-                <span className="text-gray-500 text-xs">({5})</span>
+              </div>
+
+              <div className="text-sm text-gray-600 space-y-2 my-4">
+                <div className="flex items-center gap-2">
+                  <Truck className="w-4 h-4 text-primary" />
+                  <span>Miễn phí giao hàng cho đơn trên 2,000,000 đ</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-primary" />
+                  <span>Bảo hành 1 năm</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <History className="w-4 h-4 text-primary" />
+                  <span>Trả hàng trong 7 ngày</span>
+                </div>
+              </div>
+
+              <div className="border-t border-b py-3 flex justify-between items-center mb-4">
+                <span>Số lượng</span>
+                <QuantityControl
+                  quantity={quantity}
+                  onIncrease={handleIncrease}
+                  onDecrease={handleDecrease}
+                  size="md"
+                />
+              </div>
+
+              <div className="flex gap-3 mb-4">
+                <button
+                  onClick={() => {
+                    if (!isAnimationFinished) return;
+                    handleAddToCart(product, quantity);
+                    onClose();
+                  }}
+                  className="flex-1 py-3 bg-white border border-primary text-primary rounded-lg flex items-center justify-center gap-2"
+                  disabled={!isAnimationFinished}
+                >
+                  <ShoppingCartIcon className="w-5 h-5" />
+                  <span>Thêm vào giỏ hàng</span>
+                </button>
+                <button 
+                  onClick={() => {
+                    if (!isAnimationFinished) return;
+                    handleBuyItNow(product, quantity);
+                    onClose();
+                  }}
+                  className="bg-gradient text-white px-14 py-3 text-sm rounded-lg"
+                  disabled={!isAnimationFinished}
+                >
+                  Mua ngay
+                </button>
               </div>
             </div>
           </div>
@@ -262,7 +309,7 @@ export default function MobileProductDetailCard({ product, onClose, handleAddToC
                     : "text-gray-500"
                 )}
               >
-                Description
+                Mô tả
               </button>
               <button
                 onClick={() => setActiveTab('details')}
@@ -273,7 +320,7 @@ export default function MobileProductDetailCard({ product, onClose, handleAddToC
                     : "text-gray-500"
                 )}
               >
-                Details
+                Thông số kĩ thuật
               </button>
               <button
                 onClick={() => setActiveTab('reviews')}
@@ -284,79 +331,27 @@ export default function MobileProductDetailCard({ product, onClose, handleAddToC
                     : "text-gray-500"
                 )}
               >
-                Reviews
+                Đánh giá
               </button>
             </div>
           </div>
 
           <div className="flex-1 overflow-y-auto">
-            <div className="p-4">
-              {activeTab === 'description' && (
-                <div>
-                  <p className="text-gray-700 text-sm">{product.description}</p>
-                </div>
-              )}
-              {activeTab === 'details' && (
-                <div>
-                  <div className="text-sm text-gray-600 space-y-3">
-                    <div className="flex items-center gap-2">
-                      <Truck className="w-4 h-4 text-blue-500" />
-                      <span>Free shipping for orders over $100</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <ShieldCheck className="w-4 h-4 text-blue-500" />
-                      <span>1-year warranty</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <History className="w-4 h-4 text-blue-500" />
-                      <span>Returns accepted within 7 days</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-              {activeTab === 'reviews' && (
-                <div>
-                  <p className="text-gray-600">Customer reviews coming soon...</p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="flex-shrink-0 border-t mt-auto">
-            <div className="px-4 py-3 flex justify-between items-center border-b">
-              <span>Số lượng</span>
-              <QuantityControl
-                quantity={quantity}
-                onIncrease={handleIncrease}
-                onDecrease={handleDecrease}
-                size="md"
-              />
-            </div>
-            <div className="p-4 pb-20 flex gap-3">
-              <button
-                onClick={() => {
-                  if (!isAnimationFinished) return;
-                  handleAddToCart(product, quantity);
-                  onClose();
-                }}
-                className="flex-1 py-3 bg-white border border-primary text-primary rounded-lg flex items-center justify-center gap-2"
-                disabled={!isAnimationFinished}
-              >
-                <ShoppingCartIcon className="w-5 h-5" />
-                <span>Thêm vào giỏ hàng</span>
-              </button>
-              <button 
-                onClick={() => {
-                  if (!isAnimationFinished) return;
-                  handleBuyItNow(product, quantity);
-                  onClose();
-                }}
-                className="bg-gradient text-white px-14 py-3 text-sm rounded-lg"
-                disabled={!isAnimationFinished}
-              >
-                Mua ngay
-              </button>
-            </div>
+            {activeTab === 'description' && (
+              <div className="p-4">
+                <p className="text-gray-700 text-sm">{product.description}</p>
+              </div>
+            )}
+            {activeTab === 'details' && (
+              <div className="p-4">
+                <p className="text-gray-700 text-sm">Chưa có thông số kĩ thuật</p>
+              </div>
+            )}
+            {activeTab === 'reviews' && (
+              <div className="p-4">
+                <p className="text-gray-700 text-sm">Chưa có đánh giá</p>
+              </div>
+            )}
           </div>
         </div>
       </div>

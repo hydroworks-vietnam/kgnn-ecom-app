@@ -180,14 +180,14 @@ export default function ProductDetailCard(props: ProductDetailCardProps) {
             </p>
 
             {/* Rating and Price */}
-            <div className="flex items-center gap-2 mb-4">
+            {/* <div className="flex items-center gap-2 mb-4">
               <div className="flex">
                 <ReviewStar rating={5} />
               </div>
               <span className="text-sm text-gray-500">
                 ({124} đánh giá)
               </span>
-            </div>
+            </div> */}
 
             {/* Quantity Selector and Add to Cart */}
             <div className="flex items-center gap-3 mb-4">
@@ -291,7 +291,7 @@ export default function ProductDetailCard(props: ProductDetailCardProps) {
             {activeTab === 'reviews' && (
               <div>
                 <h3 className="text-lg font-semibold text-blue-900">Đánh giá sản phẩm</h3>
-                <p className="text-gray-600 mt-2">Các bài đánh giá</p>
+                <p className="text-gray-600 mt-2">Chưa có đánh giá</p>
               </div>
             )}
           </div>

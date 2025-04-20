@@ -112,8 +112,8 @@ const ProductCardFull = ({ product, viewMode = 'grid', onAddToCart }: ProductCar
           )}
         </div>
         <div className="p-2 flex flex-col flex-1">
-          <h3 className="text-xs font-bold text-gray-900 mb-0.5">{product.name}</h3>
-          <p className="text-gray-500 text-[11px] mb-0.5 line-clamp-2">{product.description}</p>
+          <h3 className="text-[14px] font-bold text-gray-900 mb-0.5">{product.name}</h3>
+          <p className="text-gray-500 text-[12px] mb-0.5 line-clamp-2">{product.description}</p>
           {/* <div className="flex items-center gap-1 mb-1">
             <div className="flex mr-0.5">
               <ReviewStar rating={rating} />
@@ -123,9 +123,13 @@ const ProductCardFull = ({ product, viewMode = 'grid', onAddToCart }: ProductCar
           {isMobile ? (
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
-                <span className="font-bold text-xs text-gray-900">{formatCurrency(product.unit_price - product.discount_price)}</span>
+                <span className="font-bold text-xs text-gray-900">
+                  {formatCurrency(product.unit_price - product.discount_price)}
+                </span>
                 {discount > 0 && (
-                  <span className="text-xs text-primary line-through">{formatCurrency(product.unit_price)}</span>
+                <span className="text-xs text-primary line-through">
+                  {formatCurrency(product.unit_price)}
+                </span>
                 )}
               </div>
               <div className="flex justify-end">
@@ -141,9 +145,9 @@ const ProductCardFull = ({ product, viewMode = 'grid', onAddToCart }: ProductCar
           ) : (
             <div className="flex items-center justify-between mt-0.5">
               <div className="flex items-center gap-1">
-                <span className="font-bold text-xs text-gray-900">{formatCurrency(product.unit_price - product.discount_price)}</span>
+                <span className="font-bold text-[13px] text-gray-900">{formatCurrency(product.unit_price - product.discount_price)}</span>
                 {discount > 0 && (
-                  <span className="text-[10px] text-gray-400 line-through">{formatCurrency(product.unit_price)}</span>
+                <span className="text-[13px] text-primary line-through">{formatCurrency(product.unit_price)}</span>
                 )}
               </div>
               <QuantityControl
@@ -193,7 +197,7 @@ const ProductCardFull = ({ product, viewMode = 'grid', onAddToCart }: ProductCar
         <div className="flex items-center gap-2 mb-1">
           <span className="text-sm font-bold text-blue-900">{formatCurrency(product.unit_price - product.discount_price)}</span>
           {discount > 0 && (
-            <span className="text-gray-400 line-through text-sm">{formatCurrency(product.unit_price)}</span>
+            <span className="text-primary line-through text-sm">{formatCurrency(product.unit_price)}</span>
           )}
         </div>
         {/* <div className="flex items-center gap-2 mb-2">
