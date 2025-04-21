@@ -1,9 +1,10 @@
-import { cartItemsStore } from "@/store/cart";
+import { cartItemsStore, isCartOpen } from "@/store/cart";
 import { useStore } from "@nanostores/react";
 import CartItem from "@/components/ui/CartItem";
 import CartSummary from "@/components/ui/CartSummary";
 import type { ICartItem } from "@/types/cart";
 import PromoCodeInput from "@/components/ui/PromoCodeInput";
+import { navigate } from 'astro:transitions/client';
 
 interface CartDrawerProps {
   open: boolean;
@@ -14,6 +15,15 @@ interface CartDrawerProps {
 
 const CartDrawer = ({ open, onClose, callPayment, onContinueShopping }: CartDrawerProps) => {
   const cart = useStore(cartItemsStore);
+
+  const handlePayment = () => {
+    // Close the cart drawer
+    isCartOpen.set(false);
+    // Close any other popups
+    onClose();
+    // Navigate to payment page
+    navigate('/checkout');
+  };
 
   return (
     <>
@@ -68,7 +78,7 @@ const CartDrawer = ({ open, onClose, callPayment, onContinueShopping }: CartDraw
               <PromoCodeInput />
               <CartSummary />
               <button
-                onClick={callPayment}
+                onClick={handlePayment}
                 className="w-full py-2 bg-gradient text-white rounded-lg text-sm hover:shadow-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 Đến trang thanh toán

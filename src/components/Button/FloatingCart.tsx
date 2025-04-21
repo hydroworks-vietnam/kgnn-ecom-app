@@ -1,6 +1,7 @@
-import { totalCartQuantity, isAddCartAnimationFinished, isFloatingCartVisible } from "@/store/cart";
+import useCartStore, { totalCartQuantity, isAddCartAnimationFinished, isCartOpen, isFloatingCartVisible } from "@/store/cart";
+import { formatCurrency } from "@/utils/helpers";
 import { useStore } from "@nanostores/react";
-import { Package, ShoppingCartIcon } from "lucide-react";
+import { Package, ReceiptText } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
 const FloatingCart = ({
@@ -12,6 +13,7 @@ const FloatingCart = ({
   onCartClick?: () => void;
   isFinishAnimation: () => void;
 }) => {
+  const { calculateSubtotal } = useCartStore();
   const [animationTrigger, setAnimationTrigger] = useState(0);
   const [showAnimation, setShowAnimation] = useState(false);
   const [flyStartX, setFlyStartX] = useState(0);
@@ -19,7 +21,9 @@ const FloatingCart = ({
   const cartRef = useRef<HTMLButtonElement>(null);
   const animationRef = useRef<HTMLDivElement>(null);
   const $totalQuantity = useStore(totalCartQuantity);
-  const isVisible = useStore(isFloatingCartVisible);
+  const $isCartOpen = useStore(isCartOpen);
+  const $isFloatingCartVisible = useStore(isFloatingCartVisible);
+  const total = calculateSubtotal();
   const animationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -80,21 +84,26 @@ const FloatingCart = ({
         </div>
       )}
 
-      {isVisible && (
-        <button
-          ref={cartRef}
-          onClick={onCartClick}
-          className={`fixed bottom-6 right-6 p-3 bg-gradient text-white rounded-full shadow-lg hover:scale-110 transition-transform duration-200 z-[10000] ${
-            showAnimation ? "animate-cart-bounce" : ""
-          }`}
-        >
-          <ShoppingCartIcon className="w-5 h-5" />
-          {$totalQuantity > 0 && (
-            <span className="absolute -top-2 -right-1 bg-red-500 text-white text-xs w-6 h-6 flex items-center justify-center rounded-full">
-              {$totalQuantity > 99 ? '99+' : $totalQuantity}
-            </span>
-          )}
-        </button>
+      {$totalQuantity > 0 && !$isCartOpen && $isFloatingCartVisible && (
+        <div className="fixed bottom-20 right-0 z-[10000]">
+          <button
+            ref={cartRef}
+            onClick={onCartClick}
+            className="flex items-center gap-3 px-4 py-2 bg-primary text-white rounded-l-lg shadow-lg hover:opacity-90 transition-all duration-200"
+          >
+            <div className="flex flex-col items-center gap-2">
+              <span className="text-sm font-semibold">
+                {$totalQuantity > 99 ? '99+' : $totalQuantity} sản phẩm
+              </span>
+              <div className="flex items-center gap-2">
+                <ReceiptText className="w-5 h-5 bg-[#CBDB47] text-primary" />
+                <span className="text-[16px] font-semibold text-[#CBDB47]">
+                  {formatCurrency(total)}
+                </span>
+              </div>
+            </div>
+          </button>
+        </div>
       )}
     </>
   );

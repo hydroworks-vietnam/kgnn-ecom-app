@@ -12,7 +12,7 @@ import { cn, formatCurrency } from '@/utils/helpers';
 import SafetyImage from '../Image/SafetyImage';
 import type { IProduct } from '@/types/product';
 import ReviewStar from '../Review/Star';
-import { isAddCartAnimationFinished, isCartOpen } from '@/store/cart';
+import useCartStore, { isAddCartAnimationFinished, isCartOpen, isFloatingCartVisible } from '@/store/cart';
 import QuantityControl from '@/components/ui/QuantityControl';
 import { useStore } from '@nanostores/react';
 import YoutubeVideo from '@/components/ui/YoutubeVideo';
@@ -27,7 +27,8 @@ type ProductDetailCardProps = {
 
 // Mobile bottom sheet product detail component
 export default function MobileProductDetailCard({ product, onClose, handleAddToCart, handleBuyItNow }: ProductDetailCardProps) {
-  const [quantity, setQuantity] = useState(1);
+  const { getCartItemQuantity } = useCartStore();
+  const [quantity, setQuantity] = useState(getCartItemQuantity(product.id));
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [activeTab, setActiveTab] = useState('description');
   const [showVariantSelector, setShowVariantSelector] = useState(false);
@@ -46,6 +47,15 @@ export default function MobileProductDetailCard({ product, onClose, handleAddToC
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showVariantSelector]);
+
+  // Hide floating cart when component mounts
+  useEffect(() => {
+    isFloatingCartVisible.set(false);
+    return () => {
+      // Show floating cart when component unmounts
+      isFloatingCartVisible.set(true);
+    };
+  }, []);
 
   const nextImage = () => {
     setCurrentImageIndex((prevIndex) =>
@@ -144,7 +154,7 @@ export default function MobileProductDetailCard({ product, onClose, handleAddToC
 
   const handleDecrease = () => {
     if (!isAnimationFinished) return;
-    handleQuantityChange(Math.max(1, quantity - 1));
+    handleQuantityChange(Math.max(0, quantity - 1));
   };
 
   const handleBuyNowClick = (product: IProduct, quantity: number) => {
@@ -154,7 +164,7 @@ export default function MobileProductDetailCard({ product, onClose, handleAddToC
   };
 
   return (
-    <div 
+    <div
       className="fixed inset-0 bg-black bg-opacity-50 z-50 flex flex-col justify-end"
       style={{
         backgroundColor: 'rgba(0, 0, 0, 0.4)',
@@ -185,10 +195,10 @@ export default function MobileProductDetailCard({ product, onClose, handleAddToC
           onClick={onClose}
           className="absolute top-2 right-2 text-slate-500 z-100 rounded-2xl bg-primary"
         >
-          <X className="w-6 h-6 text-white"/>
+          <X className="w-6 h-6 text-white" />
         </button>
 
-        <div className="flex flex-col h-[calc(100%-2rem)]">
+        <div className="flex flex-col h-full">
           <div className="flex-shrink-0 p-4">
             <div className="relative w-full">
               <div className="relative overflow-hidden">
@@ -305,6 +315,7 @@ export default function MobileProductDetailCard({ product, onClose, handleAddToC
             </div>
           </div>
 
+          {/* Scrollable content area */}
           <div className="flex-1 overflow-y-auto py-4">
             {activeTab === 'description' && (
               <div className="p-4">
@@ -328,9 +339,10 @@ export default function MobileProductDetailCard({ product, onClose, handleAddToC
             )}
           </div>
 
-          <div className="flex-shrink-0 border-t bg-white">
+          {/* Fixed bottom section for quantity control and buttons */}
+          <div className="flex-shrink-0 border-t bg-white sticky bottom-0">
             <div className="px-4 py-3 flex justify-between items-center border-b">
-              <span>Số lượng</span>
+              <span className="text-sm font-medium">Số lượng</span>
               <QuantityControl
                 quantity={quantity}
                 onIncrease={handleIncrease}
@@ -338,29 +350,31 @@ export default function MobileProductDetailCard({ product, onClose, handleAddToC
                 size="md"
               />
             </div>
-            <div className="fixed bottom-0 left-0 right-0 p-4 pb-8 flex gap-3 bg-white border-t safe-area-bottom">
+            <div className="p-4 flex gap-3 bg-white border-t">
               <button
                 onClick={() => {
                   if (!isAnimationFinished) return;
                   handleAddToCart(product, quantity);
                   onClose();
                 }}
-                className="flex-1 py-3 bg-white border border-primary text-primary rounded-lg flex items-center justify-center gap-2"
-                disabled={!isAnimationFinished}
+                className={cn(
+                  "flex-1 py-3 bg-gradient text-white rounded-lg flex items-center justify-center gap-2",
+                  !isAnimationFinished || quantity === 0 ? 'opacity-50 cursor-not-allowed' : ''
+                )}
               >
                 <ShoppingCartIcon className="w-5 h-5" />
-                <span>Thêm vào giỏ hàng</span>
+                <span className="text-sm font-semibold">Thêm vào giỏ hàng</span>
               </button>
-              <button 
+              <button
                 onClick={() => {
                   if (!isAnimationFinished) return;
                   handleBuyItNow(product, quantity);
                   onClose();
                 }}
-                className="flex-1 bg-gradient text-white py-3 text-sm rounded-lg flex items-center justify-center"
+                className="flex-1 bg-white border border-primary text-primary py-3 text-sm rounded-lg flex items-center justify-center"
                 disabled={!isAnimationFinished}
               >
-                Mua ngay
+                <span className="text-sm font-semibold">Mua ngay</span>
               </button>
             </div>
           </div>

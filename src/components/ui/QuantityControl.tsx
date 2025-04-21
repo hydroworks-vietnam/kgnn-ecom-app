@@ -1,11 +1,13 @@
 import { useStore } from '@nanostores/react';
 import { isAddCartAnimationFinished } from '@/store/cart';
+import { cx } from 'class-variance-authority';
 
 interface QuantityControlProps {
   quantity: number;
   onIncrease: (e: React.MouseEvent) => void;
   onDecrease: (e: React.MouseEvent) => void;
   size?: 'sm' | 'md';
+  textSize?: string;
   className?: string;
 }
 
@@ -14,28 +16,26 @@ export default function QuantityControl({
   onIncrease, 
   onDecrease, 
   size = 'sm',
-  className = ''
+  className = '',
+  textSize = ''
 }: QuantityControlProps) {
   const isAnimationFinished = useStore(isAddCartAnimationFinished);
-  
   const buttonSize = size === 'sm' ? 'w-7 h-7' : 'w-8 h-8';
-  const textSize = size === 'sm' ? 'text-sm' : 'text-base';
 
   return (
     <div className={`flex items-center gap-1 ${className}`} onClick={(e) => e.stopPropagation()}>
       <button
         onClick={onDecrease}
-        className={`${buttonSize} flex items-center justify-center border-2 border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 ${
-          !isAnimationFinished ? 'cursor-not-allowed opacity-50' : ''
-        }`}
-        disabled={!isAnimationFinished}
+        className={`${buttonSize} aspect-square text- flex items-center justify-center border-2 border-primary text-white bg-primary rounded-full hover:opacity-80
+        ${!isAnimationFinished || quantity <= 0 ? 'cursor-not-allowed opacity-50' : ''}`}
+        disabled={!isAnimationFinished || quantity <= 0}
       >
         -
       </button>
-      <span className={`${textSize} text-gray-900 w-7 text-center font-medium`}>{quantity}</span>
+      <span className={cx(`${textSize} text-gray-900 text-center`, textSize === 'text-xs' ? 'w-8' : 'w-5')}>{quantity}</span>
       <button
         onClick={onIncrease}
-        className={`${buttonSize} flex items-center justify-center border-2 border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 ${
+        className={`${buttonSize} aspect-square text-md flex items-center justify-center border-2 border-primary text-white bg-primary rounded-full hover:opacity-80 ${
           !isAnimationFinished ? 'cursor-not-allowed opacity-50' : ''
         }`}
         disabled={!isAnimationFinished}

@@ -1,7 +1,12 @@
 import type { ICart, ICartItem } from '@/types/cart';
 import { atom, computed } from 'nanostores';
 
-export const cartItemsStore = atom<ICart>([])
+// Initialize cart from session storage if available
+const initialCart = typeof window !== 'undefined' 
+  ? JSON.parse(sessionStorage.getItem('cart') || '[]')
+  : [];
+
+export const cartItemsStore = atom<ICart>(initialCart)
 export const isCartOpen = atom(false)
 export const promoCodeStore = atom<string>('');
 export const discountRateStore = atom<number>(0);
@@ -9,6 +14,13 @@ export const taxRateStore = atom<number>(8);
 export const isAddCartAnimationFinished = atom(true);
 export const shippingFeeStore = atom<number>(30000);
 export const isFloatingCartVisible = atom(true);
+
+// Subscribe to cart changes to persist in session storage
+cartItemsStore.subscribe((cart) => {
+  if (typeof window !== 'undefined') {
+    sessionStorage.setItem('cart', JSON.stringify(cart));
+  }
+});
 
 /**
  * Adds or updates a cart item based on whether it already exists in the cart.

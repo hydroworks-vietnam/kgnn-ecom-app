@@ -1,13 +1,14 @@
-import { useEffect, useMemo, useState, useCallback, type JSX } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import SafetyImage from '@/components/Image/SafetyImage';
 import { ShoppingCartIcon, X, History, ShieldCheck, Truck, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { IProduct } from '@/types/product';
 import { cn, formatCurrency } from '@/utils/helpers';
 import useCartStore from '@/store/cart';
-import ReviewStar from '@/components/Review/Star';
 import YoutubeVideo from '@/components/ui/YoutubeVideo';
 import { useVideoSource } from '@/hooks/useVideoSource';
 import QuantityControl from '@/components/ui/QuantityControl';
+import { isCartOpen } from '@/store/cart';
+import { useStore } from '@nanostores/react';
 
 type ProductDetailCardProps = {
   product: IProduct,
@@ -19,16 +20,16 @@ type ProductDetailCardProps = {
 export default function ProductDetailCard(props: ProductDetailCardProps) {
   const { product, onClose, handleAddToCart, handleBuyItNow } = props;
   const { getCartItemQuantity } = useCartStore();
-  const [quantity, setQuantity] = useState(1);
+  const $isCartOpen = useStore(isCartOpen);
+  const [quantity, setQuantity] = useState(getCartItemQuantity(product.id));
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [activeTab, setActiveTab] = useState<'features' | 'specs' | 'reviews'>('features');
   const [isAddingToCart, setIsAddingToCart] = useState(false);
 
   const getTextSizeClass = (num: number): string => {
     const length = num.toString().length;
-    if (length > 6) return 'text-xs';
-    if (length > 4) return 'text-sm';
-    return 'text-md';
+    if (length >= 4) return 'text-xs';
+    return 'text-sm';
   };
 
   const textSizeClass = useMemo(() => getTextSizeClass(quantity), [quantity]);
@@ -48,7 +49,7 @@ export default function ProductDetailCard(props: ProductDetailCardProps) {
   };
 
   const handleQuantityDecrease = useCallback(() => {
-    setQuantity(prev => Math.max(1, prev - 1));
+    setQuantity(prev => Math.max(0, prev - 1));
   }, []);
 
   const handleQuantityIncrease = useCallback(() => {
@@ -61,13 +62,11 @@ export default function ProductDetailCard(props: ProductDetailCardProps) {
     await handleAddToCart(product, quantity);
     setTimeout(() => {
       setIsAddingToCart(false);
-      setQuantity(1); // Reset quantity after adding to cart
     }, 1000);
   }, [isAddingToCart, product, quantity, handleAddToCart]);
 
   const handleBuyNowClick = useCallback(() => {
     handleBuyItNow(product, quantity);
-    setQuantity(1); // Reset quantity after buying
   }, [product, quantity, handleBuyItNow]);
 
   // Memoize the quantity display
@@ -78,24 +77,18 @@ export default function ProductDetailCard(props: ProductDetailCardProps) {
         onIncrease={handleQuantityIncrease}
         onDecrease={handleQuantityDecrease}
         size="md"
+        textSize={textSizeClass}
         className={isAddingToCart ? 'opacity-50 cursor-not-allowed' : ''}
       />
     </div>
   ), [quantity, handleQuantityDecrease, handleQuantityIncrease, isAddingToCart]);
 
-  // Find this product in cart to get its initial quantity
-  useEffect(() => {
-    const cartItem = getCartItemQuantity(product.id);
-    if (cartItem) {
-      setQuantity(cartItem);
-    } else {
-      setQuantity(1);
-    }
-  }, [product.id, getCartItemQuantity]);
-
   return (
     <div
-      className="fixed inset-0 flex items-center justify-center"
+      className={cn(
+        "fixed inset-0 flex items-center justify-center",
+        $isCartOpen && "hidden"
+      )}
       style={{
         backgroundColor: 'rgba(0, 0, 0, 0.4)',
         zIndex: 40,
@@ -104,7 +97,7 @@ export default function ProductDetailCard(props: ProductDetailCardProps) {
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-lg p-6 w-full max-w-[50%] h-[90%] relative shadow-xl overflow-y-scroll scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100"
+        className="bg-white rounded-lg p-6 w-full max-w-[50%] h-[90%] relative shadow-xl overflow-y-scroll scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100 isolate"
         onClick={(e) => e.stopPropagation()} // Prevent closing when clicking modal content
       >
         <button
@@ -194,9 +187,9 @@ export default function ProductDetailCard(props: ProductDetailCardProps) {
               {quantityDisplay}
               <button
                 onClick={handleAddToCartClick}
-                disabled={isAddingToCart}
+                disabled={isAddingToCart || quantity === 0}
                 className={`min-w-[140px] text-white p-3 rounded-lg gap-2 flex items-center justify-center hover:shadow-xl transition-all ${
-                  isAddingToCart ? 'bg-gray-400 cursor-not-allowed' : 'bg-gradient'
+                  isAddingToCart || quantity === 0 ? 'bg-gray-400 cursor-not-allowed' : 'bg-gradient'
                 }`}
               >
                 <ShoppingCartIcon className="w-4 h-4" />
@@ -204,7 +197,6 @@ export default function ProductDetailCard(props: ProductDetailCardProps) {
               </button>
               <button
                 onClick={handleBuyNowClick}
-                disabled={isAddingToCart}
                 className="min-w-[120px] text-primary border border-primary p-3 rounded-lg gap-2 flex items-center justify-center hover:shadow-xl"
               >
                 <ShoppingCartIcon className="w-4 h-4" />
@@ -274,7 +266,7 @@ export default function ProductDetailCard(props: ProductDetailCardProps) {
               <div>
                 <p className="text-gray-700 text-sm">{product.description}</p>
                 {videoSrc && (
-                  <div className="relative rounded-lg overflow-hidden mt-8">
+                  <div className="relative rounded-lg overflow-hidden mt-8 z-0">
                     <YoutubeVideo src={videoSrc} />
                   </div>
                 )}
