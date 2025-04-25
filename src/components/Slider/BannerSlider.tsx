@@ -33,7 +33,7 @@ const BannerSlider = () => {
         setBanners(response);
         setIsLoading(false);
       } catch (err) {
-        setError("Failed to load banners");
+        setError("Không thể tải hình ảnh");
         setIsLoading(false);
       }
     };
