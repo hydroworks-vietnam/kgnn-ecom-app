@@ -1,15 +1,14 @@
 import { defineConfig, passthroughImageService } from "astro/config";
 import react from '@astrojs/react';
 import tailwind from '@astrojs/tailwind';
-import awsAmplify from 'astro-aws-amplify';
+import node from '@astrojs/node';
 
 export default defineConfig({
   integrations: [
     react(),
     tailwind({
-      // Explicitly point to your global CSS file
       config: {
-        applyBaseStyles: true, // Ensure Tailwind base styles are applied
+        applyBaseStyles: true,
         configFile: './tailwind.config.js',
       },
     }),
@@ -23,6 +22,10 @@ export default defineConfig({
   },
   output: 'server',
   trailingSlash: 'never',
-  adapter: awsAmplify (),
-  service: passthroughImageService(),
+  adapter: node({
+    mode: 'standalone'
+  }),
+  image: {
+    service: passthroughImageService(),
+  },
 });

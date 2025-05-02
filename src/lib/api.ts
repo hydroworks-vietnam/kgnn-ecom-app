@@ -36,7 +36,9 @@ const apiClient = axios.create({
 apiClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
-    console.log("🚀 ~ axios error:", error.cause)
+    if (error instanceof AxiosError) {
+      console.log("🚀 ~ axios error:", error.cause);
+    }
     return Promise.reject(error);
   }
 );
