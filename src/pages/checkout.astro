@@ -1,12 +1,12 @@
 ---
 import Layout from '@/layouts/Layout.astro';
-import PaymentScreen from '@/screens/Payment';
+import PaymentScreen from '@/screens/Payment.tsx';
 import Meta from '@/components/Meta/metadata.astro';
 ---
 
 <html>
   <Layout>
     <Meta title="Thanh toán" slot="meta" />
-    <PaymentScreen slot="content" client:load />
+    <PaymentScreen slot="content" />
   </Layout>
 </html>
