@@ -1,7 +1,7 @@
-import { defineConfig } from "astro/config";
+import { defineConfig, passthroughImageService } from "astro/config";
 import react from '@astrojs/react';
 import tailwind from '@astrojs/tailwind';
-import node from '@astrojs/node';
+import awsAmplify from 'astro-aws-amplify';
 
 export default defineConfig({
   integrations: [
@@ -22,7 +22,8 @@ export default defineConfig({
   },
   output: 'server',
   trailingSlash: 'never',
-  adapter: node({
-    mode: 'standalone'
-  })
+  adapter: awsAmplify(),
+  image: {
+    service: passthroughImageService(),
+  },
 });
