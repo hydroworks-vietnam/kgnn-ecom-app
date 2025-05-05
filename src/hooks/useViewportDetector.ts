@@ -8,7 +8,7 @@ export const useIsMobile = (breakpoint: number = 768): boolean => {
 
   useEffect(() => {
     // Debounce function to limit resize event frequency
-    let timeoutId;
+    let timeoutId: ReturnType<typeof setTimeout>;
     const handleResize = () => {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => {

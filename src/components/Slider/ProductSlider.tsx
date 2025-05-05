@@ -10,7 +10,7 @@ const ProductSlider = () => {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [slidesPerView, setSlidesPerView] = useState(6);
-  const [latestProducts, setLatestProducts] = useState([]);
+  const [latestProducts, setLatestProducts] = useState<IProduct[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<IProduct | null>(null);
 
   useEffect(() => {

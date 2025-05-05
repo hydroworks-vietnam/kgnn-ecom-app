@@ -128,7 +128,7 @@ function applyPromoCode(code: string): void {
     promoCodeStore.set(code);
     discountRateStore.set(20); // 20% discount
   } else {
-    promoCodeStore.set(null);
+    promoCodeStore.set("");
     discountRateStore.set(0);
   }
 }

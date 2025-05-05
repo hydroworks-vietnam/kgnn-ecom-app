@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, type JSX } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   ShoppingCartIcon,
   X,
@@ -36,8 +36,8 @@ export default function MobileProductDetailCard({ product, onClose, handleAddToC
   const [sheetPosition, setSheetPosition] = useState('peek');
   const isAnimationFinished = useStore(isAddCartAnimationFinished);
 
-  const sheetRef = useRef(null);
-  const variantRef = useRef(null);
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const variantRef = useRef<HTMLDivElement>(null);
   const startY = useRef(0);
   const currentY = useRef(0);
 
@@ -75,9 +75,11 @@ export default function MobileProductDetailCard({ product, onClose, handleAddToC
     setShowVariantSelector(!showVariantSelector);
   };
 
-  const handleClickOutside = (e) => {
-    if (sheetRef.current && !sheetRef.current.contains(e.target)) {
-      if (showVariantSelector && variantRef.current && !variantRef.current.contains(e.target)) {
+  const handleClickOutside = (e: MouseEvent) => {
+    const target = e.target as Node;
+
+    if (sheetRef.current && !sheetRef.current.contains(target)) {
+      if (showVariantSelector && variantRef.current && !variantRef.current.contains(target)) {
         setShowVariantSelector(false);
       } else if (!showVariantSelector) {
         onClose();
@@ -85,7 +87,7 @@ export default function MobileProductDetailCard({ product, onClose, handleAddToC
     }
   };
 
-  const handleTouchStart = (e) => {
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
     startY.current = e.touches[0].clientY;
     currentY.current = startY.current;
 
@@ -93,7 +95,7 @@ export default function MobileProductDetailCard({ product, onClose, handleAddToC
     document.addEventListener('touchend', handleTouchEnd);
   };
 
-  const handleTouchMove = (e) => {
+  const handleTouchMove = (e: TouchEvent) => {
     currentY.current = e.touches[0].clientY;
     const deltaY = currentY.current - startY.current;
 
