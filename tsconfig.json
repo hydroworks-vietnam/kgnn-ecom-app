@@ -20,7 +20,7 @@
     "module": "ESNext",
     "moduleResolution": "Node",
     "types": [
-      "astro",
+      "astro/client",
       "vite/client"
     ],
     "strict": true,
