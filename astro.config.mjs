@@ -24,5 +24,6 @@ export default defineConfig({
   trailingSlash: 'never',
   adapter: node({
     mode: 'standalone'
-  })
+  }),
+  server: { port: 4321, host: '0.0.0.0' } // Bind to all interfaces
 });
