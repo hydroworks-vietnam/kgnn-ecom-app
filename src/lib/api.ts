@@ -11,11 +11,10 @@ export interface ApiBaseResponse<T = any> {
 
 export type HttpAllowMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
-const isServer = typeof window === 'undefined';
-
-const BACKEND_BASE_URL = isServer
-  ? `${process.env.PUBLIC_BACKEND_URL}/api`
-  : `${import.meta.env.PUBLIC_BACKEND_URL}/api`;
+const BACKEND_BASE_URL =
+  typeof window === 'undefined'
+    ? `${process.env.PUBLIC_BACKEND_URL}/api`
+    : `${import.meta.env.PUBLIC_BACKEND_URL}/api`;
 
 const apiClient = axios.create({
   baseURL: BACKEND_BASE_URL,

@@ -3,6 +3,7 @@
   "type": "module",
   "author": "Jimmy Huynh",
   "version": "0.0.1",
+  "license": "MIT",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
