@@ -7,7 +7,7 @@ WORKDIR /app
 COPY kgnn-melon/package.json kgnn-melon/yarn.lock ./
 
 # Install dependencies
-RUN yarn install
+RUN yarn install --frozen-lockfile
 
 # Copy the rest of the application code
 COPY kgnn-melon/ .
