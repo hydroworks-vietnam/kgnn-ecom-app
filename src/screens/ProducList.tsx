@@ -6,7 +6,7 @@ import type { IProduct } from "@/types/product";
 import { useIsMobile } from "@/hooks/useViewportDetector";
 import DesktopProductList from "@/components/ui/DesktopProductList";
 import MobileProductList from "@/components/ui/MobileProductList";
-import { debounce } from "lodash";
+import { debounce } from 'lodash-es';
 import { getProductById } from "@/services/productService";
 import ProductDetailCard from "@/components/Card/ProductDetailCard";
 import MobileProductDetailCard from "@/components/Card/MobileProductDetailCard";
@@ -82,7 +82,7 @@ const ProductList = () => {
   return (
     <>
       {isMobile ? (
-        <MobileProductList 
+        <MobileProductList
           handleAddToCart={handleAddToCart} 
           initialCategory={selectedCategory}
         />
