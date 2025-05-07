@@ -1,5 +1,8 @@
 # Use the official Node.js 20 image as the base
-FROM node:20-alpine
+FROM node:20-slim
+
+# Install ca-certificates
+RUN apt-get update && apt-get install -y ca-certificates && update-ca-certificates
 
 # Set working directory
 WORKDIR /app
