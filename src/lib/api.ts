@@ -11,30 +11,27 @@ export interface ApiBaseResponse<T = any> {
 
 export type HttpAllowMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
-const BACKEND_BASE_URL =
-  typeof window === 'undefined'
-    ? `${process.env.PUBLIC_BACKEND_URL}/api`
-    : `${import.meta.env.PUBLIC_BACKEND_URL}/api`;
+const BACKEND_BASE_URL = `${import.meta.env.PUBLIC_BACKEND_URL}/api`;
 
 const apiClient = axios.create({
   baseURL: BACKEND_BASE_URL,
-  timeout: 10000, // Optional: set a timeout
+  timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// apiClient.interceptors.request.use(
-//   (config) => {
-//     // Modify request config if needed (e.g., attach a token)
-//     const token = localStorage.getItem('token'); // Example
-//     if (token) {
-//       config.headers.Authorization = `Bearer ${token}`;
-//     }
-//     return config;
-//   },
-//   (error) => Promise.reject(error)
-// );
+apiClient.interceptors.request.use(
+  (config) => {
+    // Modify request config if needed (e.g., attach a token)
+    // const token = localStorage.getItem('token'); // Example
+    // if (token) {
+    //   config.headers.Authorization = `Bearer ${token}`;
+    // }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 apiClient.interceptors.response.use(
   (response) => response,
@@ -64,7 +61,7 @@ function apiCall<T = any>(
     }
 
     apiClient({
-      url, 
+      url,
       method,
       data: body,
       headers: finalHeaders
