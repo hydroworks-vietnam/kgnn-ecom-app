@@ -77,8 +77,14 @@ export default function BlogDetail({ slug }: { slug: string }) {
   return (
     <>
       <Helmet>
-        <title>{`${post.title} - Không gian nhà nông`}</title>
-        <meta name="description" content={stripHtml(post.content)} />
+        <title>{post.title}</title>
+        <meta name="description" content={stripHtml(post.title)} />
+        {/* Add Open Graph tags for better link sharing */}
+        <meta property="og:title" content={post.title} />
+        <meta property="og:description" content={stripHtml(post.title)} />
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={`https://khonggiannhanong.site/blog/${slug}`} />
+        {/* Add og:image if available */}
       </Helmet>
       <article className="max-w-4xl mx-auto px-4 py-8">
         <header className="mb-8">
