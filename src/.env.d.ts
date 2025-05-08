@@ -1,3 +1,5 @@
+import { ComponentType, ReactElement } from 'react';
+
 interface ImportMetaEnv {
   readonly PUBLIC_BACKEND_URL: string;
 }
@@ -33,4 +35,14 @@ declare module 'astro:transitions' {
 declare module 'astro:transitions/client' {
   export function navigate(href: string): Promise<void>;
   export function preload(href: string): void;
+}
+
+declare module 'react-helmet' {
+  export interface HelmetProps {
+    [key: string]: any;
+  }
+
+  export default class Helmet extends ComponentType<HelmetProps> {
+    static renderStatic(): { toString(): string };
+  }
 }

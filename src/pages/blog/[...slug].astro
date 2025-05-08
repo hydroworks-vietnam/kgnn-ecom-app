@@ -1,35 +1,19 @@
 ---
-import { postService } from '@/services/postService';
 import BlogDetail from '@/components/BlogDetail';
 import Layout from '@/layouts/Layout.astro';
 import Meta from '@/components/Meta/metadata.astro';
-import type { Post } from '@/types/post';
 
 // Tell Astro this is a dynamic route
 export const prerender = false;
 
 const { slug } = Astro.params;
 
-let post: Post;
-
-try {
-  if (!slug) {
-    throw new Error('Slug parameter is missing from route.');
-  }
-
-  const result = await postService.getPostBySlug(slug);
-
-  if (!result) {
-    throw new Error(`Post not found for slug: ${slug}`);
-  }
-  post = result;
-} catch (error) {
-  console.error('Error fetching post:', error);
-  throw error; // Optional: Let Astro handle the error with a proper 500 page
+if (!slug) {
+  throw new Error('Slug parameter is missing from route.');
 }
 ---
 
 <Layout>
-  <Meta slot='meta' title={post.title} />
-  <BlogDetail slot='content' client:load post={post} />
+  <Meta slot='meta' title='Bài viết - Không gian nhà nông' />
+  <BlogDetail slot='content' client:load slug={slug} />
 </Layout>

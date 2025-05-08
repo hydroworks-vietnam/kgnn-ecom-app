@@ -27,7 +27,7 @@ const SearchInput = () => {
               <SearchIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
               <input
                 type="text"
-                placeholder="Search"
+                placeholder="Tìm kiếm"
                 className="w-full py-3 pl-12 pr-4 rounded-full text-gray-900 bg-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:bg-white focus:shadow-lg transition-all duration-200"
                 autoFocus
               />
@@ -35,7 +35,7 @@ const SearchInput = () => {
                 onClick={toggleSearch}
                 className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-600 font-medium"
               >
-                Cancel
+                Huỷ
               </button>
             </div>
           </div>

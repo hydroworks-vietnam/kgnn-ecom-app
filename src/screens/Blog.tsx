@@ -65,7 +65,7 @@ const Blog: React.FC = () => {
         <div className="relative w-full sm:w-64">
           <input
             type="text"
-            placeholder="Search"
+            placeholder="Tìm kiếm bài viết"
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FB2E86]"
           />
           <button type="button" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">

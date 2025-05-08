@@ -45,7 +45,7 @@ const TopBar = () => {
             </div>
             <div className="hidden sm:flex items-center gap-1 sm:gap-2">
               <PhoneIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="font-semibold text-xs sm:text-base">(12345)67890</span>
+              <span className="font-semibold text-xs sm:text-base">098 125 0725</span>
             </div>
           </div>
           <div className="flex items-center gap-2 sm:gap-4">
