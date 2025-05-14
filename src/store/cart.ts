@@ -11,7 +11,6 @@ export const isCartOpen = atom(false)
 export const promoCodeStore = atom<string>('');
 export const discountRateStore = atom<number>(0);
 export const taxRateStore = atom<number>(8);
-export const isAddCartAnimationFinished = atom(true);
 export const shippingFeeStore = atom<number>(30000);
 export const isFloatingCartVisible = atom(true);
 
@@ -27,11 +26,10 @@ cartItemsStore.subscribe((cart) => {
  * @param newItem - The cart item to add or update
  */
 const addCartItem = (newItem: ICartItem) => {
-  const currentCart = cartItemsStore.get()
-  const existingItem = currentCart.find(item => item.product.id === newItem.product.id)
+  const currentCart = cartItemsStore.get();
+  const existingItem = currentCart.find(item => item.product.id === newItem.product.id);
 
   if (existingItem) {
-    // Update quantity for existing item and return early
     const updatedCart = updateExistingItemQuantity(currentCart, newItem.product.id, newItem.quantity);
     cartItemsStore.set(updatedCart);
     return;
@@ -39,7 +37,7 @@ const addCartItem = (newItem: ICartItem) => {
 
   const updatedCart = addNewItem(currentCart, newItem);
   cartItemsStore.set(updatedCart);
-}
+};
 
 /**
  * Adds a new item to the cart with the specified or default quantity.
@@ -61,7 +59,7 @@ function updateExistingItemQuantity(
     item.product.id === productId
       ? {
           ...item,
-          quantity: item.quantity + newQuantity
+          quantity: newQuantity
         }
       : item
   );

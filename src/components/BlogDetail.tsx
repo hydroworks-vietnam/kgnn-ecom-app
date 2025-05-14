@@ -77,7 +77,7 @@ export default function BlogDetail({ slug }: { slug: string }) {
   return (
     <>
       <Helmet>
-        <title>{post.title}</title>
+        <title>{`${post.title} - Không gian nhà nông`}</title>
         <meta name="description" content={stripHtml(post.title)} />
         {/* Add Open Graph tags for better link sharing */}
         <meta property="og:title" content={post.title} />

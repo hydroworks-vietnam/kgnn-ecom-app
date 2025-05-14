@@ -3,6 +3,7 @@ import ProductCardFull from '@/components/Card/ProductCardFull';
 import { getProducts } from '@/services/productService';
 import type { ICategory, IProduct, ISubcategory } from '@/types/product';
 import CategorySidebar from '@/components/ui/CategorySidebar';
+import HorizontalCategoryBar from './HorizontalCategoryBar';
 
 const ProductCardSkeleton = () => {
   return (
@@ -94,56 +95,14 @@ const MobileProductList: React.FC<MobileProductListProps> = ({ handleAddToCart, 
         <span className="text-purple-600">Danh sách sản phẩm</span>
       </nav>
 
-      <h1 className="text-2xl font-bold text-gray-900 mb-4">Sản phẩm</h1>
-
-      <div className="bg-white shadow rounded-lg p-3 mb-4 flex justify-between items-center sticky top-0 z-10 w-full">
-        <button onClick={toggleFilter} className="flex items-center text-gray-700 font-medium">
-          <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
-          </svg>
-          Bộ lọc
-        </button>
-        <div>
-          <select
-            value={sortOption}
-            onChange={handleSortChange}
-            className="border border-gray-200 rounded px-2 py-1 text-xs text-gray-600"
-          >
-            <option value="best-match">Phù hợp nhất</option>
-            <option value="price-low-to-high">Giá: Thấp đến Cao</option>
-            <option value="price-high-to-low">Giá: Cao đến Thấp</option>
-          </select>
-        </div>
+      <div className='mb-10'>
+      <HorizontalCategoryBar
+        onCategorySelect={handleCategorySelect}
+        onLatestProductsSelect={handleLatestProductsSelect}
+      />
       </div>
 
-      <div className={`fixed inset-0 bg-black bg-opacity-50 z-20 transition-opacity ${filterOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-        <div className={`fixed inset-y-0 left-0 w-full max-w-xs bg-white shadow-xl transform transition-transform ${filterOpen ? 'translate-x-0' : '-translate-x-full'} overflow-y-auto`}>
-          <div className="p-4">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">Bộ lọc</h2>
-              <button onClick={toggleFilter} className="p-1">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Số lượng mỗi trang:</label>
-              <select value={itemsPerPage} onChange={handleItemsPerPageChange} className="w-full border border-gray-300 rounded-md px-3 py-2">
-                <option value={10}>10</option>
-                <option value={20}>20</option>
-                <option value={50}>50</option>
-              </select>
-            </div>
-            <CategorySidebar 
-              onCategorySelect={handleCategorySelect} 
-              onLatestProductsSelect={handleLatestProductsSelect}
-            />
-            <button className="w-full bg-blue-600 text-white py-2 rounded-md mt-4" onClick={toggleFilter}>Áp dụng</button>
-          </div>
-        </div>
-      </div>
-
+      {/* <h1 className="text-2xl font-bold text-gray-900 mb-4">Sản phẩm</h1> */}
       <div className="w-full overflow-x-hidden">
         {productsLoading ? (
           <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-3">

@@ -1,12 +1,9 @@
 import { isCartOpen, totalCartQuantity } from '@/store/cart';
 import { useStore } from '@nanostores/react';
-import { HeartIcon, LanguagesIcon, MailboxIcon, MenuIcon, PhoneIcon, ShoppingCartIcon, UserIcon, XIcon } from 'lucide-react';
+import { HeartIcon, LanguagesIcon, MailboxIcon, PhoneIcon, ShoppingCartIcon, UserIcon } from 'lucide-react';
 import CartDrawer from '../Drawer/CartDrawer';
 import { navigate } from 'astro:transitions/client';
 import { useState } from 'react';
-import SearchInput from "@/components/Input/SearchInput";
-
-const menuList = ['Sản phẩm', 'Kinh nghiệm', 'Dịch vụ', 'Liên hệ', 'Về chúng tôi'];
 
 const TopBar = () => {
   const $isCartOpen = useStore(isCartOpen);
@@ -28,10 +25,6 @@ const TopBar = () => {
   const handleProceedToCheckout = () => {
     isCartOpen.set(false);
     navigate('/checkout');
-  };
-
-  const toggleMenu = () => {
-    setIsMenuOpen(prev => !prev);
   };
 
   return (
@@ -63,31 +56,6 @@ const TopBar = () => {
           </div>
         </div>
       </div>
-
-      {/* Mobile Menu */}
-      {isMenuOpen && (
-        <>
-          <div
-            className="sm:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
-            onClick={toggleMenu}
-          />
-          <div
-            className="sm:hidden fixed top-[104px] left-0 w-full bg-white shadow-lg z-50 transform transition-transform duration-300"
-          >
-            <div className="flex flex-col items-center gap-3 py-3">
-              {menuList.map(item => (
-                <span
-                  className="text-sm text-gray-500 cursor-pointer"
-                  key={item}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {item}
-                </span>
-              ))}
-            </div>
-          </div>
-        </>
-      )}
 
       {/* Cart Drawer */}
       <CartDrawer

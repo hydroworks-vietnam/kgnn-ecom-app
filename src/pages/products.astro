@@ -8,6 +8,6 @@ import ProductList from '@/screens/ProducList.tsx';
 <html lang='en'>
   <Layout>
     <Meta slot='meta' title='Danh sách sản phẩm' />
-    <ProductList client:load slot='content' />
+    <ProductList client:only slot='content' />
   </Layout>
 </html>

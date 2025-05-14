@@ -199,7 +199,7 @@ const DesktopProductList: React.FC<DesktopProductListProps> = ({ handleAddToCart
                 <div className="flex gap-1">
                   <button
                     onClick={() => handleViewModeChange('grid')}
-                    className={`p-1 ${viewMode === 'grid' ? 'text-blue-900' : 'text-gray-400'}`}
+                    className={viewMode === 'grid' ? 'text-blue-900' : 'text-gray-400'}
                   >
                     <svg
                       className="w-4 h-4"
@@ -218,7 +218,7 @@ const DesktopProductList: React.FC<DesktopProductListProps> = ({ handleAddToCart
                   </button>
                   <button
                     onClick={() => handleViewModeChange('list')}
-                    className={`p-1 ${viewMode === 'list' ? 'text-blue-900' : 'text-gray-400'}`}
+                    className={viewMode === 'list' ? 'text-blue-900' : 'text-gray-400'}
                   >
                     <svg
                       className="w-4 h-4"

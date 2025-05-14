@@ -7,6 +7,6 @@ import Meta from '@/components/Meta/metadata.astro';
 <html>
   <Layout>
     <Meta title="Thanh toán" slot="meta" />
-    <PaymentScreen slot="content" />
+    <PaymentScreen client:only slot="content" />
   </Layout>
 </html>

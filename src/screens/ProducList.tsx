@@ -1,12 +1,11 @@
 import { useCallback, useState, useEffect } from "react";
 import { useStore } from "@nanostores/react";
-import useCartStore, { isAddCartAnimationFinished, isCartOpen } from "@/store/cart";
+import useCartStore, { isCartOpen } from "@/store/cart";
 import FloatingCart from "@/components/Button/FloatingCart";
 import type { IProduct } from "@/types/product";
 import { useIsMobile } from "@/hooks/useViewportDetector";
 import DesktopProductList from "@/components/ui/DesktopProductList";
 import MobileProductList from "@/components/ui/MobileProductList";
-import { debounce } from 'lodash-es';
 import { getProductById } from "@/services/productService";
 import ProductDetailCard from "@/components/Card/ProductDetailCard";
 import MobileProductDetailCard from "@/components/Card/MobileProductDetailCard";
@@ -44,30 +43,21 @@ const ProductList = () => {
     }
   }, []);
 
-  const handleAddToCart = useCallback(
-    debounce((product: IProduct, quantity: number) => {
-      setCartTrigger((prev) => {
-        const newTrigger = prev + 1;
-        setIsAddedToCart(true);
-        addCartItem({
-          product,
-          options: {},
-          quantity,
-        });
-        return newTrigger;
+  const handleAddToCart = useCallback((product: IProduct, quantity: number) => {
+    setCartTrigger((prev) => {
+      const newTrigger = prev + 1;
+      setIsAddedToCart(true);
+      addCartItem({
+        product,
+        options: {},
+        quantity,
       });
-    }, 200),
-    []
-  );
+      return newTrigger;
+    });
+  }, []);
 
   const handleCartClick = () => {
-    console.log("Toggling cart, current state:", $isCartOpen);
     isCartOpen.set(!$isCartOpen);
-  };
-
-  const handleFinishAnimation = () => {
-    isAddCartAnimationFinished.set(true);
-    setIsAddedToCart(false);
   };
 
   const handleBuyItNow = (product: IProduct, quantity: number) => {
@@ -112,9 +102,7 @@ const ProductList = () => {
       )}
 
       <FloatingCart
-        isAddedToCart={isAddedToCart}
         onCartClick={handleCartClick}
-        isFinishAnimation={handleFinishAnimation}
       />
     </>
   );

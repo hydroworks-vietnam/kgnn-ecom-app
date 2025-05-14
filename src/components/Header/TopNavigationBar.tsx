@@ -2,7 +2,21 @@ import { useState } from 'react';
 import { MenuIcon, XIcon } from 'lucide-react';
 import SearchInput from "@/components/Input/SearchInput";
 
-const menuList = ['Sản phẩm', 'Kinh nghiệm', 'Dịch vụ', 'Liên hệ', 'Về chúng tôi'];
+const menuList = [
+  {
+    name: 'Sản phẩm',
+    link: '/products'
+  }, {
+    name: 'Bài viết',
+    link: '/blog'
+  }, {
+    name: 'Liên hệ',
+    link: '#'
+  }, {
+    name: 'Về chúng tôi',
+    link: '#'
+  }
+];
 
 const TopNavigationBar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -23,9 +37,12 @@ const TopNavigationBar = () => {
         {/* Menu Items (Visible on Desktop) */}
         <div className="hidden md:flex items-center gap-6 cursor-pointer">
           {menuList.map(item => (
-            <span className="font-sm whitespace-nowrap text-slate-500" key={item}>
-              {item}
-            </span>
+            <a key={item.name}
+              className="font-sm whitespace-nowrap text-slate-500"
+              href={item.link}
+            >
+              {item.name}
+            </a>
           ))}
         </div>
 
@@ -45,34 +62,34 @@ const TopNavigationBar = () => {
         </div>
       </div>
 
-        {/* Mobile Menu Overlay and Drawer */}
-        {isMenuOpen && (
-          <>
-            {/* Overlay */}
-            <div
-              className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
-              onClick={toggleMenu}
-            />
+      {/* Mobile Menu Overlay and Drawer */}
+      {isMenuOpen && (
+        <>
+          {/* Overlay */}
+          <div
+            className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+            onClick={toggleMenu}
+          />
 
-            {/* Menu Drawer */}
-            <div
-              className={`md:hidden absolute top-16 left-0 w-full bg-white shadow-lg z-50 transform transition-transform duration-300 ${isMenuOpen ? 'translate-y-0' : '-translate-y-full'
-                }`}
-            >
-              <div className="flex flex-col items-center gap-4 py-4">
-                {menuList.map(item => (
-                  <span
-                    className="font-sm text-gray-500 cursor-pointer"
-                    key={item}
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    {item}
-                  </span>
-                ))}
-              </div>
+          {/* Menu Drawer */}
+          <div
+            className={`md:hidden absolute top-16 left-0 w-full bg-white shadow-lg z-50 transform transition-transform duration-300 ${isMenuOpen ? 'translate-y-0' : '-translate-y-full'
+              }`}
+          >
+            <div className="flex flex-col items-center gap-4 py-4">
+              {menuList.map(item => (
+                <a
+                  className="font-sm text-gray-500 cursor-pointer"
+                  key={item.name}
+                  href={item.link}
+                >
+                  {item.name}
+                </a>
+              ))}
             </div>
-          </>
-        )}
+          </div>
+        </>
+      )}
     </div>
   );
 };

@@ -2,12 +2,10 @@ import { EyeIcon, HeartIcon, ShoppingCartIcon } from 'lucide-react';
 import type { IProduct } from '@/types/product';
 import SafetyImage from '@/components/Image/SafetyImage';
 import { formatCurrency } from '@/utils/helpers';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import ProductDetailCard from './ProductDetailCard';
 import MobileProductDetailCard from './MobileProductDetailCard';
-import ReviewStar from '../Review/Star';
-import useCartStore, { isAddCartAnimationFinished, isCartOpen } from '@/store/cart';
-import { useStore } from '@nanostores/react';
+import useCartStore, { isCartOpen } from '@/store/cart';
 import QuantityControl from '@/components/ui/QuantityControl';
 
 interface ProductCardFullProps {
@@ -20,60 +18,32 @@ const ProductCardFull = ({ product, viewMode = 'grid', onAddToCart }: ProductCar
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const { addCartItem, getCartItemQuantity } = useCartStore();
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  const isAnimationFinished = useStore(isAddCartAnimationFinished);
   const cartQuantity = getCartItemQuantity(product.id);
-  const [quantity, setQuantity] = useState(0);
+  const [quantity, setQuantity] = useState(cartQuantity);
 
-  useEffect(() => {
-    if (isAnimationFinished) {
-      setQuantity(cartQuantity);
-    }
-  }, [cartQuantity, isAnimationFinished]);
-
-  const triggerAnimation = (buttonRect: DOMRect) => {
-    const event = new CustomEvent('add-to-cart-animation', {
-      detail: {
-        x: buttonRect.right,
-        y: buttonRect.top + buttonRect.height / 2
-      }
-    });
-    window.dispatchEvent(event);
+  const handleIncrease = (v: number) => {
+    console.log('handleIncrease:', { productId: product.id, newQuantity: v });
+    setQuantity(v);
+    addCartItem({ product, quantity: v, options: {} }); // Set absolute quantity
+    // onAddToCart(product, 1); // Removed to prevent doubling
   };
 
-  const handleIncrease = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!isAnimationFinished) return;
-    onAddToCart(product, 1);
+  const handleDecrease = (v: number) => {
+    console.log('handleDecrease:', { productId: product.id, newQuantity: v });
+    setQuantity(v);
+    addCartItem({ product, quantity: v, options: {} }); // Set absolute quantity
+    // onAddToCart(product, -1); // Removed to prevent doubling
   };
 
-  const handleDecrease = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!isAnimationFinished) return;
-    if (quantity >= 1) {
-      onAddToCart(product, -1);
-    }
-  };
-
-  const handleAddToCart = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!isAnimationFinished) return;
-    
-    // Get button position for animation start point
-    const buttonRect = buttonRef.current?.getBoundingClientRect();
-    if (buttonRect) {
-      triggerAnimation(buttonRect);
-    }
-    
-    onAddToCart(product, quantity);
+  const handleQuantityChange = (value: number) => {
+    console.log('handleQuantityChange:', { productId: product.id, newQuantity: value });
+    setQuantity(value);
+    addCartItem({ product, quantity: value, options: {} });
   };
 
   const onBuyItNow = (product: IProduct, quantity: number) => {
-    addCartItem({
-      product,
-      quantity,
-      options: {},
-    });
+    console.log('onBuyItNow:', { productId: product.id, quantity });
+    addCartItem({ product, quantity, options: {} });
     setIsPopupOpen(false);
     isCartOpen.set(true);
   };
@@ -90,13 +60,12 @@ const ProductCardFull = ({ product, viewMode = 'grid', onAddToCart }: ProductCar
       ? Math.round(((product.unit_price - product.discount_price) / product.unit_price) * 100)
       : 0;
 
-  const rating = 4;
-  const reviews = 47;
+  useEffect(() => {
+    setQuantity(cartQuantity);
+  }, [cartQuantity]);
 
   const GridView = () => (
-    <div className="h-full" 
-      onClick={() => setIsPopupOpen(true)}
-    >
+    <div className="h-full" onClick={() => setIsPopupOpen(true)}>
       <div className="rounded-lg shadow-md hover:shadow-lg cursor-pointer h-full flex flex-col">
         <div className="relative w-full aspect-square">
           <SafetyImage
@@ -114,12 +83,6 @@ const ProductCardFull = ({ product, viewMode = 'grid', onAddToCart }: ProductCar
         <div className="p-2 flex flex-col flex-1">
           <h3 className="text-[14px] font-bold text-gray-900 mb-0.5">{product.name}</h3>
           <p className="text-gray-500 text-[12px] mb-0.5 line-clamp-2">{product.description}</p>
-          {/* <div className="flex items-center gap-1 mb-1">
-            <div className="flex mr-0.5">
-              <ReviewStar rating={rating} />
-            </div>
-            <span className="text-gray-500 text-[10px]">({reviews})</span>
-          </div> */}
           {isMobile ? (
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
@@ -127,16 +90,17 @@ const ProductCardFull = ({ product, viewMode = 'grid', onAddToCart }: ProductCar
                   {formatCurrency(product.unit_price - product.discount_price)}
                 </span>
                 {discount > 0 && (
-                <span className="text-xs text-primary line-through">
-                  {formatCurrency(product.unit_price)}
-                </span>
+                  <span className="text-xs text-primary line-through">
+                    {formatCurrency(product.unit_price)}
+                  </span>
                 )}
               </div>
               <div className="flex justify-end">
                 <QuantityControl
                   quantity={quantity}
-                  onIncrease={(e) => handleIncrease(e)}
-                  onDecrease={(e) => handleDecrease(e)}
+                  onIncrease={v => handleIncrease(v)}
+                  onDecrease={v => handleDecrease(v)}
+                  onQuantityChange={handleQuantityChange}
                   size="sm"
                   className="scale-90 origin-right"
                 />
@@ -145,15 +109,20 @@ const ProductCardFull = ({ product, viewMode = 'grid', onAddToCart }: ProductCar
           ) : (
             <div className="flex items-center justify-between mt-0.5">
               <div className="flex items-center gap-1">
-                <span className="font-bold text-[13px] text-gray-900">{formatCurrency(product.unit_price - product.discount_price)}</span>
+                <span className="font-bold text-[13px] text-gray-900">
+                  {formatCurrency(product.unit_price - product.discount_price)}
+                </span>
                 {discount > 0 && (
-                <span className="text-[13px] text-primary line-through">{formatCurrency(product.unit_price)}</span>
+                  <span className="text-[13px] text-primary line-through">
+                    {formatCurrency(product.unit_price)}
+                  </span>
                 )}
               </div>
               <QuantityControl
                 quantity={quantity}
-                onIncrease={(e) => handleIncrease(e)}
-                onDecrease={(e) => handleDecrease(e)}
+                onIncrease={v => handleIncrease(v)}
+                onDecrease={v => handleDecrease(v)}
+                onQuantityChange={handleQuantityChange}
                 size="sm"
                 className="scale-90 origin-right"
               />
@@ -181,7 +150,7 @@ const ProductCardFull = ({ product, viewMode = 'grid', onAddToCart }: ProductCar
   );
 
   const ListView = () => (
-    <div className="w-full flex items-center gap-3 rounded-lg shadow-md bg-white p-3 cursor-pointer" 
+    <div className="w-full flex items-center gap-3 rounded-lg shadow-md bg-white p-3 cursor-pointer"
       onClick={() => setIsPopupOpen(true)}
     >
       <div className="flex-shrink-0">
@@ -200,18 +169,13 @@ const ProductCardFull = ({ product, viewMode = 'grid', onAddToCart }: ProductCar
             <span className="text-primary line-through text-sm">{formatCurrency(product.unit_price)}</span>
           )}
         </div>
-        {/* <div className="flex items-center gap-2 mb-2">
-          <div className="flex">
-            <ReviewStar rating={rating} />
-          </div>
-        </div> */}
         <p className="text-gray-500 text-sm truncate">{product.description}</p>
         <div className="flex justify-end gap-2 mt-2">
           <button className="text-blue-900 hover:text-primary cursor-pointer">
-            <ShoppingCartIcon className="w-4 h-4"/>
+            <ShoppingCartIcon className="w-4 h-4" />
           </button>
           <button className="text-blue-900 hover:text-primary cursor-pointer">
-            <HeartIcon className="w-4 h-4"/>
+            <HeartIcon className="w-4 h-4" />
           </button>
         </div>
       </div>

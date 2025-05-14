@@ -11,10 +11,8 @@ import {
 import { cn, formatCurrency } from '@/utils/helpers';
 import SafetyImage from '../Image/SafetyImage';
 import type { IProduct } from '@/types/product';
-import ReviewStar from '../Review/Star';
-import useCartStore, { isAddCartAnimationFinished, isCartOpen, isFloatingCartVisible } from '@/store/cart';
+import useCartStore, { isCartOpen, isFloatingCartVisible } from '@/store/cart';
 import QuantityControl from '@/components/ui/QuantityControl';
-import { useStore } from '@nanostores/react';
 import YoutubeVideo from '@/components/ui/YoutubeVideo';
 import { useVideoSource } from '@/hooks/useVideoSource';
 
@@ -28,13 +26,14 @@ type ProductDetailCardProps = {
 // Mobile bottom sheet product detail component
 export default function MobileProductDetailCard({ product, onClose, handleAddToCart, handleBuyItNow }: ProductDetailCardProps) {
   const { getCartItemQuantity } = useCartStore();
-  const [quantity, setQuantity] = useState(getCartItemQuantity(product.id));
+  // Track cart quantity to compare with local quantity
+  const cartQuantity = getCartItemQuantity(product.id);
+  const [quantity, setQuantity] = useState(cartQuantity);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [activeTab, setActiveTab] = useState('description');
   const [showVariantSelector, setShowVariantSelector] = useState(false);
-  const [selectedVariant, setSelectedVariant] = useState('3 in One');
+  // const [selectedVariant, setSelectedVariant] = useState('3 in One');
   const [sheetPosition, setSheetPosition] = useState('peek');
-  const isAnimationFinished = useStore(isAddCartAnimationFinished);
 
   const sheetRef = useRef<HTMLDivElement>(null);
   const variantRef = useRef<HTMLDivElement>(null);
@@ -145,18 +144,17 @@ export default function MobileProductDetailCard({ product, onClose, handleAddToC
   };
 
   const handleQuantityChange = (newQuantity: number) => {
-    if (!isAnimationFinished) return;
-    setQuantity(newQuantity);
+    const validQuantity = Math.min(newQuantity, 999);
+    console.log('handleQuantityChange:', { productId: product.id, newQuantity: validQuantity }); // Debug log
+    setQuantity(validQuantity);
   };
 
   const handleIncrease = () => {
-    if (!isAnimationFinished) return;
     handleQuantityChange(quantity + 1);
   };
 
   const handleDecrease = () => {
-    if (!isAnimationFinished) return;
-    handleQuantityChange(Math.max(0, quantity - 1));
+    handleQuantityChange(Math.max(1, quantity - 1)); // Enforce min 1
   };
 
   const handleBuyNowClick = (product: IProduct, quantity: number) => {
@@ -349,32 +347,31 @@ export default function MobileProductDetailCard({ product, onClose, handleAddToC
                 quantity={quantity}
                 onIncrease={handleIncrease}
                 onDecrease={handleDecrease}
+                onQuantityChange={handleQuantityChange}
                 size="md"
               />
             </div>
             <div className="p-4 flex gap-3 bg-white border-t">
               <button
                 onClick={() => {
-                  if (!isAnimationFinished) return;
                   handleAddToCart(product, quantity);
                   onClose();
                 }}
                 className={cn(
                   "flex-1 py-3 bg-gradient text-white rounded-lg flex items-center justify-center gap-2",
-                  !isAnimationFinished || quantity === 0 ? 'opacity-50 cursor-not-allowed' : ''
+                  quantity == cartQuantity || quantity === 0 ? 'opacity-50 cursor-not-allowed' : ''
                 )}
+                disabled={quantity == cartQuantity || quantity === 0}
               >
                 <ShoppingCartIcon className="w-5 h-5" />
                 <span className="text-sm font-semibold">Thêm vào giỏ hàng</span>
               </button>
               <button
                 onClick={() => {
-                  if (!isAnimationFinished) return;
                   handleBuyItNow(product, quantity);
                   onClose();
                 }}
                 className="flex-1 bg-white border border-primary text-primary py-3 text-sm rounded-lg flex items-center justify-center"
-                disabled={!isAnimationFinished}
               >
                 <span className="text-sm font-semibold">Mua ngay</span>
               </button>

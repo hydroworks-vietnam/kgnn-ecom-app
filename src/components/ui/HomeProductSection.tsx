@@ -3,10 +3,9 @@ import ProductSlider from '@/components/Slider/ProductSlider';
 import { ChevronRight } from 'lucide-react';
 import FloatingCart from '../Button/FloatingCart';
 import { useStore } from '@nanostores/react';
-import { isAddCartAnimationFinished, isCartOpen } from '@/store/cart';
+import { isCartOpen } from '@/store/cart';
 
 export default function HomePage() {
-  const [isAddedToCart, setIsAddedToCart] = useState(false);
   const $isCartOpen = useStore(isCartOpen);
 
   const handleCartClick = () => {
@@ -61,13 +60,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      <FloatingCart
-        isAddedToCart={isAddedToCart}
-        onCartClick={handleCartClick}
-        isFinishAnimation={() => {
-          setIsAddedToCart(false);
-        }}
-      />
+      <FloatingCart onCartClick={handleCartClick}/>
     </>
   );
 }

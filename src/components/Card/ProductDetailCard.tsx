@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo, useState, useCallback, useEffect, memo } from 'react';
 import SafetyImage from '@/components/Image/SafetyImage';
 import { ShoppingCartIcon, X, History, ShieldCheck, Truck, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { IProduct } from '@/types/product';
@@ -10,8 +10,25 @@ import QuantityControl from '@/components/ui/QuantityControl';
 import { isCartOpen } from '@/store/cart';
 import { useStore } from '@nanostores/react';
 
+// Memoized VideoSection to prevent re-rendering
+const VideoSection = memo(({ videoSrc, productDescription }: { videoSrc: string | null; productDescription: string }) => {
+  return (
+    <div>
+      <p className="text-gray-700 text-sm">{productDescription}</p>
+      {videoSrc && (
+        <div className="relative rounded-lg overflow-hidden mt-8 z-0">
+          <YoutubeVideo src={videoSrc} />
+        </div>
+      )}
+    </div>
+  );
+});
+
+// Ensure VideoSection doesn't re-render unnecessarily
+VideoSection.displayName = 'VideoSection';
+
 type ProductDetailCardProps = {
-  product: IProduct,
+  product: IProduct;
   onClose: () => void;
   handleAddToCart: (product: IProduct, quantity: number) => void;
   handleBuyItNow: (product: IProduct, quantity: number) => void;
@@ -19,12 +36,13 @@ type ProductDetailCardProps = {
 
 export default function ProductDetailCard(props: ProductDetailCardProps) {
   const { product, onClose, handleAddToCart, handleBuyItNow } = props;
-  const { getCartItemQuantity } = useCartStore();
+  const { addCartItem, getCartItemQuantity } = useCartStore();
   const $isCartOpen = useStore(isCartOpen);
-  const [quantity, setQuantity] = useState(getCartItemQuantity(product.id));
+  // Track cart quantity to compare with local quantity
+  const cartQuantity = getCartItemQuantity(product.id);
+  const [quantity, setQuantity] = useState(cartQuantity);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [activeTab, setActiveTab] = useState<'features' | 'specs' | 'reviews'>('features');
-  const [isAddingToCart, setIsAddingToCart] = useState(false);
 
   const getTextSizeClass = (num: number): string => {
     const length = num.toString().length;
@@ -35,7 +53,7 @@ export default function ProductDetailCard(props: ProductDetailCardProps) {
   const textSizeClass = useMemo(() => getTextSizeClass(quantity), [quantity]);
   const videoSrc = useVideoSource(product.video_link);
 
-  // Functions to handle sliding
+  // Image slider functions
   const nextImage = () => {
     setCurrentImageIndex((prevIndex) =>
       prevIndex === product.images.length - 1 ? 0 : prevIndex + 1
@@ -48,40 +66,42 @@ export default function ProductDetailCard(props: ProductDetailCardProps) {
     );
   };
 
-  const handleQuantityDecrease = useCallback(() => {
-    setQuantity(prev => Math.max(0, prev - 1));
-  }, []);
+  // Quantity control handlers (update local state only)
+  const handleIncrease = useCallback((v: number) => {
+    setQuantity(v);
+  }, [product.id]);
 
-  const handleQuantityIncrease = useCallback(() => {
-    setQuantity(prev => prev + 1);
-  }, []);
+  const handleDecrease = useCallback((v: number) => {
+    setQuantity(v);
+  }, [product.id]);
 
-  const handleAddToCartClick = useCallback(async () => {
-    if (isAddingToCart) return;
-    setIsAddingToCart(true);
-    await handleAddToCart(product, quantity);
-    setTimeout(() => {
-      setIsAddingToCart(false);
-    }, 1000);
-  }, [isAddingToCart, product, quantity, handleAddToCart]);
+  const handleQuantityChange = useCallback((value: number) => {
+    setQuantity(value);
+  }, [product.id]);
+
+  const handleAddToCartClick = useCallback(() => {
+    addCartItem({ product, quantity, options: {} });
+    handleAddToCart(product, quantity);
+  }, [product, quantity, addCartItem, handleAddToCart]);
 
   const handleBuyNowClick = useCallback(() => {
+    addCartItem({ product, quantity, options: {} });
     handleBuyItNow(product, quantity);
-  }, [product, quantity, handleBuyItNow]);
+  }, [product, quantity, addCartItem, handleBuyItNow]);
 
   // Memoize the quantity display
   const quantityDisplay = useMemo(() => (
     <div className="flex items-center">
       <QuantityControl
         quantity={quantity}
-        onIncrease={handleQuantityIncrease}
-        onDecrease={handleQuantityDecrease}
+        onIncrease={handleIncrease}
+        onDecrease={handleDecrease}
+        onQuantityChange={handleQuantityChange}
         size="md"
         textSize={textSizeClass}
-        className={isAddingToCart ? 'opacity-50 cursor-not-allowed' : ''}
       />
     </div>
-  ), [quantity, handleQuantityDecrease, handleQuantityIncrease, isAddingToCart]);
+  ), [quantity, handleIncrease, handleDecrease, handleQuantityChange, textSizeClass]);
 
   return (
     <div
@@ -98,14 +118,14 @@ export default function ProductDetailCard(props: ProductDetailCardProps) {
     >
       <div
         className="bg-white rounded-lg p-6 w-full max-w-[50%] h-[90%] relative shadow-xl overflow-y-scroll scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100 isolate"
-        onClick={(e) => e.stopPropagation()} // Prevent closing when clicking modal content
+        onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={(e) => {
             e.stopPropagation();
             onClose();
           }}
-          className="absolute top-1 right-0 border-2 border-red-500 hover:text-red-700  hover:border-red-700 rounded-full p-1"
+          className="absolute top-1 right-0 border-2 border-red-500 hover:text-red-700 hover:border-red-700 rounded-full p-1"
         >
           <X className="w-5 h-5 text-red-500" />
         </button>
@@ -127,7 +147,6 @@ export default function ProductDetailCard(props: ProductDetailCardProps) {
               height={200}
               width={200}
             />
-            {/* Navigation Buttons */}
             {product.images.length > 1 && (
               <>
                 <button
@@ -142,7 +161,6 @@ export default function ProductDetailCard(props: ProductDetailCardProps) {
                 >
                   <ChevronRight className="w-6 h-6" />
                 </button>
-                {/* Image Indicators */}
                 <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex gap-2">
                   {product.images.map((_, index) => (
                     <span
@@ -158,7 +176,6 @@ export default function ProductDetailCard(props: ProductDetailCardProps) {
             )}
           </div>
 
-          {/* Details Section */}
           <div className="w-1/2">
             <div className="text-2xl font-bold text-orange-500 mb-2">
               {formatCurrency(product.unit_price - product.discount_price)}
@@ -167,30 +184,17 @@ export default function ProductDetailCard(props: ProductDetailCardProps) {
               {product.stock > 0 ? 'Còn hàng' : 'Hết hàng'}
             </div>
 
-            {/* Description */}
             <p className="text-gray-600 text-sm mb-2">
               {product.description}
             </p>
 
-            {/* Rating and Price */}
-            {/* <div className="flex items-center gap-2 mb-4">
-              <div className="flex">
-                <ReviewStar rating={5} />
-              </div>
-              <span className="text-sm text-gray-500">
-                ({124} đánh giá)
-              </span>
-            </div> */}
-
-            {/* Quantity Selector and Add to Cart */}
             <div className="flex items-center gap-3 mb-4">
               {quantityDisplay}
               <button
                 onClick={handleAddToCartClick}
-                disabled={isAddingToCart || quantity === 0}
-                className={`min-w-[140px] text-white p-3 rounded-lg gap-2 flex items-center justify-center hover:shadow-xl transition-all ${
-                  isAddingToCart || quantity === 0 ? 'bg-gray-400 cursor-not-allowed' : 'bg-gradient'
-                }`}
+                className={`min-w-[140px] text-white p-3 rounded-lg gap-2 flex items-center justify-center hover:shadow-xl transition-all 
+                ${quantity == cartQuantity || quantity === 0 ? 'bg-gray-400 cursor-not-allowed' : 'bg-gradient'}`}
+                disabled={quantity == cartQuantity || quantity === 0}
               >
                 <ShoppingCartIcon className="w-4 h-4" />
                 <span className='text-sm whitespace-nowrap'>Thêm vào giỏ</span>
@@ -204,7 +208,6 @@ export default function ProductDetailCard(props: ProductDetailCardProps) {
               </button>
             </div>
 
-            {/* Additional Info */}
             <div className="text-sm text-gray-600 space-y-2">
               <div className="flex items-center gap-2">
                 <Truck className="w-4 h-4 text-orange-500" />
@@ -222,7 +225,6 @@ export default function ProductDetailCard(props: ProductDetailCardProps) {
           </div>
         </div>
 
-        {/* Tabs for Features, Specifications, Reviews */}
         <div className="mt-6">
           <div className="flex gap-4 border-b border-gray-200">
             <button
@@ -260,17 +262,9 @@ export default function ProductDetailCard(props: ProductDetailCardProps) {
             </button>
           </div>
 
-          {/* Tab Content */}
           <div className="mt-4">
             {activeTab === 'features' && (
-              <div>
-                <p className="text-gray-700 text-sm">{product.description}</p>
-                {videoSrc && (
-                  <div className="relative rounded-lg overflow-hidden mt-8 z-0">
-                    <YoutubeVideo src={videoSrc} />
-                  </div>
-                )}
-              </div>
+              <VideoSection videoSrc={videoSrc} productDescription={product.description || ''} />
             )}
             {activeTab === 'specs' && (
               <p className="text-gray-700 text-sm">Chưa có thông số kĩ thuật</p>
