@@ -38,7 +38,7 @@ const TopNavigationBar = () => {
         <div className="hidden md:flex items-center gap-6 cursor-pointer">
           {menuList.map(item => (
             <a key={item.name}
-              className="font-sm whitespace-nowrap text-slate-500"
+              className="font-sm whitespace-nowrap text-slate-500 hover:text-primary"
               href={item.link}
             >
               {item.name}
@@ -79,7 +79,7 @@ const TopNavigationBar = () => {
             <div className="flex flex-col items-center gap-4 py-4">
               {menuList.map(item => (
                 <a
-                  className="font-sm text-gray-500 cursor-pointer"
+                  className="font-sm text-gray-500 cursor-pointer hover:text-primary hover:bg-slate-200"
                   key={item.name}
                   href={item.link}
                 >

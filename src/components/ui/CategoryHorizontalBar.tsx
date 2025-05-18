@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { getCategories } from '@/services/categoryService'; // Adjust import path
 import { getLatestProducts } from '@/services/productService';
 import type { ICategory, ISubcategory } from '@/types/product';
+import { ChevronDown } from 'lucide-react';
+import { cn } from '@/utils/helpers';
 
 interface CategoryHorizontalBarProps {
   onCategorySelect: (category: ICategory, subcategory?: ISubcategory) => void;
@@ -27,7 +29,7 @@ const SubcategoryBar: React.FC<{
   onSubcategorySelect: (subcategory: ISubcategory) => void;
 }> = ({ subcategories, selectedSubcategory, onSubcategorySelect }) => {
   return (
-    <div className="w-full mt-2 py-1">
+    <div className="w-full mt-2 py-1 bg-slate-200">
       <div className="flex items-center space-x-2 overflow-x-auto px-4">
         {subcategories.map((subcategory) => (
           <button
@@ -35,7 +37,7 @@ const SubcategoryBar: React.FC<{
             onClick={() => onSubcategorySelect(subcategory)}
             className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors duration-200 relative ${selectedSubcategory?.id === subcategory.id
                 ? 'bg-white text-primary'
-                : 'text-white hover:text-primary hover:bg-white'
+                : 'text-black hover:text-primary hover:bg-white'
               }`}
           >
             {subcategory.name}
@@ -147,24 +149,31 @@ const CategoryHorizontalBar: React.FC<CategoryHorizontalBarProps> = ({ onCategor
   };
 
   return (
-    <div className="w-full bg-gradient">
+    <div className="w-full">
       {/* Parent Category Bar */}
-      <div className="flex items-center space-x-2 overflow-x-auto px-4 py-2">
+      <div className="flex items-center space-x-2 overflow-x-auto px-4 py-2 bg-gradient">
         {isLoading ? (
           <CategorySidebarSkeleton />
         ) : (
           <>
             {categories.map((category) => (
-              <button
-                key={category.id}
-                onClick={() => handleCategorySelect(category)}
-                className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors duration-200 relative ${selectedCategory?.id === category.id
+              <div
+                key={category.id} // ✅ Move key to the outermost element
+                className={cn(
+                  'flex items-center rounded-full transition-colors duration-200',
+                  selectedCategory?.id === category.id
                     ? 'bg-white text-primary'
                     : 'text-white hover:text-primary hover:bg-white'
-                  }`}
+                )}
               >
-                {category.name}
-              </button>
+                <button
+                  onClick={() => handleCategorySelect(category)}
+                  className="flex items-center gap-1 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap"
+                >
+                  {category.name}
+                  {selectedCategory?.id === category.id && <ChevronDown className="w-3 h-3" />}
+                </button>
+              </div>
             ))}
 
             {/* New Arrivals button */}
