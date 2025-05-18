@@ -145,7 +145,6 @@ export default function MobileProductDetailCard({ product, onClose, handleAddToC
 
   const handleQuantityChange = (newQuantity: number) => {
     const validQuantity = Math.min(newQuantity, 999);
-    console.log('handleQuantityChange:', { productId: product.id, newQuantity: validQuantity }); // Debug log
     setQuantity(validQuantity);
   };
 

@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import ProductCardFull from '@/components/Card/ProductCardFull';
-import { getProducts } from '@/services/productService';
+import { getLatestProducts, getProducts } from '@/services/productService';
 import type { ICategory, IProduct, ISubcategory } from '@/types/product';
-import CategorySidebar from '@/components/ui/CategorySidebar';
-import HorizontalCategoryBar from './HorizontalCategoryBar';
+import CategoryHorizontalBar from '@/components/ui/CategoryHorizontalBar';
 
 const ProductCardSkeleton = () => {
   return (
@@ -51,17 +50,30 @@ const MobileProductList: React.FC<MobileProductListProps> = ({ handleAddToCart, 
     }
   }, [initialCategory]);
 
-  const fetchProductList = async ({ catId, subCatId }: { catId: string; subCatId: string }) => {
-    if (!catId || catId === 'all') return;
+  const fetchProductList = async (category?: { catId: string; subCatId: string } | null) => {
     try {
       setProductsLoading(true);
       setProductsError(null);
-      const query = subCatId === 'all' ? `category_id=${catId}` : `category_id=${catId}&sub_category_id=${subCatId}`;
-      const fetchedProducts = await getProducts(query);
+
+      let fetchedProducts: IProduct[] = [];
+      if (!category || category.catId === 'all') {
+        // Fetch latest products
+        fetchedProducts = await getLatestProducts(10);
+      } else {
+        const query =
+          category.subCatId === 'all'
+            ? `category_id=${category.catId}`
+            : `category_id=${category.catId}&sub_category_id=${category.subCatId}`;
+        fetchedProducts = await getProducts(query);
+      }
+
       setProducts(fetchedProducts);
       setFilterOpen(false);
     } catch (error: any) {
-      const errorMessage = typeof error.error === 'object' && error.error?.message ? error.error.message : 'Failed to fetch products';
+      const errorMessage =
+        typeof error.error === 'object' && error.error?.message
+          ? error.error.message
+          : 'Failed to fetch products';
       setProductsError(errorMessage);
     } finally {
       setProductsLoading(false);
@@ -69,10 +81,13 @@ const MobileProductList: React.FC<MobileProductListProps> = ({ handleAddToCart, 
   };
 
   useEffect(() => {
-    if (selectedCategory) {
-      fetchProductList(selectedCategory);
+    if (initialCategory) {
+      setSelectedCategory(initialCategory);
+      fetchProductList(initialCategory); // Fetch using initial category
+    } else {
+      fetchProductList(null); // Fetch latest products
     }
-  }, [selectedCategory]);
+  }, []);
 
   const handleCategorySelect = (category: ICategory, subcategory?: ISubcategory) => {
     setSelectedCategory({ catId: category.id, subCatId: subcategory?.id || 'all' });
@@ -96,7 +111,7 @@ const MobileProductList: React.FC<MobileProductListProps> = ({ handleAddToCart, 
       </nav>
 
       <div className='mb-10'>
-      <HorizontalCategoryBar
+      <CategoryHorizontalBar
         onCategorySelect={handleCategorySelect}
         onLatestProductsSelect={handleLatestProductsSelect}
       />

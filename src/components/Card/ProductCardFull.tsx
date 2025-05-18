@@ -22,7 +22,6 @@ const ProductCardFull = ({ product, viewMode = 'grid', onAddToCart }: ProductCar
   const [quantity, setQuantity] = useState(cartQuantity);
 
   const handleIncrease = (v: number) => {
-    console.log('handleIncrease:', { productId: product.id, newQuantity: v });
     setQuantity(v);
     addCartItem({ product, quantity: v, options: {} }); // Set absolute quantity
     // onAddToCart(product, 1); // Removed to prevent doubling
@@ -36,7 +35,6 @@ const ProductCardFull = ({ product, viewMode = 'grid', onAddToCart }: ProductCar
   };
 
   const handleQuantityChange = (value: number) => {
-    console.log('handleQuantityChange:', { productId: product.id, newQuantity: value });
     setQuantity(value);
     addCartItem({ product, quantity: value, options: {} });
   };

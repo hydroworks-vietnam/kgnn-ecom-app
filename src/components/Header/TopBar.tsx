@@ -61,7 +61,6 @@ const TopBar = () => {
       <CartDrawer
         open={$isCartOpen}
         onClose={handleCloseCart}
-        callPayment={handleProceedToCheckout}
         onContinueShopping={handleContinueShopping}
       />
     </>

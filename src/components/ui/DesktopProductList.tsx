@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import ProductCardFull from '@/components/Card/ProductCardFull';
-import { getProducts } from '@/services/productService';
+import { getLatestProducts, getProducts } from '@/services/productService';
 import type { ICategory, IProduct, ISubcategory } from '@/types/product';
-import CategorySidebar from '@/components/ui/CategorySidebar';
+import CategoryHorizontalBar from '@/components/ui/CategoryHorizontalBar';
 
 const ProductCardSkeleton = () => {
   return (
@@ -61,17 +61,30 @@ const DesktopProductList: React.FC<DesktopProductListProps> = ({ handleAddToCart
     }
   }, [initialCategory]);
 
-  const fetchProductList = async ({ catId, subCatId }: { catId: string; subCatId: string }) => {
-    if (!catId || catId === 'all') return;
+  const fetchProductList = async (category?: { catId: string; subCatId: string } | null) => {
     try {
       setProductsLoading(true);
       setProductsError(null);
-      const query = subCatId === 'all' ? `category_id=${catId}` : `category_id=${catId}&sub_category_id=${subCatId}`;
-      const fetchedProducts = await getProducts(query);
+
+      let fetchedProducts: IProduct[] = [];
+      if (!category || category.catId === 'all') {
+        // Fetch latest products
+        fetchedProducts = await getLatestProducts(10);
+      } else {
+        const query =
+          category.subCatId === 'all'
+            ? `category_id=${category.catId}`
+            : `category_id=${category.catId}&sub_category_id=${category.subCatId}`;
+        fetchedProducts = await getProducts(query);
+      }
+
       setProducts(fetchedProducts);
       setFilterOpen(false);
     } catch (error: any) {
-      const errorMessage = typeof error.error === 'object' && error.error?.message ? error.error.message : 'Failed to fetch products';
+      const errorMessage =
+        typeof error.error === 'object' && error.error?.message
+          ? error.error.message
+          : 'Failed to fetch products';
       setProductsError(errorMessage);
     } finally {
       setProductsLoading(false);
@@ -79,10 +92,13 @@ const DesktopProductList: React.FC<DesktopProductListProps> = ({ handleAddToCart
   };
 
   useEffect(() => {
-    if (selectedCategory) {
-      fetchProductList(selectedCategory);
+    if (initialCategory) {
+      setSelectedCategory(initialCategory);
+      fetchProductList(initialCategory); // Fetch using initial category
+    } else {
+      fetchProductList(null); // Fetch latest products
     }
-  }, [selectedCategory]);
+  }, []);
 
   const handleCategorySelect = (category: ICategory, subcategory?: ISubcategory) => {
     setSelectedCategory({ catId: category.id, subCatId: subcategory?.id || 'all' });
@@ -114,21 +130,21 @@ const DesktopProductList: React.FC<DesktopProductListProps> = ({ handleAddToCart
       <nav className="text-sm text-gray-500 mb-4">
         <a href="/" className="hover:underline">Trang chủ</a>
         <span> / </span>
-      <span className="text-purple-600">Danh sách sản phẩm</span>
+        <span className="text-purple-600">Danh sách sản phẩm</span>
       </nav>
 
       {/* Page Title */}
       <h1 className="text-3xl font-bold text-gray-900 mb-6">Sản phẩm</h1>
 
+      <div className='mb-6'>
+      <CategoryHorizontalBar
+        onCategorySelect={handleCategorySelect}
+        onLatestProductsSelect={handleLatestProductsSelect}
+      />
+      </div>
+
       {/* Main Content */}
       <div className="flex flex-col md:flex-row gap-8">
-        {/* Sidebar */}
-        <aside className="w-full md:w-1/4 bg-white shadow-lg rounded-lg p-6 border border-gray-200">
-          <CategorySidebar 
-            onCategorySelect={handleCategorySelect} 
-            onLatestProductsSelect={handleLatestProductsSelect}
-          />
-
           {/* Price Filter */}
           {/* <div className="mb-6">
             <h3 className="text-lg font-semibold text-gray-800 mb-2">Price Filter</h3>
@@ -159,7 +175,6 @@ const DesktopProductList: React.FC<DesktopProductListProps> = ({ handleAddToCart
               ))}
             </div>
           </div> */}
-        </aside>
 
         {/* Product Grid */}
         <div className="w-full">
