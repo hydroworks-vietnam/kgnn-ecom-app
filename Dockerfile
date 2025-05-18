@@ -19,6 +19,7 @@ RUN yarn install --frozen-lockfile
 COPY kgnn-melon/ .
 
 # Build the Astro project
+ENV ASTRO_TELEMETRY_DISABLED=1
 RUN PUBLIC_BACKEND_URL=$PUBLIC_BACKEND_URL yarn build
 
 # Expose the port Astro uses (default: 4321)
