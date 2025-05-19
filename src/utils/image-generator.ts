@@ -15,8 +15,8 @@ const generateCartCanvasImage = async (
   const imageColumnWidth = imageSize + columnGap; // Width for the image column (80 + 24 = 104px)
   const remainingWidth = availableWidth - imageColumnWidth; // Width for the four columns (652 - 104 = 548px)
   const columnWidths = [
-    remainingWidth * 0.20, // Product Name (35% of remaining width)
-    remainingWidth * 0.20, // Quantity (15% of remaining width)
+    remainingWidth * 0.20, // Product Name (20% of remaining width)
+    remainingWidth * 0.20, // Quantity (20% of remaining width)
     remainingWidth * 0.25, // Unit Price (25% of remaining width)
     remainingWidth * 0.25, // Total (25% of remaining width)
   ];
@@ -84,6 +84,9 @@ const generateCartCanvasImage = async (
 
   // Products (Table with 4 columns, center-aligned)
   for (const item of cart) {
+    const rowStartY = y; // Store the starting Y position for this row
+    let rowHeight = itemHeight; // Default row height
+
     // Image (already centered by its container)
     try {
       const img = await loadProxiedImage(item.product.images[0]);
@@ -115,33 +118,53 @@ const generateCartCanvasImage = async (
     ctx.fillStyle = "#6b7280";
     ctx.font = "14px Arial";
 
-    // Product Name
-    const productNameWidth = ctx.measureText(item.product.name).width;
-    const productNameX = columnX + (columnWidths[0] - productNameWidth) / 2;
-    ctx.fillText(item.product.name, productNameX, y + 40);
+    // Product Name - Wrap text if too long
+    if (item.product.name.length > 50) {
+      item.product.name = item.product.name.substring(0, 47) + "..."; // 47 + 3 dots = 50 chars
+    }
+    const maxProductNameWidth = columnWidths[0] - 10; // Leave small margin
+    const lines = wrapText(item.product.name, maxProductNameWidth, ctx);
+
+    // Adjust row height based on number of lines
+    const lineHeight = 18;
+    const textHeight = lines.length * lineHeight;
+    if (textHeight > rowHeight - 40) { // 40 is the vertical positioning offset
+      rowHeight = textHeight + 40;
+    }
+    
+    // Calculate vertical center position for the wrapped text
+    const textY = rowStartY + (rowHeight - textHeight) / 2;
+    
+    // Draw each line of the wrapped text
+    lines.forEach((line, index) => {
+      const lineWidth = ctx.measureText(line).width;
+      const lineX = columnX + (columnWidths[0] - lineWidth) / 2;
+      ctx.fillText(line, lineX, textY + index * lineHeight);
+    });
+    
     columnX += columnWidths[0] + columnGap;
 
-    // Quantity
+    // Quantity - Vertically center with product name
     const quantityText = `${item.quantity}`;
     const quantityWidth = ctx.measureText(quantityText).width;
     const quantityX = columnX + (columnWidths[1] - quantityWidth) / 2;
-    ctx.fillText(quantityText, quantityX, y + 40);
+    ctx.fillText(quantityText, quantityX, rowStartY + rowHeight/2);
     columnX += columnWidths[1] + columnGap;
 
-    // Unit Price
+    // Unit Price - Vertically center with product name
     const unitPriceText = `${item.product.unit_price.toLocaleString()} đ`;
     const unitPriceWidth = ctx.measureText(unitPriceText).width;
     const unitPriceX = columnX + (columnWidths[2] - unitPriceWidth) / 2;
-    ctx.fillText(unitPriceText, unitPriceX, y + 40);
+    ctx.fillText(unitPriceText, unitPriceX, rowStartY + rowHeight/2);
     columnX += columnWidths[2] + columnGap;
 
-    // Total Price
+    // Total Price - Vertically center with product name
     const totalText = `${total.toLocaleString()} đ`;
     const totalWidth = ctx.measureText(totalText).width;
     const totalX = columnX + (columnWidths[3] - totalWidth) / 2;
-    ctx.fillText(totalText, totalX, y + 40);
+    ctx.fillText(totalText, totalX, rowStartY + rowHeight/2);
 
-    y += itemHeight;
+    y += rowHeight; // Use the potentially adjusted row height
   }
 
   // Divider
@@ -210,6 +233,26 @@ const loadProxiedImage = (src: string): Promise<HTMLImageElement> => {
     img.onerror = reject;
     img.src = proxyUrl;
   });
+};
+
+// Helper function to wrap text
+const wrapText = (text: string, maxWidth: number, ctx: CanvasRenderingContext2D) => {
+  const words = text.split(' ');
+  const lines = [];
+  let currentLine = words[0];
+
+  for (let i = 1; i < words.length; i++) {
+    const word = words[i];
+    const width = ctx.measureText(currentLine + " " + word).width;
+    if (width < maxWidth) {
+      currentLine += " " + word;
+    } else {
+      lines.push(currentLine);
+      currentLine = word;
+    }
+  }
+  lines.push(currentLine);
+  return lines;
 };
 
 export { generateCartCanvasImage };
