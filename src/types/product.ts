@@ -13,6 +13,12 @@ export interface IProduct {
   category_id: string;
   sub_category_id?: string;
   video_link: string;
+  rank_prices?: {
+    GOLD?: number;
+    SILVER?: number;
+    BRONZE?: number;
+    [key: string]: number | undefined;
+  };
 }
 
 export interface ICategory {
