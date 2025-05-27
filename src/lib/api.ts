@@ -70,7 +70,7 @@ function apiCall<T = any>(
       const result: Result<T> = {
         data: {
           statusCode: response.status,
-          message: response.data.message
+          message: response.data.message || response.data.payload
         },
       };
     callback(result);
@@ -86,4 +86,4 @@ function apiCall<T = any>(
   });
 }
 
-export default apiCall
+export default apiCall;
