@@ -37,7 +37,7 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
     if (error instanceof AxiosError) {
-      console.log("🚀 ~ axios error:", error.cause);
+      console.log("🚀 ~ axios error:", error.response);
     }
     return Promise.reject(error);
   }

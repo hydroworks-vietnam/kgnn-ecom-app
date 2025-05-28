@@ -5,9 +5,10 @@ import CartSummary from "@/components/ui/CartSummary";
 import type { ICartItem } from "@/types/cart";
 import PromoCodeInput from "@/components/ui/PromoCodeInput";
 import { navigate } from 'astro:transitions/client';
-import { Download, XIcon } from 'lucide-react';
-import { useRef } from "react";
+import { Download, X, ShoppingBag } from 'lucide-react';
+import { useRef, useState, useEffect } from "react";
 import { generateCartCanvasImage } from "@/utils/image-generator";
+import * as AlertDialog from '@radix-ui/react-alert-dialog';
 
 interface CartDrawerProps {
   open: boolean;
@@ -18,6 +19,24 @@ interface CartDrawerProps {
 const CartDrawer = ({ open, onClose, onContinueShopping }: CartDrawerProps) => {
   const cart = useStore(cartItemsStore);
   const exportRef = useRef<HTMLDivElement>(null);
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+
+    // Prevent body scroll when cart is open
+    if (open) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [open]);
 
   const handlePayment = () => {
     isCartOpen.set(false);
@@ -26,98 +45,178 @@ const CartDrawer = ({ open, onClose, onContinueShopping }: CartDrawerProps) => {
   };
 
   const handleDownloadCart = async () => {
+    if (cart.length === 0) return;
+
+    setIsDownloading(true);
     try {
       await generateCartCanvasImage(cart);
     } catch (err) {
       console.error("Failed to generate image:", err);
+    } finally {
+      setIsDownloading(false);
     }
   };
+
+  const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
     <>
       {/* Backdrop */}
       {open && (
         <div
-          className="fixed inset-0 bg-gray-900 bg-opacity-50 z-40 transition-opacity duration-300"
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-all duration-300"
           onClick={onClose}
         />
       )}
 
       {/* Drawer */}
       <div
-        className={`fixed top-0 right-0 h-full w-full sm:w-96 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${open ? 'translate-x-0' : 'translate-x-full'}`}
+        className={`fixed top-0 right-0 h-full w-full max-w-md bg-white shadow-2xl z-50 transform transition-all duration-300 ease-out ${open ? 'translate-x-0' : 'translate-x-full'
+          } ${alertOpen ? 'opacity-30' : 'opacity-100'}`}
       >
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="p-4 border-b border-gray-200">
+          <div className="sticky top-0 bg-white/95 backdrop-blur-md border-b border-gray-100 px-6 py-4 z-10">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-900">
-                Giỏ hàng
-              </h2>
+              <div className="flex items-center space-x-3">
+                <div className="p-2 bg-orange-50 rounded-full">
+                  <ShoppingBag className="w-5 h-5 text-orange-500" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">Giỏ hàng</h2>
+                  {cart.length > 0 && (
+                    <p className="text-sm text-gray-500">{totalItems} sản phẩm</p>
+                  )}
+                </div>
+              </div>
+
               <div className="flex items-center space-x-2">
-                {/* Download Cart Button */}
-                <button
-                  onClick={handleDownloadCart}
-                  className="flex items-center space-x-2 px-3 py-1 border border-gray-300 rounded-full text-primary hover:text-white hover:bg-primary transition-colors"
-                  aria-label="Download cart"
-                  disabled={cart.length === 0}
-                >
-                  <Download className="w-4 h-4" />
-                  <span className="text-sm">Lưu đơn hàng</span>
-                </button>
+                {/* Download Button */}
+                {cart.length > 0 && (
+                  <button
+                    onClick={handleDownloadCart}
+                    disabled={isDownloading}
+                    className="flex items-center space-x-2 px-3 py-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg text-gray-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    aria-label="Lưu đơn hàng"
+                  >
+                    <Download className={`w-4 h-4 ${isDownloading ? 'animate-pulse' : ''}`} />
+                    <span className="text-sm font-medium hidden sm:block">
+                      {isDownloading ? 'Đang lưu...' : 'Lưu'}
+                    </span>
+                  </button>
+                )}
+
                 {/* Close Button */}
                 <button
-                  className="p-1 text-gray-500 hover:text-gray-700 transition-colors"
+                  className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-all duration-200"
                   onClick={onClose}
-                  aria-label="Close cart"
+                  aria-label="Đóng giỏ hàng"
                 >
-                  <XIcon className="w-4 h-4" />
+                  <X className="w-5 h-5" />
                 </button>
               </div>
             </div>
           </div>
 
-          {/* Cart Items */}
-          <div className="flex-1 overflow-y-auto p-4">
+          {/* Cart Content */}
+          <div className="flex-1 flex flex-col h-[calc(100vh-100px)]">
             {cart.length === 0 ? (
-              <div className="flex items-center justify-center h-full">
-                <p className="text-gray-500 text-center text-lg">Giỏ hàng trống</p>
+              // Empty State
+              <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
+                <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+                  <ShoppingBag className="w-8 h-8 text-gray-300" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Giỏ hàng trống
+                </h3>
+                <p className="text-gray-500 text-center mb-6 max-w-sm">
+                  Hãy khám phá các sản phẩm tuyệt vời và thêm chúng vào giỏ hàng của bạn
+                </p>
+                <button
+                  onClick={onContinueShopping}
+                  className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium transition-colors duration-200"
+                >
+                  Bắt đầu mua sắm
+                </button>
               </div>
             ) : (
-              <div ref={exportRef}>
-                <div className="space-y-2">
-                  {cart.map((item: ICartItem) => (
-                    <CartItem key={item.product.id} item={item} />
-                  ))}
+              <>
+                {/* Cart Items */}
+                <div className="flex-1 overflow-y-auto px-6 py-4">
+                  <div ref={exportRef} className="space-y-4">
+                    {cart.map((item: ICartItem, index) => (
+                      <div key={item.product.id} className="group">
+                        <CartItem item={item} setAlertOpen={setAlertOpen} />
+                        {index < cart.length - 1 && (
+                          <div className="mt-4 border-b border-gray-100" />
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="mt-4">
-                  <CartSummary />
+
+                {/* Footer */}
+                <div className="sticky bottom-0 bg-white/95 backdrop-blur-md border-t border-gray-100 px-6 py-4 space-y-4">
+                  {/* Promo Code */}
+                  <div className="rounded-lg p-2 bg-slate-50 border border-slate-100">
+                    <div className="py-2">
+                      <label className="text-sm">Mã giảm giá</label>
+                      <PromoCodeInput />
+                    </div>
+                  </div>
+
+                  {/* Summary */}
+                    <div className="bg-slate-50 border border-slate-100 rounded-lg p-4">
+                    <CartSummary />
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="space-y-3">
+                    <button
+                      onClick={handlePayment}
+                      className="w-full py-4 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-500 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-orange-200"
+                    >
+                      Đến trang thanh toán
+                    </button>
+                    <button
+                      onClick={onContinueShopping}
+                      className="w-full py-3 text-gray-600 hover:text-gray-800 border-2 border-gray-200 hover:border-gray-300 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-gray-100"
+                    >
+                      Tiếp tục mua sắm
+                    </button>
+                  </div>
                 </div>
-              </div>
+              </>
             )}
           </div>
-
-          {/* Footer */}
-          {cart.length > 0 && (
-            <div className="px-4 pb-8 border-t border-gray-200 bg-white">
-              <PromoCodeInput />
-              <CartSummary />
-              <button
-                onClick={handlePayment}
-                className="w-full py-2 bg-gradient text-white rounded-lg text-sm hover:shadow-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Đến trang thanh toán
-              </button>
-              <button
-                onClick={onContinueShopping}
-                className="w-full text-gray-500 border rounded-lg border-slate-300 py-2 mt-2 text-sm hover:shadow-lg"
-              >
-                Tiếp tục mua sắm
-              </button>
-            </div>
-          )}
         </div>
       </div>
+
+      {/* Alert Dialog */}
+      <AlertDialog.Root open={alertOpen} onOpenChange={setAlertOpen}>
+        <AlertDialog.Portal container={document.body}>
+          <AlertDialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in-0 duration-200" />
+          <AlertDialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl p-6 shadow-2xl max-w-sm w-full mx-4 animate-in fade-in-0 zoom-in-95 duration-200" style={{zIndex: 1000}}>
+            <div className="text-center">
+              <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">😭</span>
+              </div>
+              <AlertDialog.Title className="text-xl font-bold text-gray-900 mb-2">
+                Tiếc quá!
+              </AlertDialog.Title>
+              <AlertDialog.Description className="text-gray-600 mb-6 leading-relaxed">
+                Mã giảm giá chưa thể áp dụng được do không tìm thấy giá phù hợp
+              </AlertDialog.Description>
+              <AlertDialog.Action
+                className="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-colors duration-200 focus:outline-none focus:ring-4 focus:ring-blue-200"
+                onClick={() => setAlertOpen(false)}
+              >
+                Đã hiểu
+              </AlertDialog.Action>
+            </div>
+          </AlertDialog.Content>
+        </AlertDialog.Portal>
+      </AlertDialog.Root>
     </>
   );
 };

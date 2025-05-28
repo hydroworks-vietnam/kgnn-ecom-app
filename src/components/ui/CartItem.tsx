@@ -1,18 +1,38 @@
-// src/components/CartDrawer/CartItem.tsx
-import useCartStore from '@/store/cart';
+import useCartStore, { userRankStore } from '@/store/cart';
 import type { ICartItem } from '@/types/cart';
 import { formatCurrency } from '@/utils/helpers';
 import SafetyImage from '@/components/Image/SafetyImage';
-import { X } from 'lucide-react';
+import { X, Minus, Plus } from 'lucide-react';
+import { useEffect } from 'react';
+import { useStore } from '@nanostores/react';
 
 interface CartItemProps {
   item: ICartItem;
+  setAlertOpen?: (open: boolean) => void;
 }
 
-const CartItem = ({ item }: CartItemProps) => {
+const CartItem = ({ item, setAlertOpen }: CartItemProps) => {
   const { product, quantity } = item;
-  const { name, images, unit_price } = product;
   const { increaseQuantity, decreaseQuantity, removeFromCart } = useCartStore();
+  const { id, name, images, unit_price, price_variants } = product;
+  const userRank = useStore(userRankStore);
+
+  useEffect(() => {
+    if (userRank) {
+      if (!price_variants || price_variants.length === 0) {
+        setAlertOpen?.(true);
+      } else {
+        const variant = price_variants.find((v) => v.rank === userRank);
+        if (!variant) {
+          setAlertOpen?.(true);
+        } else {
+          setAlertOpen?.(false);
+        }
+      }
+    } else {
+      setAlertOpen?.(false);
+    }
+  }, [userRank, price_variants, setAlertOpen]);
 
   const handleIncrease = () => {
     increaseQuantity(product.id);
@@ -22,54 +42,123 @@ const CartItem = ({ item }: CartItemProps) => {
     decreaseQuantity(product.id);
   };
 
+  // Calculate discount percentage
+  const getDiscountInfo = () => {
+    if (userRank && price_variants) {
+      const variant = price_variants.find((v) => v.rank === userRank);
+      if (variant && variant.price < unit_price) {
+        const discountPercent = Math.round(((unit_price - variant.price) / unit_price) * 100);
+        return {
+          hasDiscount: true,
+          originalPrice: unit_price,
+          discountedPrice: variant.price,
+          discountPercent
+        };
+      }
+    }
+    return {
+      hasDiscount: false,
+      originalPrice: unit_price,
+      discountedPrice: unit_price,
+      discountPercent: 0
+    };
+  };
+
+  const discountInfo = getDiscountInfo();
+
   return (
-    <div className="flex items-start gap-4 p-2 border border-gray-100 rounded-lg">
-      <div className="relative w-24 h-24">
+    <div className="flex items-start gap-4 p-4 bg-white border border-gray-100 rounded-xl hover:shadow-sm transition-shadow duration-200">
+      {/* Product Image */}
+      <div className="relative w-20 h-20 flex-shrink-0">
         <SafetyImage
-          clazz="w-full h-full rounded-md object-cover"
+          clazz="w-full h-full rounded-lg object-cover"
           src={images?.[0]}
-          height={96}
-          width={96}
+          height={80}
+          width={80}
         />
+        {discountInfo.hasDiscount && (
+          <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
+            -{discountInfo.discountPercent}%
+          </div>
+        )}
       </div>
 
       {/* Product Details */}
-      <div className="flex-1 flex flex-col justify-between gap-2">
-        <p className="text-sm font-medium text-gray-900">{name}</p>
-        {/* <p className="text-xs text-gray-500">
-          {color} {storage && `| ${storage}`} {connectivity && `| ${connectivity}`}
-        </p> */}
+      <div className="flex-1 min-w-0">
+        <h3 className="text-sm font-semibold text-gray-900 leading-tight mb-2 line-clamp-2">
+          {name}
+        </h3>
+
+        {/* Price Display */}
+        <div className="mb-3">
+          {discountInfo.hasDiscount ? (
+            <div className="space-y-2">
+              {/* Unit Price Display */}
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-gray-500">Đơn giá:</span>
+                <span className="line-through text-gray-400">
+                  {formatCurrency(discountInfo.originalPrice)}
+                </span>
+                <span className="font-semibold text-red-600">
+                  {formatCurrency(discountInfo.discountedPrice)}
+                </span>
+              </div>
+
+              {/* Total Price Display */}
+              <div className="flex items-center justify-end gap-2">
+                <span className="text-gray-500 text-sm">Tổng cộng:</span>
+                <span className="text-gray-600 line-through text-sm">
+                  {formatCurrency(discountInfo.originalPrice * quantity)}
+                </span>
+                <span className="font-bold text-primary">
+                  {formatCurrency(discountInfo.discountedPrice * quantity)}
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-1">
+              <div className="text-xs text-gray-500">
+                Đơn giá: {formatCurrency(unit_price)}
+              </div>
+              <div className="font-bold text-gray-900 text-lg">
+                {formatCurrency(unit_price * quantity)}
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* Quantity Controls */}
-        <div className="flex items-center gap-2 mt-1">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleDecrease}
+              className="w-6 h-6 flex items-center justify-center bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg text-gray-600 transition-colors duration-200"
+              disabled={quantity <= 1}
+            >
+              <Minus className="w-3 h-3" />
+            </button>
+
+            <span className="text-sm font-semibold text-gray-900 min-w-[1rem] text-center">
+              {quantity}
+            </span>
+
+            <button
+              onClick={handleIncrease}
+              className="w-6 h-6 flex items-center justify-center bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg text-gray-600 transition-colors duration-200"
+            >
+              <Plus className="w-3 h-3" />
+            </button>
+          </div>
+
+          {/* Remove Button */}
           <button
-            onClick={handleDecrease}
-            className="w-6 h-6 flex items-center justify-center border border-gray-300 rounded text-gray-600 hover:bg-gray-100"
+            onClick={() => removeFromCart(id)}
+            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-200"
+            aria-label="Xóa sản phẩm"
           >
-            -
-          </button>
-          <span className="text-sm text-gray-900">{quantity}</span>
-          <button
-            onClick={handleIncrease}
-            className="w-6 h-6 flex items-center justify-center border border-gray-300 rounded text-gray-600 hover:bg-gray-100"
-          >
-            +
+            <X className="w-5 h-5" />
           </button>
         </div>
-      </div>
-
-      {/* Price and Remove */}
-      <div className="flex flex-col items-end justify-between h-24">
-        <button
-          onClick={() => removeFromCart(product.id)}
-          className="text-gray-400 hover:text-red-500 transition-colors"
-          aria-label="Remove item"
-        >
-          <X className="w-4 h-4 text-red-500" />
-        </button>
-        <span className="text-sm font-medium text-gray-900">
-          {formatCurrency(unit_price * quantity)}
-        </span>
       </div>
     </div>
   );

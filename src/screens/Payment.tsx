@@ -2,18 +2,20 @@ import { Input } from '@/components/Input/BasicInput';
 import CartItem from '@/components/ui/CartItem';
 import CartSummary from '@/components/ui/CartSummary';
 import PromoCodeInput from '@/components/ui/PromoCodeInput';
-import useCartStore, { cartItemsStore, discountRateStore, promoCodeStore, shippingFeeStore, taxRateStore } from '@/store/cart';
+import useCartStore, { cartItemsStore, discountRateStore, shippingFeeStore, taxRateStore } from '@/store/cart';
 import type { ICartItem } from '@/types/cart';
 import { useStore } from '@nanostores/react';
 import { Banknote, CreditCard, Landmark, MapPin, TruckIcon } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import momoIcon from '@/assets/momo_icon.svg'; 
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import { cx } from 'class-variance-authority';
+import { navigate } from 'astro:transitions/client';
 
-type PaymentMethod = 'BANK' | 'COD' | 'CREDIT_CARD';
+type PaymentMethod = 'BANK' | 'COD' | 'CREDIT_CARD' | 'E_WALLET';
 
 const PaymentScreen: React.FC = () => {
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod>('BANK');
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod>('COD');
   const [selectedBank, setSelectedBank] = useState('HDBank');
   const [shippingMethod, setShippingMethod] = useState('Delivery');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
@@ -30,7 +32,6 @@ const PaymentScreen: React.FC = () => {
   const [alertType, setAlertType] = useState<'error' | 'success'>('error');
 
   const cart = useStore(cartItemsStore);
-  const promoCode = useStore(promoCodeStore);
   const discountRate = useStore(discountRateStore);
   const shippingFee = useStore(shippingFeeStore);
   const taxRate = useStore(taxRateStore);
@@ -44,10 +45,7 @@ const PaymentScreen: React.FC = () => {
 
   const isErrorAlert = (type : string) => type === 'error';
 
-  // Log cart changes
-  useEffect(() => {
-    console.log(cart);
-  }, [cart]);
+  const onContinueShopping = () => { navigate('/products') }
 
   // Handle order confirmation
   const handleConfirmOrder = async () => {
@@ -58,7 +56,7 @@ const PaymentScreen: React.FC = () => {
       return;
     }
 
-    if (!userInfo.fullName || !userInfo.email || !userInfo.phone || !userInfo.address) {
+    if (!userInfo.fullName || !userInfo.phone || !userInfo.city || !userInfo.district || !userInfo.address) {
       setAlertMessage('Xin hãy điền đầy đủ thông tin');
       setAlertType('error');
       setAlertOpen(true);
@@ -88,7 +86,7 @@ const PaymentScreen: React.FC = () => {
         shippingFee: calculateShippingFee(),
         total: calculateTotal(),
       },
-      promoCode: promoCode || null,
+      promoCode: '',
       discountRate,
       shippingFee,
       taxRate,
@@ -145,7 +143,7 @@ const PaymentScreen: React.FC = () => {
             <h1 className="text-xl font-semibold text-gray-600">Thông tin nhận hàng</h1>
           </div>
 
-          {/* Shipping Method Toggle */}
+          {/* Shipping Method */}
           <div className="flex space-x-4 mb-6">
             <button
               className={`flex-1 border rounded-lg p-3 text-center flex items-center justify-center space-x-2 ${shippingMethod === 'Delivery' ? 'border-primary text-primary' : 'border-gray-300 text-gray-700'}`}
@@ -155,7 +153,8 @@ const PaymentScreen: React.FC = () => {
               <span className={`text-sm ${shippingMethod === 'Delivery' ? 'text-primary' : 'text-slate-500'}`}>Giao hàng tận nơi</span>
             </button>
             <button
-              className={`flex-1 border rounded-lg p-3 text-center flex items-center justify-center space-x-2 ${shippingMethod === 'Pick up' ? 'border-primary text-primary' : 'border-gray-300 text-gray-700'}`}
+              disabled={true}
+              className={`flex-1 border rounded-lg p-3 text-center flex items-center justify-center space-x-2 ${shippingMethod === 'Pick up' ? 'border-primary text-primary' : 'border-gray-300 bg-gray-300'}`}
               onClick={() => setShippingMethod('Pick up')}
             >
               <MapPin className={`w-4 h-4 ${shippingMethod === 'Pick up' ? 'text-primary' : 'text-slate-500'}`} />
@@ -178,7 +177,7 @@ const PaymentScreen: React.FC = () => {
             </div>
             <div>
               <label className="text-sm font-medium text-gray-700">
-                Email <span className="text-red-500">*</span>
+                Emai
               </label>
               <Input
                 name="email"
@@ -200,7 +199,7 @@ const PaymentScreen: React.FC = () => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium text-gray-700">Tỉnh/Thành phố</label>
+                <label className="text-sm font-medium text-gray-700">Tỉnh/Thành phố <span className="text-red-500">*</span></label>
                 <Input
                   name="city"
                   placeholder="Nhập tỉnh/thành phố"
@@ -209,7 +208,7 @@ const PaymentScreen: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-700">Quận/Huyện</label>
+                <label className="text-sm font-medium text-gray-700">Quận/Huyện <span className="text-red-500">*</span></label>
                 <Input
                   name="district"
                   placeholder="Nhập quận/huyện"
@@ -229,6 +228,7 @@ const PaymentScreen: React.FC = () => {
                 onChange={handleInputChange}
               />
             </div>
+            <div className='text-xs text-red-500'>(Dấu * là bắt buộc điền)</div>
             <div className="flex items-center mt-4">
               <input
                 type="checkbox"
@@ -237,7 +237,8 @@ const PaymentScreen: React.FC = () => {
                 className="h-4 w-4 text-primary border-gray-300 rounded"
               />
               <label className="ml-2 text-sm text-gray-700">
-                Tôi đã đọc và đồng ý với điều khoản và điều kiện.
+                Tôi đã đọc và đồng ý với điều khoản và điều kiện khi mua hàng ở trang {' '}
+                <span className='text-primary font-bold'>Không gian nhà nông</span>
               </label>
             </div>
           </div>
@@ -260,18 +261,28 @@ const PaymentScreen: React.FC = () => {
                 <span className="text-sm text-center">Thanh toán khi nhận hàng (COD)</span>
               </button>
               <button
-                className={`flex-1 border rounded-lg p-3 flex flex-col items-center gap-1 ${selectedPaymentMethod === 'BANK' ? 'border-primary text-primary' : 'border-gray-300 text-gray-700'}`}
+                disabled={true}
+                className={`flex-1 border rounded-lg p-3 flex flex-col items-center gap-1 ${selectedPaymentMethod === 'BANK' ? 'border-primary text-primary' : 'border-gray-300 bg-gray-300 text-slate-500'}`}
                 onClick={() => setSelectedPaymentMethod('BANK')}
               >
                 <Landmark className="w-6 h-6" />
-                <span className="text-sm text-center">Chuyển khoản</span>
+                <span className="text-sm text-center">Chuyển khoản ngân hàng</span>
               </button>
               <button
-                className={`flex-1 border rounded-lg p-3 flex flex-col items-center gap-1 ${selectedPaymentMethod === 'CREDIT_CARD' ? 'border-primary text-primary' : 'border-gray-300 text-gray-700'}`}
+                disabled={true}
+                className={`flex-1 border rounded-lg p-3 flex flex-col items-center gap-1 ${selectedPaymentMethod === 'CREDIT_CARD' ? 'border-primary text-primary' : 'border-gray-300 bg-gray-300 text-slate-500'}`}
                 onClick={() => setSelectedPaymentMethod('CREDIT_CARD')}
               >
                 <CreditCard className="w-6 h-6" />
                 <span className="text-sm text-center">Thanh toán bằng thẻ quốc tế</span>
+              </button>
+              <button
+                disabled={true}
+                className={`flex-1 border rounded-lg p-3 flex flex-col items-center gap-1 ${selectedPaymentMethod === 'E_WALLET' ? 'border-primary text-primary' : 'border-gray-300 bg-gray-300 text-slate-500'}`}
+                onClick={() => setSelectedPaymentMethod('E_WALLET')}
+              >
+                <img src={momoIcon.src} alt="Momo logo" className="h-8 w-auto" />
+                <span className="text-sm text-center">Ví điện tử (MoMo, Zalopay)</span>
               </button>
             </div>
           </div>
@@ -299,7 +310,7 @@ const PaymentScreen: React.FC = () => {
 
       {/* Right Section */}
       <div className="w-full xl:w-2/5">
-        <div className="bg-white rounded-lg shadow-lg p-4 md:p-6 sticky top-4">
+        <div className="bg-white rounded-lg shadow-lg p-4">
           <div className="flex items-center mb-4">
             <div className="w-6 h-6 bg-orange-500 rounded-full mr-2"></div>
             <h2 className="text-xl font-semibold text-gray-600">Thông tin đơn hàng</h2>
@@ -323,12 +334,21 @@ const PaymentScreen: React.FC = () => {
           <hr className="my-2" />
           <PromoCodeInput />
           <CartSummary />
-          <button
-            className="w-full bg-gradient text-white rounded-lg p-3 mt-4 hover:shadow-xl transition"
-            onClick={handleConfirmOrder}
-          >
-            Xác nhận đơn hàng
-          </button>
+
+          <div className="space-y-3">
+            <button
+              className="w-full bg-gradient text-white rounded-lg p-3 mt-4 hover:shadow-xl transition"
+              onClick={handleConfirmOrder}
+            >
+              Xác nhận đơn hàng
+            </button>
+            <button
+              onClick={onContinueShopping}
+              className="w-full py-3 text-gray-600 hover:text-gray-800 border-2 border-gray-200 hover:border-gray-300 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-gray-100"
+            >
+              Tiếp tục mua sắm
+            </button>
+          </div>
         </div>
       </div>
 

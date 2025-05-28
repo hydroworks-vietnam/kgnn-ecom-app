@@ -1,4 +1,11 @@
-
 export interface IUserRank {
-  rank: string;
+  rank: Rank;
+}
+
+export enum Rank {
+  DIAMOND = 'DIAMOND',
+  PLATINUM = 'PLATINUM',
+  GOLD = 'GOLD',
+  SILVER = 'SILVER',
+  BRONZE = 'BRONZE'
 }

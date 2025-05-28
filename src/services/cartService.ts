@@ -1,8 +1,8 @@
 import apiCall, { type HttpAllowMethod } from "@/lib/api";
-import type { IUserRank } from "@/types/user";
+import type { IUserRank, Rank } from "@/types/user";
 
-const CartService = {
-  applyPromoCode: (code: string): Promise<{ valid: boolean; rank?: string }> => {
+const cartService = {
+  applyPromoCode: (code: string): Promise<{ valid: boolean; rank?: Rank }> => {
     return new Promise((resolve) => {
       const message = {
         url: `/v1/admin/users/rank?code=${encodeURIComponent(code)}`,
@@ -10,22 +10,21 @@ const CartService = {
         headers: {
           'X-Request-Id': crypto.randomUUID()
         }
-      };
+      }
 
-  apiCall<IUserRank>(message, (res) => {
+    apiCall<IUserRank>(message, (res) => {
         try {
-          console.log("🚀 ~ res:", res);
           if (res.data.statusCode === 200 && res.data.message?.rank) {
-            resolve({ valid: true, rank: res.data.message?.rank });
+            resolve({ valid: true, rank: res.data.message?.rank as Rank })
           } else {
-            resolve({ valid: false });
+            resolve({ valid: false })
           }
         } catch {
-          resolve({ valid: false });
+          resolve({ valid: false })
         }
-      });
-    });
+      })
+    })
   }
-};
+}
 
-export default CartService;
+export default cartService;

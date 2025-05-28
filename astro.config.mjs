@@ -18,7 +18,7 @@ export default defineConfig({
       alias: {
         '@': '/src'
       }
-    }
+    },
   },
   output: 'server',
   trailingSlash: 'never',

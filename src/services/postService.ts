@@ -20,10 +20,10 @@ export const postService = {
               message: data.message || 'No posts returned',
               code: data.statusCode || 500
             }
-          });
+          })
         }
-      });
-    });
+      })
+    })
   },
 
   getPostBySlug: (slug: string): Promise<Post> => {

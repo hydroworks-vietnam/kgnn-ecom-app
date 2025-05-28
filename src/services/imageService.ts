@@ -18,9 +18,9 @@ export const bannerApi = {
               message: res.data.message || 'No images returned',
               code: res.data.statusCode || 500
             }
-          });
+          })
         }
-      });
-    });
+      })
+    })
   }
-};
+}

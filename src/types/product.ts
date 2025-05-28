@@ -3,7 +3,10 @@ export interface IProduct {
   sku: string;
   name: string;
   unit_price: number;
-  discount_price: number;
+  price_variants?: {
+    rank: string;
+    price: number;
+  }[];
   unit_type: string;
   stock: number;
   brand: string;
@@ -13,12 +16,6 @@ export interface IProduct {
   category_id: string;
   sub_category_id?: string;
   video_link: string;
-  rank_prices?: {
-    GOLD?: number;
-    SILVER?: number;
-    BRONZE?: number;
-    [key: string]: number | undefined;
-  };
 }
 
 export interface ICategory {

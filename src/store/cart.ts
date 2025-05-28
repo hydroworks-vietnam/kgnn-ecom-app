@@ -1,22 +1,20 @@
 import type { ICart, ICartItem } from '@/types/cart';
+import type { Rank } from '@/types/user';
 import { atom, computed } from 'nanostores';
-import CartService from "@/services/cartService";
 
-// Initialize cart from session storage if available
 const initialCart = typeof window !== 'undefined' 
-  ? JSON.parse(localStorage.getItem('cart') || '[]')
+  ? JSON.parse(localStorage.getItem('cart') || '[]') as ICart
   : [];
 
 export const cartItemsStore = atom<ICart>(initialCart)
 export const isCartOpen = atom(false)
-export const promoCodeStore = atom<string>('');
-export const userRankStore = atom<string>('');
-export const discountRateStore = atom<number>(0);
-export const taxRateStore = atom<number>(8);
-export const shippingFeeStore = atom<number>(30000);
-export const isFloatingCartVisible = atom(true);
+export const promoCodeStore = atom<string>('')
+export const userRankStore = atom<Rank | undefined>(undefined);
+export const discountRateStore = atom<number>(0)
+export const taxRateStore = atom<number>(8)
+export const shippingFeeStore = atom<number>(30000)
+export const isFloatingCartVisible = atom(true)
 
-// Subscribe to cart changes to persist in session storage
 cartItemsStore.subscribe((cart) => {
   if (typeof window !== 'undefined') {
     localStorage.setItem('cart', JSON.stringify(cart));
@@ -71,12 +69,6 @@ function getCartItemQuantity(productId: string): number {
   return cartItemsStore.get().find(item => item.product.id === productId)?.quantity || 0;
 }
 
-// function determineNewQuantity(currentQuantity: number, newQuantity: number): number {
-//   if (newQuantity === 0) return 0; // Reset to 0 if specified
-//   if (newQuantity > 0) return newQuantity; // Set specific quantity
-//   return currentQuantity + 1; // Increment by 1 if -1 (default behavior)
-// }
-
 /**
  * Removes an item from the cart by product ID.
  * @param productId - The ID of the product to remove
@@ -118,46 +110,23 @@ function decreaseQuantity(productId: string) {
             quantity: item.quantity - 1,
           }
         : item
-    );
-  cartItemsStore.set(updatedCart);
+    )
+  cartItemsStore.set(updatedCart)
 }
-
-export async function applyPromoCode(code: string): Promise<void> {
-  const res = await CartService.applyPromoCode(code);
-  console.log("applyPromoCode res", res);
- if (res.valid && res.rank) {
-  console.log("applyPromoCode res", res);
-    promoCodeStore.set(code);
-    userRankStore.set(res.rank);
-    localStorage.setItem("promoCode", code);
-    localStorage.setItem(code, res.rank);
-
-    // Lấy cart từ localStorage
-    console.log("cart " + JSON.stringify(initialCart))
-    // initialCart.forEach(item => {
-    // });
- }}
-// function calculateSubtotal(): number {
-//   const currentCart = cartItemsStore.get();
-//   return currentCart.reduce(
-//     (sum, item) => sum + (item.product.unit_price * item.quantity || 0),
-//     0
-//   );
-// }
 
 function calculateSubtotal(): number {
   const currentCart = cartItemsStore.get();
   const rank = userRankStore.get();
   return currentCart.reduce((sum, item) => {
     let price = item.product.unit_price;
-    if (rank && item.product.rank_prices && Array.isArray(item.product.rank_prices)) {
-      const matchedVariant = item.product.rank_prices.find(
-        (variant: any) => variant.rank === rank
-      );
-      if (matchedVariant && matchedVariant.price) {
-        price = matchedVariant.price;
-      }
-    }
+    // if (rank && item.product.rank_prices && Array.isArray(item.product.rank_prices)) {
+    //   const matchedVariant = item.product.rank_prices.find(
+    //     (variant: any) => variant.rank === rank
+    //   );
+    //   if (matchedVariant && matchedVariant.price) {
+    //     price = matchedVariant.price;
+    //   }
+    // }
     return sum + (price * item.quantity || 0);
   }, 0);
 }
@@ -200,7 +169,6 @@ export const useCartStore = () => {
     removeFromCart,
     clearCart,
     decreaseQuantity,
-    applyPromoCode,
     calculateSubtotal,
     calculateDiscount,
     calculateTax,

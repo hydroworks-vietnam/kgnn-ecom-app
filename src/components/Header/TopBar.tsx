@@ -2,13 +2,17 @@ import { isCartOpen, totalCartQuantity } from '@/store/cart';
 import { useStore } from '@nanostores/react';
 import { HeartIcon, LanguagesIcon, MailboxIcon, PhoneIcon, ShoppingCartIcon, UserIcon } from 'lucide-react';
 import CartDrawer from '../Drawer/CartDrawer';
-import { navigate } from 'astro:transitions/client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const TopBar = () => {
   const $isCartOpen = useStore(isCartOpen);
   const $totalQuantity = useStore(totalCartQuantity);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isCheckoutPage, setIsCheckoutPage] = useState(false);
+
+  useEffect(() => {
+    // Check if the current route is the checkout page
+    setIsCheckoutPage(window.location.pathname === '/checkout');
+  }, []);
 
   const toggleCart = () => {
     isCartOpen.set(!$isCartOpen);
@@ -20,11 +24,6 @@ const TopBar = () => {
 
   const handleContinueShopping = () => {
     isCartOpen.set(false);
-  };
-
-  const handleProceedToCheckout = () => {
-    isCartOpen.set(false);
-    navigate('/checkout');
   };
 
   return (
@@ -45,24 +44,26 @@ const TopBar = () => {
             <LanguagesIcon className="w-4 h-4 sm:w-5 sm:h-5 cursor-pointer hover:text-black" />
             <UserIcon className="w-4 h-4 sm:w-5 sm:h-5 cursor-pointer hover:text-black" />
             <HeartIcon className="w-4 h-4 sm:w-5 sm:h-5 cursor-pointer hover:text-pink-500" />
-            <div className="relative" onClick={toggleCart}>
+            {!isCheckoutPage && <div className="relative" onClick={toggleCart}>
               <ShoppingCartIcon className="w-4 h-4 sm:w-5 sm:h-5 cursor-pointer hover:text-black" />
               {$totalQuantity > 0 && (
                 <span className="absolute -top-2 -right-2 bg-primary text-white text-[10px] rounded-full h-4 w-4 flex items-center justify-center">
                   {$totalQuantity > 99 ? '99+' : $totalQuantity}
                 </span>
               )}
-            </div>
+            </div>}
           </div>
         </div>
       </div>
 
       {/* Cart Drawer */}
-      <CartDrawer
-        open={$isCartOpen}
-        onClose={handleCloseCart}
-        onContinueShopping={handleContinueShopping}
-      />
+      {!isCheckoutPage && (
+        <CartDrawer
+          open={$isCartOpen}
+          onClose={handleCloseCart}
+          onContinueShopping={handleContinueShopping}
+        />
+      )}
     </>
   );
 };
