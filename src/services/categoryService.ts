@@ -6,7 +6,7 @@ export const getCategories = (): Promise<ICategory[]> => {
     const message = {
       url: '/v1/categories',
       method: 'GET' as HttpAllowMethod,
-    };
+    }
 
     apiCall<{ data: ICategory[] }>(message, (res) => {
       if (res.data.statusCode === 200 && res.data.message?.data) {
@@ -18,8 +18,8 @@ export const getCategories = (): Promise<ICategory[]> => {
             message: res.data.message || 'No data returned', 
             code: res.data.statusCode || 500 
           },
-        });
+        })
       }
-    });
-  });
+    })
+  })
 };

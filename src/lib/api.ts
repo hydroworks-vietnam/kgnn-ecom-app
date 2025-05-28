@@ -37,7 +37,7 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
     if (error instanceof AxiosError) {
-      console.log("🚀 ~ axios error:", error.cause);
+      console.log("🚀 ~ axios error:", error.response);
     }
     return Promise.reject(error);
   }
@@ -70,7 +70,7 @@ function apiCall<T = any>(
       const result: Result<T> = {
         data: {
           statusCode: response.status,
-          message: response.data.message
+          message: response.data.message || response.data.payload
         },
       };
     callback(result);
@@ -86,4 +86,4 @@ function apiCall<T = any>(
   });
 }
 
-export default apiCall
+export default apiCall;

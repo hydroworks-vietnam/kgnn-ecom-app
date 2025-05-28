@@ -3,7 +3,10 @@ export interface IProduct {
   sku: string;
   name: string;
   unit_price: number;
-  discount_price: number;
+  price_variants?: {
+    rank: string;
+    price: number;
+  }[];
   unit_type: string;
   stock: number;
   brand: string;
