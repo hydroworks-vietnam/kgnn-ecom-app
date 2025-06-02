@@ -3,12 +3,10 @@ import { useStore } from "@nanostores/react";
 import CartItem from "@/components/ui/CartItem";
 import CartSummary from "@/components/ui/CartSummary";
 import type { ICartItem } from "@/types/cart";
-import PromoCodeInput from "@/components/ui/PromoCodeInput";
 import { navigate } from 'astro:transitions/client';
 import { Download, X, ShoppingBag } from 'lucide-react';
 import { useRef, useState, useEffect } from "react";
 import { generateCartCanvasImage } from "@/utils/image-generator";
-import * as AlertDialog from '@radix-ui/react-alert-dialog';
 
 interface CartDrawerProps {
   open: boolean;
@@ -19,7 +17,6 @@ interface CartDrawerProps {
 const CartDrawer = ({ open, onClose, onContinueShopping }: CartDrawerProps) => {
   const cart = useStore(cartItemsStore);
   const exportRef = useRef<HTMLDivElement>(null);
-  const [alertOpen, setAlertOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
 
@@ -32,11 +29,17 @@ const CartDrawer = ({ open, onClose, onContinueShopping }: CartDrawerProps) => {
     } else {
       document.body.style.overflow = 'unset';
     }
-
     return () => {
       document.body.style.overflow = 'unset';
     };
   }, [open]);
+
+  // 👇 Close cart store on unmount
+  useEffect(() => {
+    return () => {
+      isCartOpen.set(false);
+    };
+  }, []);
 
   const handlePayment = () => {
     isCartOpen.set(false);
@@ -59,20 +62,16 @@ const CartDrawer = ({ open, onClose, onContinueShopping }: CartDrawerProps) => {
 
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
-  return (
+  return open && 
     <>
       {/* Backdrop */}
-      {open && (
-        <div
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-all duration-300"
-          onClick={onClose}
-        />
-      )}
-
-      {/* Drawer */}
       <div
-        className={`fixed top-0 right-0 h-full w-full max-w-md bg-white shadow-2xl z-50 transform transition-all duration-300 ease-out ${open ? 'translate-x-0' : 'translate-x-full'
-          } ${alertOpen ? 'opacity-30' : 'opacity-100'}`}
+        className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-all duration-300"
+        onClick={onClose}
+      />
+
+      <div
+        className='fixed top-0 right-0 h-full w-full max-w-md bg-white shadow-2xl z-50 transform transition-all duration-300 ease-out'
       >
         <div className="flex flex-col h-full">
           {/* Header */}
@@ -146,7 +145,7 @@ const CartDrawer = ({ open, onClose, onContinueShopping }: CartDrawerProps) => {
                   <div ref={exportRef} className="space-y-4">
                     {cart.map((item: ICartItem, index) => (
                       <div key={item.product.id} className="group">
-                        <CartItem item={item} setAlertOpen={setAlertOpen} />
+                        <CartItem item={item} />
                         {index < cart.length - 1 && (
                           <div className="mt-4 border-b border-gray-100" />
                         )}
@@ -157,14 +156,6 @@ const CartDrawer = ({ open, onClose, onContinueShopping }: CartDrawerProps) => {
 
                 {/* Footer */}
                 <div className="sticky bottom-0 bg-white/95 backdrop-blur-md border-t border-gray-100 px-6 py-4 space-y-4">
-                  {/* Promo Code */}
-                  <div className="rounded-lg p-2 bg-slate-50 border border-slate-100">
-                    <div className="py-2">
-                      <label className="text-sm">Mã giảm giá</label>
-                      <PromoCodeInput />
-                    </div>
-                  </div>
-
                   {/* Summary */}
                     <div className="bg-slate-50 border border-slate-100 rounded-lg p-4">
                     <CartSummary />
@@ -192,33 +183,8 @@ const CartDrawer = ({ open, onClose, onContinueShopping }: CartDrawerProps) => {
         </div>
       </div>
 
-      {/* Alert Dialog */}
-      <AlertDialog.Root open={alertOpen} onOpenChange={setAlertOpen}>
-        <AlertDialog.Portal container={document.body}>
-          <AlertDialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in-0 duration-200" />
-          <AlertDialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl p-6 shadow-2xl max-w-sm w-full mx-4 animate-in fade-in-0 zoom-in-95 duration-200" style={{zIndex: 1000}}>
-            <div className="text-center">
-              <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">😭</span>
-              </div>
-              <AlertDialog.Title className="text-xl font-bold text-gray-900 mb-2">
-                Tiếc quá!
-              </AlertDialog.Title>
-              <AlertDialog.Description className="text-gray-600 mb-6 leading-relaxed">
-                Mã giảm giá chưa thể áp dụng được do không tìm thấy giá phù hợp
-              </AlertDialog.Description>
-              <AlertDialog.Action
-                className="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-colors duration-200 focus:outline-none focus:ring-4 focus:ring-blue-200"
-                onClick={() => setAlertOpen(false)}
-              >
-                Đã hiểu
-              </AlertDialog.Action>
-            </div>
-          </AlertDialog.Content>
-        </AlertDialog.Portal>
-      </AlertDialog.Root>
+     
     </>
-  );
 };
 
 export default CartDrawer;

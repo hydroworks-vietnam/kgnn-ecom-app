@@ -1,4 +1,5 @@
 import axios, { AxiosError } from 'axios';
+import { v4 as uuidv4 } from 'uuid';
 
 export interface Result<T = any> {
   data: ApiBaseResponse<T>;
@@ -16,18 +17,15 @@ const BACKEND_BASE_URL = `${import.meta.env.PUBLIC_BACKEND_URL}/api`;
 const apiClient = axios.create({
   baseURL: BACKEND_BASE_URL,
   timeout: 10000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
 });
 
 apiClient.interceptors.request.use(
   (config) => {
-    // Modify request config if needed (e.g., attach a token)
-    // const token = localStorage.getItem('token'); // Example
-    // if (token) {
-    //   config.headers.Authorization = `Bearer ${token}`;
-    // }
+    if (!config.headers['Content-Type']) {
+      config.headers['Content-Type'] = 'application/json';
+    }
+    // Always generate a new X-Request-Id
+    config.headers['X-Request-Id'] = uuidv4();
     return config;
   },
   (error) => Promise.reject(error)
@@ -54,17 +52,12 @@ function apiCall<T = any>(
   callback: (res: Result<T>) => void
 ) {
     const { url, method, body, headers } = message;
-    const finalHeaders = {
-      ...headers,
-      Accept: '*/*',
-      'Content-Type': 'application/json',
-    }
-
+    
     apiClient({
       url,
       method,
       data: body,
-      headers: finalHeaders
+      headers: headers
     })
     .then((response) => {
       const result: Result<T> = {

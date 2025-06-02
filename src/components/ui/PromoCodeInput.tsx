@@ -4,22 +4,30 @@ import { useState } from "react";
 import { Input } from "../Input/BasicInput";
 import { cn } from "@/utils/helpers";
 
-const PromoCodeInput = () => {
+const PromoCodeInput = ({ onApplyCode }: { onApplyCode: (isValid: boolean) => void }) => {
   const [$promoCode, setPromoCode] = useState(promoCodeStore.get());
-  const [isValidCode, setIsValiCode] = useState<boolean>(false);
+  const [isValidCode, setIsValidCode] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [hasCheckedCode, setHasCheckedCode] = useState<boolean>(false);
 
   async function applyCode(code: string): Promise<void> {
-    const res = await cartService.applyPromoCode(code);
-    setHasCheckedCode(true);
-    if (res.valid && res.rank) {
-      promoCodeStore.set(code);
-      userRankStore.set(res.rank);
-      setIsValiCode(true);
+    try {
+      const res = await cartService.applyPromoCode(code);
+      setHasCheckedCode(true);
+      if (res.valid && res.rank) {
+        promoCodeStore.set(code);
+        userRankStore.set(res.rank);
+        setIsValidCode(true);
+        onApplyCode(true);
+      } else {
+        promoCodeStore.set("");
+        userRankStore.set(undefined);
+        setIsValidCode(false);
+        onApplyCode(false);
+      }
+    } finally {
+      setIsLoading(false);
     }
-    await new Promise(resolve => setTimeout(resolve, 500));
-    setIsLoading(false);
   }
   const handleApply = () => {
     if (!$promoCode.trim()) return;
@@ -33,7 +41,7 @@ const PromoCodeInput = () => {
         <Input
           type="text"
           value={$promoCode}
-          onChange={(e) => setPromoCode(e.target.value)}
+          onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
           placeholder="Nhập mã giảm giá"
           className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none"
         />

@@ -1,25 +1,32 @@
 import type { ICart, ICartItem } from '@/types/cart';
 import type { Rank } from '@/types/user';
+import { isEmpty } from 'lodash-es';
 import { atom, computed } from 'nanostores';
 
 const initialCart = typeof window !== 'undefined' 
   ? JSON.parse(localStorage.getItem('cart') || '[]') as ICart
-  : [];
+  : []
 
 export const cartItemsStore = atom<ICart>(initialCart)
 export const isCartOpen = atom(false)
 export const promoCodeStore = atom<string>('')
-export const userRankStore = atom<Rank | undefined>(undefined);
+export const userRankStore = atom<Rank | undefined>(undefined)
 export const discountRateStore = atom<number>(0)
 export const taxRateStore = atom<number>(8)
 export const shippingFeeStore = atom<number>(30000)
 export const isFloatingCartVisible = atom(true)
 
 cartItemsStore.subscribe((cart) => {
-  if (typeof window !== 'undefined') {
+  if (typeof window !== 'undefined' && !isEmpty(cart)) {
     localStorage.setItem('cart', JSON.stringify(cart));
   }
-});
+})
+
+promoCodeStore.subscribe((code) => {
+  if (typeof window !== 'undefined' && code) {
+    sessionStorage.setItem('promo', code);
+  }
+})
 
 /**
  * Adds or updates a cart item based on whether it already exists in the cart.
@@ -81,6 +88,8 @@ const removeFromCart = (productId: string): void => {
 
 const clearCart = (): void => {
   cartItemsStore.set([]);
+  localStorage.removeItem('cart')
+  sessionStorage.removeItem('promo')
 }
 
 function increaseQuantity(productId: string) {

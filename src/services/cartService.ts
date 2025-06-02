@@ -6,10 +6,7 @@ const cartService = {
     return new Promise((resolve) => {
       const message = {
         url: `/v1/admin/users/rank?code=${encodeURIComponent(code)}`,
-        method: 'GET' as HttpAllowMethod,
-        headers: {
-          'X-Request-Id': crypto.randomUUID()
-        }
+        method: 'GET' as HttpAllowMethod
       }
 
     apiCall<IUserRank>(message, (res) => {

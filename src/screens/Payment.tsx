@@ -2,15 +2,16 @@ import { Input } from '@/components/Input/BasicInput';
 import CartItem from '@/components/ui/CartItem';
 import CartSummary from '@/components/ui/CartSummary';
 import PromoCodeInput from '@/components/ui/PromoCodeInput';
-import useCartStore, { cartItemsStore, discountRateStore, shippingFeeStore, taxRateStore } from '@/store/cart';
+import useCartStore, { cartItemsStore, promoCodeStore } from '@/store/cart';
 import type { ICartItem } from '@/types/cart';
 import { useStore } from '@nanostores/react';
 import { Banknote, CreditCard, Landmark, MapPin, TruckIcon } from 'lucide-react';
 import React, { useState } from 'react';
 import momoIcon from '@/assets/momo_icon.svg'; 
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
-import { cx } from 'class-variance-authority';
 import { navigate } from 'astro:transitions/client';
+import { orderService } from '@/services/orderService';
+import { cn } from '@/utils/helpers';
 
 type PaymentMethod = 'BANK' | 'COD' | 'CREDIT_CARD' | 'E_WALLET';
 
@@ -28,108 +29,104 @@ const PaymentScreen: React.FC = () => {
     address: '',
   });
   const [alertOpen, setAlertOpen] = useState(false);
-  const [alertMessage, setAlertMessage] = useState('');
-  const [alertType, setAlertType] = useState<'error' | 'success'>('error');
+  const [alertContext, setAlertContext] = useState({
+    title: 'Thông báo',
+    message: '',
+    type: 'error' as 'error' | 'success',
+    onConfirm: () => {},
+  });
 
   const cart = useStore(cartItemsStore);
-  const discountRate = useStore(discountRateStore);
-  const shippingFee = useStore(shippingFeeStore);
-  const taxRate = useStore(taxRateStore);
-  const { calculateSubtotal, calculateDiscount, calculateTax, calculateShippingFee, calculateTotal } = useCartStore();
+  const promoCode = useStore(promoCodeStore);
+  const { calculateDiscount, calculateShippingFee, calculateTotal } = useCartStore();
 
-  // Handle input changes for user information
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setUserInfo((prev) => ({ ...prev, [name]: value }));
   };
 
-  const isErrorAlert = (type : string) => type === 'error';
-
   const onContinueShopping = () => { navigate('/products') }
+
+  const handleApplyCode = (isValid: boolean) => {
+    if (!isValid) {
+      setAlertContext({
+        title: 'Tiếc quá!',
+        message: 'Mã giảm giá chưa thể áp dụng được do không tìm thấy giá phù hợp',
+        type: 'error',
+        onConfirm: () => {},
+      })
+    }
+  };
 
   // Handle order confirmation
   const handleConfirmOrder = async () => {
     if (cart.length === 0) {
-      setAlertMessage('Giỏ hàng trống');
-      setAlertType('error');
-      setAlertOpen(true);
       return;
     }
 
     if (!userInfo.fullName || !userInfo.phone || !userInfo.city || !userInfo.district || !userInfo.address) {
-      setAlertMessage('Xin hãy điền đầy đủ thông tin');
-      setAlertType('error');
+      setAlertContext((prev) => ({
+        title: 'Lỗi',
+        message: 'Xin hãy điền đầy đủ thông tin',
+        type: 'error',
+        onConfirm: () => {},
+      }))
       setAlertOpen(true);
       return;
     }
 
     if (!agreedToTerms) {
-      setAlertMessage('Xin hãy đồng ý điều khoản điều kiện');
-      setAlertType('error');
+      setAlertContext((prev) => ({
+        ...prev,
+        message: 'Xin hãy đồng ý điều khoản điều kiện',
+        type: 'error',
+        onConfirm: () => {},
+      }))
       setAlertOpen(true);
       return;
     }
 
-    // Prepare cart data for payment
     const orderData = {
-      cartItems: cart.map((item) => ({
-        productId: item.product.id,
-        productName: item.product.name || 'Unknown',
-        quantity: item.quantity,
-        unitPrice: item.product.unit_price,
-        total: item.product.unit_price * item.quantity,
-      })),
-      financialSummary: {
-        subtotal: calculateSubtotal(),
-        discount: calculateDiscount(),
-        tax: calculateTax(),
-        shippingFee: calculateShippingFee(),
-        total: calculateTotal(),
-      },
-      promoCode: '',
-      discountRate,
-      shippingFee,
-      taxRate,
+      deliveryFee: calculateShippingFee(),
+      deliveryAddr: `${userInfo.address}, ${userInfo.district}, ${userInfo.city}`,
+      orderTime: new Date().toISOString(),
+      receiverName: userInfo.fullName,
+      receiverPhone: userInfo.phone,
+      receiverEmail: userInfo.email,
       paymentMethod: selectedPaymentMethod,
-      bank: selectedPaymentMethod === 'BANK' ? selectedBank : null,
-      shippingMethod,
-      userInfo: {
-        fullName: userInfo.fullName,
-        email: userInfo.email,
-        phone: userInfo.phone,
-        city: userInfo.city,
-        district: userInfo.district,
-        address: userInfo.address,
-      },
-      agreedToTerms,
+      discountFee: calculateDiscount(),
+      totalAmount: calculateTotal(),
+      productDetailList: cart.map(item => ({
+        productId: item.product.id,
+        originalPrice: item.product.unit_price,
+        quantity: item.quantity
+      })),
+      promoCode
     };
 
-    try {
-      const response = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(orderData),
+    orderService.createOrder(orderData)
+    .then((_) => {
+      setAlertContext({
+        title: 'Đơn hàng đã được đặt thành công',
+        message: 'Chúng tôi sẽ liên hệ với bạn để xác nhận đơn hàng.',
+        type: 'success',
+        onConfirm: () => {
+          navigate('/products')
+        },
       });
-
-      if (response.ok) {
-        setAlertMessage('Order placed successfully!');
-        setAlertType('success');
-        setAlertOpen(true);
-        useCartStore().clearCart();
-        setTimeout(() => {
-          window.location.href = '/order-confirmation';
-        }, 1500); // Redirect after showing success message
-      } else {
-        setAlertMessage('Không thể đặt hàng. Vui lòng thử lại hoặc tải đơn hàng và gửi về trang Zalo chính thức của chúng tôi để được hỗ trợ.');
-        setAlertType('error');
-        setAlertOpen(true);
-      }
-    } catch (error) {
-      console.error('Error processing payment:', error);
-      setAlertMessage('Không thể đặt hàng. Vui lòng thử lại hoặc tải đơn hàng và gửi về trang Zalo chính thức của chúng tôi để được hỗ trợ.');
-      setAlertType('error');
       setAlertOpen(true);
-    }
+      useCartStore().clearCart();     
+    })
+    .catch((error) => {
+      console.error('Error processing payment:', error);
+      setAlertContext({
+        title: 'Đặt hàng không thành công',
+        message: 'Không thể đặt hàng. Vui lòng thử lại hoặc tải đơn hàng và gửi về trang Zalo chính thức của chúng tôi để được hỗ trợ.',
+        type: 'error',
+        onConfirm: () => {},
+      })
+      setAlertOpen(true);
+    })
   };
 
   return (
@@ -326,18 +323,19 @@ const PaymentScreen: React.FC = () => {
             ) : (
               <div className="space-y-2">
                 {cart.map((item: ICartItem) => (
-                  <CartItem key={item.product.id} item={item} />
+                  <CartItem key={item.product.id} item={item} setAlertOpen={setAlertOpen} />
                 ))}
               </div>
             )}
           </div>
           <hr className="my-2" />
-          <PromoCodeInput />
+          <PromoCodeInput onApplyCode={handleApplyCode}/>
           <CartSummary />
 
           <div className="space-y-3">
             <button
-              className="w-full bg-gradient text-white rounded-lg p-3 mt-4 hover:shadow-xl transition"
+              disabled={cart.length === 0}
+              className={cn("w-full rounded-lg p-3 mt-4 hover:shadow-xl transition", cart.length === 0 ? "bg-gray-300 text-slate-500" : "bg-gradient text-white")}
               onClick={handleConfirmOrder}
             >
               Xác nhận đơn hàng
@@ -352,26 +350,33 @@ const PaymentScreen: React.FC = () => {
         </div>
       </div>
 
-      {/* Alert Dialog */}
       <AlertDialog.Root open={alertOpen} onOpenChange={setAlertOpen}>
-        <AlertDialog.Portal>
-          <AlertDialog.Overlay className="fixed inset-0 bg-black/50" />
-          <AlertDialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg p-6 shadow-lg max-w-md w-full">
-            <AlertDialog.Title className={cx("text-lg font-semibold", isErrorAlert('error') ? 'text-red-600' : 'text-blue-500')}>
-              {isErrorAlert('error') ? 'Lỗi' : 'Thành công'}
-            </AlertDialog.Title>
-            <AlertDialog.Description className="mt-2 text-sm text-gray-600">
-              {alertMessage}
-            </AlertDialog.Description>
-            <div className="mt-4 flex justify-end">
+        <AlertDialog.Portal container={document.body}>
+          <AlertDialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in-0 duration-200" />
+          <AlertDialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl p-6 shadow-2xl max-w-sm w-full mx-4 animate-in fade-in-0 zoom-in-95 duration-200" style={{ zIndex: 1000 }}>
+            {alertContext.type == 'success' && (
+              <div className="flex justify-center mb-4">
+                <svg className="w-16 h-16 text-green-500 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="white" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2l4-4" />
+                </svg>
+              </div>
+            )}
+            <div className="text-center">
+              {alertContext.type == 'error' && <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">😭</span>
+              </div> }
+              <AlertDialog.Title className={cn('text-xl font-bold mb-2', alertContext.type == 'error' ? 'text-red-500' : 'text-gray-900')}>
+                {alertContext.title}
+              </AlertDialog.Title>
+              <AlertDialog.Description className="text-gray-600 mb-6 leading-relaxed">
+                {alertContext.message}
+              </AlertDialog.Description>
               <AlertDialog.Action
-                className={`px-4 py-2 rounded-lg text-sm font-medium ${isErrorAlert('error')
-                  ? 'hover:bg-gray-300' 
-                  : 'bg-primary text-white hover:bg-primary-dark'
-                  }`}
-                onClick={() => setAlertOpen(false)}
+                className="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-colors duration-200 focus:outline-none focus:ring-4 focus:ring-blue-200"
+                onClick={() => alertContext.onConfirm()}
               >
-                OK
+                Đã hiểu
               </AlertDialog.Action>
             </div>
           </AlertDialog.Content>
