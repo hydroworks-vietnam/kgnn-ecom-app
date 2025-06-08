@@ -7,8 +7,6 @@ services:
       args:
         - PUBLIC_BACKEND_URL=${PUBLIC_BACKEND_URL}
     image: kgnn-ecom-app:v1.2.3
-    volumes:
-      - astro_dist:/app/dist
     user: "101:101"  # Match Nginx user/group
     environment:
       - PUBLIC_BACKEND_URL=${PUBLIC_BACKEND_URL}
@@ -27,6 +25,3 @@ services:
       - ../certs:/etc/nginx/ssl:ro  # Mount cert files into the container
     depends_on:
       - ecom
-
-volumes:
-  astro_dist:

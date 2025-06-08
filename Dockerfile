@@ -20,8 +20,5 @@ COPY . .
 ENV ASTRO_TELEMETRY_DISABLED=1
 RUN PUBLIC_BACKEND_URL=$PUBLIC_BACKEND_URL yarn build
 
-# Expose the port Astro uses (default: 4321)
-EXPOSE 4321
-
 # Command to start the Astro server
 CMD ["yarn", "start"]
