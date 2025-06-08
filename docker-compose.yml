@@ -1,0 +1,28 @@
+version: '3.8'
+services:
+  ecom:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - PUBLIC_BACKEND_URL=${PUBLIC_BACKEND_URL}
+    volumes:
+      - astro_dist:/app/dist
+    environment:
+      - PUBLIC_BACKEND_URL=${PUBLIC_BACKEND_URL}
+    # Comment out ports if using Nginx to serve static files directly
+    # ports:
+    #   - "4321:4321"
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - astro_dist:/usr/share/nginx/html
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - ecom
+
+volumes:
+  astro_dist:
