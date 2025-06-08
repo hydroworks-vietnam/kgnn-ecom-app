@@ -1,6 +1,5 @@
 import type { ICart, ICartItem } from '@/types/cart';
 import type { Rank } from '@/types/user';
-import { isEmpty } from 'lodash-es';
 import { atom, computed } from 'nanostores';
 
 const initialCart = typeof window !== 'undefined' 
@@ -17,10 +16,10 @@ export const shippingFeeStore = atom<number>(30000)
 export const isFloatingCartVisible = atom(true)
 
 cartItemsStore.subscribe((cart) => {
-  if (typeof window !== 'undefined' && !isEmpty(cart)) {
+  if (typeof window !== 'undefined') {
     localStorage.setItem('cart', JSON.stringify(cart));
   }
-})
+});
 
 promoCodeStore.subscribe((code) => {
   if (typeof window !== 'undefined' && code) {
@@ -133,8 +132,8 @@ function getCartCalculations() {
   const subtotal = currentCart.reduce((sum, item) => {
     let price = item.product.unit_price;
     // Optional rank-based pricing logic
-    // const matchedVariant = item.product.rank_prices?.find(v => v.rank === rank);
-    // if (matchedVariant?.price) price = matchedVariant.price;
+    const matchedVariant = item.product.price_variants?.find(v => v.rank === rank);
+    if (matchedVariant?.price) price = matchedVariant.price;
     return sum + (price * item.quantity || 0);
   }, 0);
 
