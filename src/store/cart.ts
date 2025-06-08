@@ -123,49 +123,48 @@ function decreaseQuantity(productId: string) {
   cartItemsStore.set(updatedCart)
 }
 
-function calculateSubtotal(): number {
+function getCartCalculations() {
   const currentCart = cartItemsStore.get();
   const rank = userRankStore.get();
-  return currentCart.reduce((sum, item) => {
+  const shippingFee = shippingFeeStore.get();
+  const discountRate = discountRateStore.get();
+  const taxRate = taxRateStore.get();
+
+  const subtotal = currentCart.reduce((sum, item) => {
     let price = item.product.unit_price;
-    // if (rank && item.product.rank_prices && Array.isArray(item.product.rank_prices)) {
-    //   const matchedVariant = item.product.rank_prices.find(
-    //     (variant: any) => variant.rank === rank
-    //   );
-    //   if (matchedVariant && matchedVariant.price) {
-    //     price = matchedVariant.price;
-    //   }
-    // }
+    // Optional rank-based pricing logic
+    // const matchedVariant = item.product.rank_prices?.find(v => v.rank === rank);
+    // if (matchedVariant?.price) price = matchedVariant.price;
     return sum + (price * item.quantity || 0);
   }, 0);
+
+  const discount = (subtotal * discountRate) / 100;
+  const tax = ((subtotal - discount) * taxRate) / 100;
+  const shipping = subtotal >= 2000000 ? 0 : shippingFee;
+  // const total = subtotal - discount + tax + shipping;
+  const total = subtotal
+
+  return { subtotal, discount, tax, shipping, total };
+}
+
+function calculateSubtotal(): number {
+  return getCartCalculations().subtotal;
 }
 
 function calculateShippingFee(): number {
-  const subtotal = calculateSubtotal();
-  return subtotal >= 2000000 ? 0 : shippingFeeStore.get();
+  return getCartCalculations().shipping;
 }
 
 function calculateDiscount(): number {
-  const subtotal = calculateSubtotal();
-  const discountRate = discountRateStore.get();
-  return (subtotal * discountRate) / 100;
+  return getCartCalculations().discount;
 }
 
 function calculateTax(): number {
-  const subtotal = calculateSubtotal();
-  const discount = calculateDiscount();
-  // Fixed 8% tax rate
-  const TAX_RATE = 8;
-  return ((subtotal - discount) * TAX_RATE) / 100;
+  return getCartCalculations().tax;
 }
 
 function calculateTotal(): number {
-  const subtotal = calculateSubtotal();
-  const discount = calculateDiscount();
-  const tax = calculateTax();
-  const shippingFee = calculateShippingFee();
-  return subtotal;
-  // return subtotal - discount + tax + shippingFee;
+  return getCartCalculations().total;
 }
 
 export const totalCartQuantity = computed(cartItemsStore, (cartItems) =>
