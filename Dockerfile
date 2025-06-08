@@ -1,22 +1,20 @@
 # Use the official Node.js 20 image as the base
 FROM node:20-slim
 
-# Install ca-certificates
-RUN apt-get update && apt-get install -y ca-certificates && update-ca-certificates
-
 # Set working directory
 WORKDIR /app
 
 ARG PUBLIC_BACKEND_URL
 ENV PUBLIC_BACKEND_URL=${PUBLIC_BACKEND_URL}
 
-COPY kgnn-melon/package.json kgnn-melon/yarn.lock ./
+# Copy package.json and yarn.lock from the project root
+COPY package.json yarn.lock ./
 
 # Install dependencies
 RUN yarn install --frozen-lockfile
 
-# Copy the rest of the application code
-COPY kgnn-melon/ .
+# Copy the rest of the application code from the project root
+COPY . .
 
 # Build the Astro project
 ENV ASTRO_TELEMETRY_DISABLED=1
