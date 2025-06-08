@@ -6,7 +6,7 @@ services:
       dockerfile: Dockerfile
       args:
         - PUBLIC_BACKEND_URL=${PUBLIC_BACKEND_URL}
-    image: kgnn-ecom-app:v1.0.0
+    image: kgnn-ecom-app:v1.2.0
     volumes:
       - astro_dist:/app/dist
     user: "101:101"  # Match Nginx user/group
@@ -23,6 +23,7 @@ services:
       - "80:80"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ../certs:/etc/nginx/ssl:ro  # Mount cert files into the container
     depends_on:
       - ecom
 

@@ -47,7 +47,7 @@ const BannerSlider = () => {
   if (error || banners.length === 0) {
     return (
       <div className="h-96 bg-gray-100 rounded-lg flex items-center justify-center">
-        <p className="text-gray-500">{error || "No banners available"}</p>
+        <p className="text-gray-500">Chưa có banner</p>
       </div>
     );
   }
