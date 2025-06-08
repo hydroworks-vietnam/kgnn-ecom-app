@@ -13,8 +13,8 @@ services:
     environment:
       - PUBLIC_BACKEND_URL=${PUBLIC_BACKEND_URL}
     # Comment out ports if using Nginx to serve static files directly
-    ports:
-      - 4321
+    expose:
+      - "4322"  # Expose port 4322 to match astro.config.mjs
 
   nginx:
     container_name: nginx
