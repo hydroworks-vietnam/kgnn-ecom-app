@@ -164,7 +164,8 @@ function calculateTotal(): number {
   const discount = calculateDiscount();
   const tax = calculateTax();
   const shippingFee = calculateShippingFee();
-  return subtotal - discount + tax + shippingFee;
+  return subtotal;
+  // return subtotal - discount + tax + shippingFee;
 }
 
 export const totalCartQuantity = computed(cartItemsStore, (cartItems) =>
