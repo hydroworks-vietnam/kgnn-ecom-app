@@ -91,14 +91,17 @@ const DesktopProductList: React.FC<DesktopProductListProps> = ({ handleAddToCart
     }
   };
 
+  // On mount: sync selectedCategory with initialCategory
   useEffect(() => {
     if (initialCategory) {
       setSelectedCategory(initialCategory);
-      fetchProductList(initialCategory); // Fetch using initial category
-    } else {
-      fetchProductList(null); // Fetch latest products
     }
-  }, []);
+  }, [initialCategory]);
+
+  // Whenever selectedCategory changes, fetch products
+  useEffect(() => {
+    fetchProductList(selectedCategory);
+  }, [selectedCategory]);
 
   const handleCategorySelect = (category: ICategory, subcategory?: ISubcategory) => {
     setSelectedCategory({ catId: category.id, subCatId: subcategory?.id || 'all' });
