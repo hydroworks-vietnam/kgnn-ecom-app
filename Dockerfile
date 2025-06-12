@@ -1,24 +1,52 @@
-# Use the official Node.js 20 image as the base
-FROM node:20-slim
+# -------- Base stage: install dependencies --------
+FROM node:20-alpine AS deps
 
-# Set working directory
 WORKDIR /app
 
-ARG PUBLIC_BACKEND_URL
-ENV PUBLIC_BACKEND_URL=${PUBLIC_BACKEND_URL}
+# Install necessary native dependencies
+RUN apk add --no-cache libc6-compat
 
-# Copy package.json and yarn.lock from the project root
 COPY package.json yarn.lock ./
 
-# Install dependencies
 RUN yarn install --frozen-lockfile
 
-# Copy the rest of the application code from the project root
+
+# -------- Builder stage --------
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Set build-time argument
+ENV PUBLIC_BACKEND_URL=${PUBLIC_BACKEND_URL}
+ENV ASTRO_TELEMETRY_DISABLED=1
+
+# Install build dependencies
+RUN apk add --no-cache libc6-compat
+
+# Copy installed node_modules from deps
+COPY --from=deps /app/node_modules ./node_modules
+
+# Copy app source
 COPY . .
 
-# Build the Astro project
-ENV ASTRO_TELEMETRY_DISABLED=1
-RUN PUBLIC_BACKEND_URL=$PUBLIC_BACKEND_URL yarn build
+# Build Astro app (static or SSR)
+RUN yarn build
 
-# Command to start the Astro server
+
+# -------- Final minimal image --------
+FROM node:20-alpine AS runner
+
+WORKDIR /app
+
+# Only keep runtime essentials
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/yarn.lock ./
+COPY --from=builder /app/node_modules ./node_modules
+
+# Runtime environment variable (can be overridden in docker-compose)
+ENV NODE_ENV=production
+ENV PUBLIC_BACKEND_URL=""
+
+# Start the Astro server (SSR mode)
 CMD ["yarn", "start"]
