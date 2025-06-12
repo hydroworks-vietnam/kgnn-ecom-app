@@ -3,11 +3,13 @@ FROM node:20-alpine AS deps
 
 WORKDIR /app
 
-# Install necessary native dependencies
+# Install native dependencies (for things like sharp, tailwind, etc.)
 RUN apk add --no-cache libc6-compat
 
+# Copy only dependency-related files
 COPY package.json yarn.lock ./
 
+# Install dependencies
 RUN yarn install --frozen-lockfile
 
 
@@ -16,37 +18,41 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Set build-time argument
-ENV PUBLIC_BACKEND_URL=${PUBLIC_BACKEND_URL}
+# Disable Astro telemetry
 ENV ASTRO_TELEMETRY_DISABLED=1
 
 # Install build dependencies
 RUN apk add --no-cache libc6-compat
 
-# Copy installed node_modules from deps
+# Copy dependencies from deps stage
 COPY --from=deps /app/node_modules ./node_modules
 
-# Copy app source
+# Copy source code
 COPY . .
 
-# Build Astro app (static or SSR)
+# Build the Astro app
 RUN yarn build
 
 
-# -------- Final minimal image --------
+# -------- Runtime stage --------
 FROM node:20-alpine AS runner
 
 WORKDIR /app
 
-# Only keep runtime essentials
+# Set production environment
+ENV NODE_ENV=production
+
+# Copy only what’s needed for runtime
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/yarn.lock ./
 COPY --from=builder /app/node_modules ./node_modules
 
-# Runtime environment variable (can be overridden in docker-compose)
-ENV NODE_ENV=production
-ENV PUBLIC_BACKEND_URL=""
+# PUBLIC_BACKEND_URL is used at runtime via process.env
+# So no need to bake it in — just use docker-compose/env
 
-# Start the Astro server (SSR mode)
+# Expose default Astro SSR port
+EXPOSE 4322
+
+# Start Astro SSR server
 CMD ["yarn", "start"]
