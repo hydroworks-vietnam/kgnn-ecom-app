@@ -15,23 +15,19 @@ RUN yarn install --frozen-lockfile
 
 # -------- Builder stage --------
 FROM node:20-alpine AS builder
-
 WORKDIR /app
 
-# Disable Astro telemetry
+ARG PUBLIC_BACKEND_URL
+ENV PUBLIC_BACKEND_URL=${PUBLIC_BACKEND_URL}
 ENV ASTRO_TELEMETRY_DISABLED=1
 
-# Install build dependencies
 RUN apk add --no-cache libc6-compat
 
-# Copy dependencies from deps stage
 COPY --from=deps /app/node_modules ./node_modules
-
-# Copy source code
 COPY . .
 
-# Build the Astro app
-RUN yarn build
+# Force Astro to use this env var instead of .env.local
+RUN PUBLIC_BACKEND_URL=${PUBLIC_BACKEND_URL} yarn build
 
 
 # -------- Runtime stage --------
