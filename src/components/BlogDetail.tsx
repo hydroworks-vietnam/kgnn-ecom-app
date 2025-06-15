@@ -1,7 +1,7 @@
 
+import postService from '@/services/postService';
 import type { Post } from '@/types/post';
 import { useEffect, useState } from 'react';
-import { postService } from '@/services/postService';
 import { Helmet } from 'react-helmet';
 
 export default function BlogDetail({ slug }: { slug: string }) {

@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
-import { bannerApi } from "@/services/imageService";
 import { Dot } from "@/components/ui/Dot";
 import { NavigationArrow } from "@/components/ui/NavigationArrow";
-import { cn } from "@/utils/helpers";
+import { imageService } from "@/services/imageService";
 
 const BannerSlider = () => {
   const [banners, setBanners] = useState<string[]>([]);
@@ -29,7 +28,7 @@ const BannerSlider = () => {
   useEffect(() => {
     const fetchBanners = async () => {
       try {
-        const response = await bannerApi.getAllBanners('banner');
+        const response = await imageService.bannerService.getAllBanners('banner');
         setBanners(response);
         setIsLoading(false);
       } catch (err) {

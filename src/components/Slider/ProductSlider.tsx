@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/utils/helpers';
-import { getLatestProducts } from '@/services/productService';
 import ProductCardSlider from '@/components/Card/ProductCardSlider';
 import type { IProduct } from '@/types/product';
+import productService from '@/services/productService';
 
 const ProductSlider = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -18,7 +18,7 @@ const ProductSlider = () => {
   }, []);
 
   const fetchLatestlatestProducts = () => {
-    getLatestProducts(6).then((res) => {
+    productService.getLatestProducts(6).then((res) => {
       setLatestProducts(res);
     }).catch((err) => {
       console.log("🚀 ~ fetchLatestlatestProducts ~ err:", err);

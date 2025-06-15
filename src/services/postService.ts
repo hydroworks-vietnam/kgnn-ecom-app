@@ -1,7 +1,7 @@
 import apiCall, { type HttpAllowMethod } from "@/lib/api";
 import type { Post } from "@/types/post";
 
-export const postService = {
+const postService = {
   getAllPosts: (): Promise<Post[]> => {
     return new Promise((resolve, reject) => {
       const message = {
@@ -58,3 +58,5 @@ export const postService = {
       .slice(0, limit);
   }
 };
+
+export default postService;

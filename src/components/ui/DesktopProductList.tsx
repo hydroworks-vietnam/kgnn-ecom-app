@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import ProductCardFull from '@/components/Card/ProductCardFull';
-import { getLatestProducts, getProducts } from '@/services/productService';
 import type { ICategory, IProduct, ISubcategory } from '@/types/product';
 import CategoryHorizontalBar from '@/components/ui/CategoryHorizontalBar';
+import productService from '@/services/productService';
 
 const ProductCardSkeleton = () => {
   return (
@@ -69,13 +69,13 @@ const DesktopProductList: React.FC<DesktopProductListProps> = ({ handleAddToCart
       let fetchedProducts: IProduct[] = [];
       if (!category || category.catId === 'all') {
         // Fetch latest products
-        fetchedProducts = await getLatestProducts(10);
+        fetchedProducts = await productService.getLatestProducts(10);
       } else {
         const query =
           category.subCatId === 'all'
             ? `category_id=${category.catId}`
             : `category_id=${category.catId}&sub_category_id=${category.subCatId}`;
-        fetchedProducts = await getProducts(query);
+        fetchedProducts = await productService.getProducts(query);
       }
 
       setProducts(fetchedProducts);

@@ -6,7 +6,7 @@ services:
       dockerfile: Dockerfile
       args:
         - PUBLIC_BACKEND_URL=${PUBLIC_BACKEND_URL}
-    image: kgnn-ecom-app:v1.2.5
+    image: kgnn-ecom-app:v1.2.6
     user: "101:101"  # Match Nginx user/group
     environment:
       - PUBLIC_BACKEND_URL=${PUBLIC_BACKEND_URL}

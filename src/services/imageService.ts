@@ -1,6 +1,6 @@
 import apiCall, { type HttpAllowMethod } from "@/lib/api";
 
-export const bannerApi = {
+const bannerService = {
   getAllBanners: (folder = 'banner'): Promise<string[]> => {
     return new Promise((resolve, reject) => {
       const message = {
@@ -15,12 +15,16 @@ export const bannerApi = {
           reject({
             success: false,
             error: {
-              message: res.data.message || 'No images returned',
+              message: res.data.message || 'Không có hình ảnh',
               code: res.data.statusCode || 500
             }
-          })
+          });
         }
-      })
-    })
-  }
-}
+      });
+    });
+  },
+};
+
+export const imageService = {
+  bannerService,
+};

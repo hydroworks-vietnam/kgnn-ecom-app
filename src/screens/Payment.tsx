@@ -10,8 +10,8 @@ import React, { useState } from 'react';
 import momoIcon from '@/assets/momo_icon.svg'; 
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import { navigate } from 'astro:transitions/client';
-import { orderService } from '@/services/orderService';
 import { cn } from '@/utils/helpers';
+import orderService from '@/services/orderService';
 
 type PaymentMethod = 'BANK' | 'COD' | 'CREDIT_CARD' | 'E_WALLET';
 

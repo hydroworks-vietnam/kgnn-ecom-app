@@ -6,9 +6,9 @@ import type { IProduct } from "@/types/product";
 import { useIsMobile } from "@/hooks/useViewportDetector";
 import DesktopProductList from "@/components/ui/DesktopProductList";
 import MobileProductList from "@/components/ui/MobileProductList";
-import { getProductById } from "@/services/productService";
 import ProductDetailCard from "@/components/Card/ProductDetailCard";
 import MobileProductDetailCard from "@/components/Card/MobileProductDetailCard";
+import productService from "@/services/productService";
 
 const ProductList = () => {
   const isMobile = useIsMobile();
@@ -27,7 +27,7 @@ const ProductList = () => {
 
     if (productId) {
       // Fetch product details
-      getProductById(productId)
+      productService.getProductById(productId)
         .then((product) => {
           setSelectedProduct(product);
           setIsPopupOpen(true);

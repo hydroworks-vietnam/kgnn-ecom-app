@@ -1,6 +1,6 @@
 import apiCall, { type HttpAllowMethod } from "@/lib/api";
 
-export const orderService = {
+const orderService = {
   createOrder: (orderData: CreateOrderRequest): Promise<string> => {
     return new Promise((resolve, reject) => {
       const message = {
@@ -24,5 +24,7 @@ export const orderService = {
         }
       });
     });
-  }
+  },
 };
+
+export default orderService;

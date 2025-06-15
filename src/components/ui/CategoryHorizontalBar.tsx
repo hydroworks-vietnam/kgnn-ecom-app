@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { getCategories } from '@/services/categoryService'; // Adjust import path
-import { getLatestProducts } from '@/services/productService';
 import type { ICategory, ISubcategory } from '@/types/product';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@/utils/helpers';
+import categoryService from '@/services/categoryService';
+import productService from '@/services/productService';
 
 interface CategoryHorizontalBarProps {
   onCategorySelect: (category: ICategory, subcategory?: ISubcategory) => void;
@@ -60,7 +60,7 @@ const CategoryHorizontalBar: React.FC<CategoryHorizontalBarProps> = ({ onCategor
     const fetchCategories = async () => {
       try {
         setIsLoading(true);
-        const response = await getCategories();
+        const response = await categoryService.getCategories();
 
         if (response && Array.isArray(response)) {
           const processedCategories = response.map((category) => ({
@@ -133,7 +133,7 @@ const CategoryHorizontalBar: React.FC<CategoryHorizontalBarProps> = ({ onCategor
   const handleNewArrivalsClick = async () => {
     try {
       setIsLoading(true);
-      const latestProducts = await getLatestProducts(10); // Fetch 10 latest products
+      const latestProducts = await productService.getLatestProducts(10); // Fetch 10 latest products
       setShowNewArrivals(true);
       setSelectedCategory(null); // Clear category selection
       setSelectedSubcategory(null); // Clear subcategory selection

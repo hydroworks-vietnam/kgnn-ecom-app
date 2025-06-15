@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { postService } from '@/services/postService';
 import type { Post } from '@/types/post';
 import { ChevronRight } from 'lucide-react';
+import postService from '@/services/postService';
 
 const Blog: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>([]);
