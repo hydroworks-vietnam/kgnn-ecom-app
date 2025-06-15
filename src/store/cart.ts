@@ -9,6 +9,7 @@ const initialCart = typeof window !== 'undefined'
 export const cartItemsStore = atom<ICart>(initialCart)
 export const isCartOpen = atom(false)
 export const promoCodeStore = atom<string>('')
+export const orderNoteStore = atom<string>('')
 export const userRankStore = atom<Rank | undefined>(undefined)
 export const discountRateStore = atom<number>(0)
 export const taxRateStore = atom<number>(8)

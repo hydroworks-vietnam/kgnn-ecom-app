@@ -2,7 +2,7 @@ import { Input } from '@/components/Input/BasicInput';
 import CartItem from '@/components/ui/CartItem';
 import CartSummary from '@/components/ui/CartSummary';
 import PromoCodeInput from '@/components/ui/PromoCodeInput';
-import useCartStore, { cartItemsStore, promoCodeStore } from '@/store/cart';
+import useCartStore, { cartItemsStore, orderNoteStore, promoCodeStore } from '@/store/cart';
 import type { ICartItem } from '@/types/cart';
 import { useStore } from '@nanostores/react';
 import { Banknote, CreditCard, Landmark, MapPin, TruckIcon } from 'lucide-react';
@@ -38,6 +38,7 @@ const PaymentScreen: React.FC = () => {
 
   const cart = useStore(cartItemsStore);
   const promoCode = useStore(promoCodeStore);
+  const orderNote = useStore(orderNoteStore);
   const { calculateDiscount, calculateShippingFee, calculateTotal } = useCartStore();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -101,7 +102,8 @@ const PaymentScreen: React.FC = () => {
         originalPrice: item.product.unit_price,
         quantity: item.quantity
       })),
-      promoCode
+      promoCode,
+      note: orderNote,
     };
 
     orderService.createOrder(orderData)
