@@ -26,8 +26,8 @@ RUN apk add --no-cache libc6-compat
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Force Astro to use this env var instead of .env.local
-RUN PUBLIC_BACKEND_URL=${PUBLIC_BACKEND_URL} yarn build
+RUN echo "Backend URL is: ${PUBLIC_BACKEND_URL}"
+RUN yarn build
 
 
 # -------- Runtime stage --------
@@ -43,9 +43,6 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/yarn.lock ./
 COPY --from=builder /app/node_modules ./node_modules
-
-# PUBLIC_BACKEND_URL is used at runtime via process.env
-# So no need to bake it in — just use docker-compose/env
 
 # Expose default Astro SSR port
 EXPOSE 4322
