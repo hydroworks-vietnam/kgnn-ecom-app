@@ -1,205 +1,123 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { ICategory, ISubcategory } from '@/types/product';
+import { useCategories } from '@/hooks/useCategories';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@/utils/helpers';
-import categoryService from '@/services/categoryService';
-import productService from '@/services/productService';
 
-interface CategoryHorizontalBarProps {
-  onCategorySelect: (category: ICategory, subcategory?: ISubcategory) => void;
-  onLatestProductsSelect?: (products: any[]) => void;
+interface Props {
+  onCategorySelect?: (category: ICategory, subcategories: ISubcategory[] | null) => void;
+  onSubcategorySelect?: (subcategory: ISubcategory) => void;
 }
 
-const CategorySidebarSkeleton: React.FC = () => {
-  return (
-    <div className="flex space-x-2 overflow-x-auto pb-2">
-      {Array(5).fill(0).map((_, index) => (
-        <div
-          key={`cat-skeleton-${index}`}
-          className="h-10 w-24 bg-gray-200 rounded-full animate-pulse"
-        ></div>
-      ))}
-    </div>
-  );
-};
+const CategoryHorizontalBar: React.FC<Props> = ({
+  onCategorySelect,
+  onSubcategorySelect,
+}) => {
+  const {
+    categories,
+    selectedCategory,
+    setCategorySelection,
+    setSubcategorySelection,
+  } = useCategories();
 
-const SubcategoryBar: React.FC<{
-  subcategories: ISubcategory[];
-  selectedSubcategory: ISubcategory | null;
-  onSubcategorySelect: (subcategory: ISubcategory) => void;
-}> = ({ subcategories, selectedSubcategory, onSubcategorySelect }) => {
-  return (
-    <div className="w-full mt-2 py-1 bg-slate-200">
-      <div className="flex items-center space-x-2 overflow-x-auto px-4">
-        {subcategories.map((subcategory) => (
-          <button
-            key={subcategory.id}
-            onClick={() => onSubcategorySelect(subcategory)}
-            className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors duration-200 relative ${selectedSubcategory?.id === subcategory.id
-                ? 'bg-white text-primary'
-                : 'text-black hover:text-primary hover:bg-white'
-              }`}
-          >
-            {subcategory.name}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-const CategoryHorizontalBar: React.FC<CategoryHorizontalBarProps> = ({ onCategorySelect, onLatestProductsSelect }) => {
-  const [categories, setCategories] = useState<ICategory[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<ICategory | null>(null);
+  const [activeSubcategories, setActiveSubcategories] = useState<ISubcategory[] | null>(null);
   const [selectedSubcategory, setSelectedSubcategory] = useState<ISubcategory | null>(null);
-  const [showNewArrivals, setShowNewArrivals] = useState<boolean>(false);
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        setIsLoading(true);
-        const response = await categoryService.getCategories();
+    if (selectedCategory?.sub_categories?.length) {
+      setActiveSubcategories(selectedCategory.sub_categories);
 
-        if (response && Array.isArray(response)) {
-          const processedCategories = response.map((category) => ({
-            ...category,
-            sub_categories: [
-              {
-                id: 'all',
-                name: 'Tất cả',
-                cat_id: category.id,
-              },
-              ...(category.sub_categories || []),
-            ],
-          }));
-          // Add the "all" category to the beginning of the array
-          const finalCategories = [
-            {
-              id: 'all',
-              name: 'Tất cả',
-              sub_categories: [],
-            },
-            ...processedCategories,
-          ];
+      // Prevent resetting if subcategory already selected and belongs to current category
+      const isSubValid = selectedCategory.sub_categories.some(
+        (sub) => sub.id === selectedSubcategory?.id
+      );
 
-          setCategories(finalCategories);
-          setSelectedCategory(finalCategories[0]);
-          setSelectedSubcategory(finalCategories[0].sub_categories[0] || null);
-          onCategorySelect(finalCategories[0], finalCategories[0].sub_categories[0]);
-          setIsLoading(false);
-        } else {
-          throw new Error('Invalid response from getCategories');
-        }
-      } catch (error: any) {
-        let errorMessage: string;
+      if (!isSubValid) {
+        const defaultSub =
+          selectedCategory.sub_categories.find((s) => s.id === 'all') ||
+          selectedCategory.sub_categories[0];
 
-        if (error instanceof Error) {
-          errorMessage = error.message || 'Đã có lỗi trong quá trình xử lí, vui lòng thử lại';
-        } else if (typeof error === 'object' && error.error) {
-          errorMessage =
-            typeof error.error === 'object' && error.error.message
-              ? error.error.message
-              : 'Đã có lỗi trong quá trình xử lí, vui lòng thử lại';
-        } else {
-          errorMessage = 'Đã có lỗi trong quá trình xử lí, vui lòng thử lại';
-        }
-
-        console.error('Error fetching categories:', error);
-        setError(errorMessage);
-        setIsLoading(false);
+        setSelectedSubcategory(defaultSub);
+        setSubcategorySelection(defaultSub);
+        onSubcategorySelect?.(defaultSub);
       }
-    };
+    } else {
+      setActiveSubcategories(null);
+      setSelectedSubcategory(null);
+    }
+  }, [selectedCategory]);
 
-    fetchCategories();
-  }, []);
-
-  const handleCategorySelect = (category: ICategory) => {
-    setSelectedCategory(category);
-    setSelectedSubcategory(category.sub_categories[0] || null);
-    setShowNewArrivals(false);
-    onCategorySelect(category, category.sub_categories[0]);
+  const handleCategoryClick = (category: ICategory) => {
+    const subcategories = category.sub_categories || null;
+    setCategorySelection(category, subcategories ?? undefined);
+    onCategorySelect?.(category, subcategories);
   };
 
-  const handleSubcategorySelect = (subcategory: ISubcategory) => {
-    setSelectedSubcategory(subcategory);
-    setShowNewArrivals(false);
-    if (selectedCategory) {
-      onCategorySelect(selectedCategory, subcategory);
-    }
-  };
+  const handleSubcategoryClick = (sub: ISubcategory) => {
+    if (!selectedCategory) return;
 
-  const handleNewArrivalsClick = async () => {
-    try {
-      setIsLoading(true);
-      const latestProducts = await productService.getLatestProducts(10); // Fetch 10 latest products
-      setShowNewArrivals(true);
-      setSelectedCategory(null); // Clear category selection
-      setSelectedSubcategory(null); // Clear subcategory selection
-      if (onLatestProductsSelect) {
-        onLatestProductsSelect(latestProducts);
-      }
-    } catch (error) {
-      console.error('Error fetching latest products:', error);
-      setError('Failed to fetch latest products');
-    } finally {
-      setIsLoading(false);
-    }
+    setSelectedSubcategory(sub);
+    setSubcategorySelection(sub);
+    onSubcategorySelect?.(sub);
+    onCategorySelect?.(selectedCategory, selectedCategory.sub_categories || null);
   };
 
   return (
-    <div className="w-full">
-      {/* Parent Category Bar */}
-      <div className="flex items-center space-x-2 overflow-x-auto px-4 py-2 bg-gradient">
-        {isLoading ? (
-          <CategorySidebarSkeleton />
-        ) : (
-          <>
-            {categories.map((category) => (
+    <div className="category-sticky sticky top-0 z-40 w-full mb-3">
+      <div className="px-4 md:px-[9rem]">
+        {/* Parent Category Bar */}
+        <div className="flex items-center space-x-2 overflow-x-auto px-4 py-2 bg-primary">
+          {categories.map((cat) => {
+            const isSelected = selectedCategory?.id === cat.id;
+
+            return (
               <div
-                key={category.id} // ✅ Move key to the outermost element
+                key={cat.id}
                 className={cn(
                   'flex items-center rounded-full transition-colors duration-200',
-                  selectedCategory?.id === category.id
+                  isSelected
                     ? 'bg-white text-primary'
                     : 'text-white hover:text-primary hover:bg-white'
                 )}
               >
                 <button
-                  onClick={() => handleCategorySelect(category)}
+                  onClick={() => handleCategoryClick(cat)}
                   className="flex items-center gap-1 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap"
                 >
-                  {category.name}
-                  {selectedCategory?.id === category.id && <ChevronDown className="w-3 h-3" />}
+                  {cat.name}
+                  {isSelected && <ChevronDown className="w-3 h-3" />}
                 </button>
               </div>
-            ))}
+            );
+          })}
+        </div>
 
-            {/* New Arrivals button */}
-            <button
-              onClick={handleNewArrivalsClick}
-              className={`px-4 py-1 rounded-full text-sm font-medium whitespace-nowrap transition-colors duration-200 relative ${showNewArrivals
-                  ? 'bg-white text-primary'
-                  : 'text-white hover:shadow-xl hover:bg-white hover:text-primary'
-                }`}
-            >
-              Sản phẩm mới
-            </button>
-          </>
+        {/* Subcategory Bar */}
+        {activeSubcategories && activeSubcategories.length > 0 && (
+          <div className="border-t border-slate-200 bg-white shadow-sm">
+            <div className="flex items-center overflow-x-auto space-x-2 px-4 py-3 scrollbar-hide">
+              {activeSubcategories.map((sub) => (
+                <button
+                  key={sub.id}
+                  onClick={() => handleSubcategoryClick(sub)}
+                  className={cn(
+                    'flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ease-in-out whitespace-nowrap transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-1',
+                    selectedSubcategory?.id === sub.id
+                      ? sub.id === 'all'
+                        ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg border-0 focus:ring-indigo-300'
+                        : 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-md border-0 focus:ring-blue-300'
+                      : sub.id === 'all'
+                        ? 'bg-white text-indigo-700 border-2 border-indigo-200 shadow-sm hover:border-indigo-300 hover:bg-indigo-50 focus:ring-indigo-200'
+                        : 'bg-white text-gray-700 border border-gray-200 shadow-sm hover:border-gray-300 hover:bg-gray-50 hover:text-gray-900 focus:ring-gray-200'
+                  )}
+                >
+                  {sub.name}
+                </button>
+              ))}
+            </div>
+          </div>
         )}
       </div>
-
-      <hr className='bg-white h-1' />
-
-      {/* Subcategory Bar */}
-      {selectedCategory && selectedCategory.sub_categories.length > 0 && !showNewArrivals && (
-        <SubcategoryBar
-          subcategories={selectedCategory.sub_categories}
-          selectedSubcategory={selectedSubcategory}
-          onSubcategorySelect={handleSubcategorySelect}
-        />
-      )}
     </div>
   );
 };

@@ -35,3 +35,12 @@ body {
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
+
+/* For your modal component */
+.modal-overlay {
+  z-index: 50; /* Higher than category bar */
+}
+
+.modal-content {
+  z-index: 51; /* Even higher */
+}

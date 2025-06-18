@@ -3,19 +3,10 @@ import { MenuIcon, XIcon } from 'lucide-react';
 import SearchInput from "@/components/Input/SearchInput";
 
 const menuList = [
-  {
-    name: 'Sản phẩm',
-    link: '/products'
-  }, {
-    name: 'Bài viết',
-    link: '/blog'
-  }, {
-    name: 'Liên hệ',
-    link: '#'
-  }, {
-    name: 'Về chúng tôi',
-    link: '#'
-  }
+  { name: 'Sản phẩm', link: '/products' },
+  { name: 'Bài viết', link: '/blog' },
+  { name: 'Liên hệ', link: '#' },
+  { name: 'Về chúng tôi', link: '#' }
 ];
 
 const TopNavigationBar = () => {
@@ -26,7 +17,7 @@ const TopNavigationBar = () => {
   };
 
   return (
-    <div className="w-full px-4 md:px-[10rem] py-4 flex items-center justify-between gap-4 relative">
+    <div className="w-full px-4 md:px-[10rem] py-2 flex items-center justify-between gap-4 bg-white">
       {/* Left Section: Logo */}
       <div className="text-sm md:text-md font-bold text-gradient cursor-pointer" onClick={() => window.location.href = '/'}>
         KHÔNG GIAN NHÀ NÔNG
@@ -37,7 +28,8 @@ const TopNavigationBar = () => {
         {/* Menu Items (Visible on Desktop) */}
         <div className="hidden md:flex items-center gap-6 cursor-pointer">
           {menuList.map(item => (
-            <a key={item.name}
+            <a
+              key={item.name}
               className="font-sm whitespace-nowrap text-slate-500 hover:text-primary"
               href={item.link}
             >
@@ -65,23 +57,24 @@ const TopNavigationBar = () => {
       {/* Mobile Menu Overlay and Drawer */}
       {isMenuOpen && (
         <>
-          {/* Overlay */}
+          {/* Overlay (Using relative positioning to avoid fixed scroll lock) */}
           <div
-            className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+            className="md:hidden bg-black bg-opacity-50 z-40"
+            style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
             onClick={toggleMenu}
           />
 
-          {/* Menu Drawer */}
+          {/* Menu Drawer (Using relative flow) */}
           <div
-            className={`md:hidden absolute top-16 left-0 w-full bg-white shadow-lg z-50 transform transition-transform duration-300 ${isMenuOpen ? 'translate-y-0' : '-translate-y-full'
-              }`}
+            className={`md:hidden w-full bg-white shadow-lg z-50 ${isMenuOpen ? 'block' : 'hidden'}`}
           >
             <div className="flex flex-col items-center gap-4 py-4">
               {menuList.map(item => (
                 <a
-                  className="font-sm text-gray-500 cursor-pointer hover:text-primary hover:bg-slate-200"
+                  className="font-sm text-gray-500 cursor-pointer hover:text-primary hover:bg-slate-200 w-full text-center py-2"
                   key={item.name}
                   href={item.link}
+                  onClick={toggleMenu}
                 >
                   {item.name}
                 </a>

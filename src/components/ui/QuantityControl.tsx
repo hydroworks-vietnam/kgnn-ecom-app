@@ -1,7 +1,7 @@
 import { cx } from 'class-variance-authority';
-import { Input } from '@/components/Input/BasicInput';
 import { useRef, useState, useEffect, useCallback } from 'react';
 import { debounce } from 'lodash-es';
+import Input from '../Input/BasicInput';
 
 interface QuantityControlProps {
   quantity: number;
@@ -63,7 +63,7 @@ export default function QuantityControl({
 
   return (
     <div
-      className={`flex items-center gap-1 ${className}`}
+      className={`flex items-center space-x-2 ${className}`}
       onClick={(e) => e.stopPropagation()}
     >
       <button
@@ -76,8 +76,8 @@ export default function QuantityControl({
         }}
         className={cx(
           buttonSize,
-          'aspect-square flex items-center justify-center border-2 border-primary text-white bg-primary rounded-full',
-          quantity <= 0 && 'cursor-not-allowed opacity-50'
+          'w-8 h-8 bg-primary text-white rounded-full hover:bg-orange-400',
+          quantity <= 0 && 'cursor-not-allowed'
         )}
         disabled={quantity === 0}
       >
@@ -89,7 +89,7 @@ export default function QuantityControl({
         onBlur={handleInputBlur}
         onClick={(e) => e.stopPropagation()}
         className={cx(
-          `${textSize} text-center h-8 w-12 px-0 py-0 rounded-md shadow-none`,
+          'text-center w-12 h-8 px-0 py-0 rounded-md',
           textSize === 'text-xs' ? 'text-xs' : 'text-sm'
         )}
         ref={inputRef}
@@ -107,8 +107,8 @@ export default function QuantityControl({
         }}
         className={cx(
           buttonSize,
-          'aspect-square flex items-center justify-center border-2 border-primary text-white bg-primary rounded-full',
-          quantity >= MAX_QUANTITY && 'cursor-not-allowed opacity-50'
+          'w-8 h-8 bg-primary text-white rounded-full hover:bg-orange-400',
+          quantity >= MAX_QUANTITY && 'cursor-not-allowed'
         )}
         disabled={quantity >= MAX_QUANTITY}
       >

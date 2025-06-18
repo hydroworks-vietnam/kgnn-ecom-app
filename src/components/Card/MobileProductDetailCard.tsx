@@ -15,13 +15,14 @@ import useCartStore, { isCartOpen, isFloatingCartVisible } from '@/store/cart';
 import QuantityControl from '@/components/ui/QuantityControl';
 import YoutubeVideo from '@/components/ui/YoutubeVideo';
 import { useVideoSource } from '@/hooks/useVideoSource';
+import ImageGalleryIndicator from '../Image/ImageGalleryIndicator';
 
 type ProductDetailCardProps = {
-  product: IProduct,
+  product: IProduct;
   onClose: () => void;
   handleAddToCart: (product: IProduct, quantity: number) => void;
   handleBuyItNow: (product: IProduct, quantity: number) => void;
-}
+};
 
 // Mobile bottom sheet product detail component
 export default function MobileProductDetailCard({ product, onClose, handleAddToCart, handleBuyItNow }: ProductDetailCardProps) {
@@ -32,13 +33,20 @@ export default function MobileProductDetailCard({ product, onClose, handleAddToC
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [activeTab, setActiveTab] = useState('description');
   const [showVariantSelector, setShowVariantSelector] = useState(false);
-  // const [selectedVariant, setSelectedVariant] = useState('3 in One');
   const [sheetPosition, setSheetPosition] = useState('peek');
 
   const sheetRef = useRef<HTMLDivElement>(null);
   const variantRef = useRef<HTMLDivElement>(null);
   const startY = useRef(0);
   const currentY = useRef(0);
+
+  // Disable body scroll when card is open
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, []);
 
   useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
@@ -51,7 +59,6 @@ export default function MobileProductDetailCard({ product, onClose, handleAddToC
   useEffect(() => {
     isFloatingCartVisible.set(false);
     return () => {
-      // Show floating cart when component unmounts
       isFloatingCartVisible.set(true);
     };
   }, []);
@@ -135,11 +142,11 @@ export default function MobileProductDetailCard({ product, onClose, handleAddToC
   const getSheetStyle = () => {
     switch (sheetPosition) {
       case 'half':
-        return 'h-2/3';
+        return 'min-h-[60%] max-h-[90%]';
       case 'full':
-        return 'h-full';
+        return 'min-h-[90%] max-h-[100%]';
       default:
-        return 'h-2/3';
+        return 'min-h-[60%] max-h-[90%]';
     }
   };
 
@@ -156,19 +163,10 @@ export default function MobileProductDetailCard({ product, onClose, handleAddToC
     handleQuantityChange(Math.max(1, quantity - 1)); // Enforce min 1
   };
 
-  const handleBuyNowClick = (product: IProduct, quantity: number) => {
-    handleBuyItNow(product, quantity);
-    isCartOpen.set(true);
-    onClose();
-  };
-
   return (
     <div
       className="fixed inset-0 bg-black bg-opacity-50 z-50 flex flex-col justify-end"
-      style={{
-        backgroundColor: 'rgba(0, 0, 0, 0.4)',
-        zIndex: 40
-      }}
+      style={{ backgroundColor: 'rgba(0, 0, 0, 0.4)', zIndex: 40 }}
       onClick={onClose}
     >
       <div
@@ -190,156 +188,155 @@ export default function MobileProductDetailCard({ product, onClose, handleAddToC
           <div className="w-10 h-1 bg-gray-300 rounded-full"></div>
         </div>
 
-        <button
-          onClick={onClose}
-          className="absolute top-2 right-2 text-slate-500 z-100 rounded-2xl bg-primary"
-        >
-          <X className="w-6 h-6 text-white" />
-        </button>
-
         <div className="flex flex-col h-full">
-          <div className="flex-shrink-0 p-4">
-            <div className="relative w-full">
-              <div className="relative overflow-hidden">
-                <div className="relative w-full h-64 overflow-hidden rounded-md">
-                  <SafetyImage
-                    src={product.images[currentImageIndex]}
-                    alt={`${product.name} - Image ${currentImageIndex + 1}`}
-                    clazz="w-full h-full object-cover rounded-md"
-                  />
+          {/* Scrollable content area */}
+          <div className="flex-1 overflow-y-auto">
+            <div className="relative pb-4">
+              <div className="relative w-full">
+                <div className="relative overflow-hidden">
+                  <div className="relative w-full h-64 overflow-hidden rounded-t-md">
+                    <SafetyImage
+                      src={product.images[currentImageIndex]}
+                      alt={`${product.name} - Image ${currentImageIndex + 1}`}
+                      clazz="w-full h-full object-cover"
+                    />
+                  </div>
+                  <ImageGalleryIndicator currentIndex={currentImageIndex} totalImages={product.images.length} position="bottom-left" />            
+
+                  {product.images.length > 1 && (
+                    <>
+                      <button
+                        onClick={prevImage}
+                        className="absolute left-2 top-1/2 -translate-y-1/2 bg-gray-800 bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 transition-all z-10"
+                      >
+                        <ChevronLeft className="w-5 h-5" />
+                      </button>
+                      <button
+                        onClick={nextImage}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 bg-gray-800 bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 transition-all z-10"
+                      >
+                        <ChevronRight className="w-5 h-5" />
+                      </button>
+                    </>
+                  )}
                 </div>
 
                 {product.images.length > 1 && (
-                  <>
-                    <button
-                      onClick={prevImage}
-                      className="absolute left-2 top-1/2 -translate-y-1/2 bg-gray-800 bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 transition-all"
-                    >
-                      <ChevronLeft className="w-5 h-5" />
-                    </button>
-                    <button
-                      onClick={nextImage}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-gray-800 bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 transition-all"
-                    >
-                      <ChevronRight className="w-5 h-5" />
-                    </button>
-                  </>
-                )}
-              </div>
-
-              {product.images.length > 1 && (
-                <div className="flex justify-center gap-2 mt-2">
-                  {product.images.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setCurrentImageIndex(index)}
-                      className={cn(
-                        "w-2 h-2 rounded-full transition-all",
-                        currentImageIndex === index
-                          ? "bg-blue-600 w-4"
-                          : "bg-gray-300 hover:bg-gray-400"
-                      )}
-                    />
-                  ))}
-                </div>
-              )}
-
-              {product.images.length > 1 && (
-                <div className="absolute top-2 right-2 bg-gray-800 bg-opacity-60 text-white text-xs px-2 py-1 rounded-sm">
-                  {currentImageIndex + 1}/{product.images.length}
-                </div>
-              )}
-            </div>
-
-            <div className="mt-4">
-              <div className="flex justify-between items-start mb-2">
-                <h1 className="text-lg text-primary font-bold truncate flex-1">{product.name}</h1>
-                <div className="text-slate-400 font-bold ml-4">
-                  {formatCurrency(product.unit_price - product.discount_price)}
-                </div>
-              </div>
-
-              <div className="text-sm text-gray-600 space-y-2 my-4">
-                <div className="flex items-center gap-2">
-                  <Truck className="w-4 h-4 text-primary" />
-                  <span>Miễn phí giao hàng cho đơn trên 2,000,000 đ</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-primary" />
-                  <span>Bảo hành 1 năm</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <History className="w-4 h-4 text-primary" />
-                  <span>Trả hàng trong 7 ngày</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="border-t border-b flex-shrink-0">
-            <div className="flex">
-              <button
-                onClick={() => setActiveTab('description')}
-                className={cn(
-                  "flex-1 py-3 text-sm font-medium",
-                  activeTab === 'description'
-                    ? "text-blue-600 border-b-2 border-blue-600"
-                    : "text-gray-500"
-                )}
-              >
-                Mô tả
-              </button>
-              <button
-                onClick={() => setActiveTab('details')}
-                className={cn(
-                  "flex-1 py-3 text-sm font-medium",
-                  activeTab === 'details'
-                    ? "text-blue-600 border-b-2 border-blue-600"
-                    : "text-gray-500"
-                )}
-              >
-                Thông số kĩ thuật
-              </button>
-              <button
-                onClick={() => setActiveTab('reviews')}
-                className={cn(
-                  "flex-1 py-3 text-sm font-medium",
-                  activeTab === 'reviews'
-                    ? "text-blue-600 border-b-2 border-blue-600"
-                    : "text-gray-500"
-                )}
-              >
-                Đánh giá
-              </button>
-            </div>
-          </div>
-
-          {/* Scrollable content area */}
-          <div className="flex-1 overflow-y-auto py-4">
-            {activeTab === 'description' && (
-              <div className="p-4">
-                <p className="text-gray-700 text-sm">{product.description}</p>
-                {videoSrc && (
-                  <div className="mt-4">
-                    <YoutubeVideo src={videoSrc} />
+                  <div className="flex justify-center gap-2 mt-2">
+                    {product.images.map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setCurrentImageIndex(index)}
+                        className={cn(
+                          "w-2 h-2 rounded-full transition-all",
+                          currentImageIndex === index
+                            ? "bg-blue-600 w-4"
+                            : "bg-gray-300 hover:bg-gray-400"
+                        )}
+                      />
+                    ))}
                   </div>
                 )}
               </div>
-            )}
-            {activeTab === 'details' && (
-              <div className="p-4">
-                <p className="text-gray-700 text-sm">Chưa có thông số kĩ thuật</p>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onClose();
+                }}
+                className="absolute top-1 right-2 bg-red-500 text-white 
+                rounded-full w-8 h-8 flex items-center justify-center z-50"
+              >
+                <X />
+              </button>
+
+              <div className="mt-4 px-4">
+                <div className="flex justify-between items-start mb-2 text-lg">
+                  <h1 className="text-slate-400 font-bold truncate flex-1">{product.name}</h1>
+                  <div className="text-primary font-bold ml-4">
+                    {formatCurrency(product.unit_price)}
+                  </div>
+                </div>
+
+                <div className="text-sm text-gray-600 space-y-2 my-4">
+                  <div className="flex items-center gap-2">
+                    <Truck className="w-4 h-4 text-primary" />
+                    <span>Miễn phí giao hàng cho đơn trên 2,000,000 đ</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-primary" />
+                    <span>Bảo hành 1 năm</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <History className="w-4 h-4 text-primary" />
+                    <span>Trả hàng trong 7 ngày</span>
+                  </div>
+                </div>
               </div>
-            )}
-            {activeTab === 'reviews' && (
-              <div className="p-4">
-                <p className="text-gray-700 text-sm">Chưa có đánh giá</p>
+
+              <div className="border-t border-b flex-shrink-0">
+                <div className="flex">
+                  <button
+                    onClick={() => setActiveTab('description')}
+                    className={cn(
+                      "flex-1 py-3 text-sm font-medium",
+                      activeTab === 'description'
+                        ? "text-blue-600 border-b-2 border-blue-600"
+                        : "text-gray-500"
+                    )}
+                  >
+                    Mô tả
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('details')}
+                    className={cn(
+                      "flex-1 py-3 text-sm font-medium",
+                      activeTab === 'details'
+                        ? "text-blue-600 border-b-2 border-blue-600"
+                        : "text-gray-500"
+                    )}
+                  >
+                    Thông số kĩ thuật
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('reviews')}
+                    className={cn(
+                      "flex-1 py-3 text-sm font-medium",
+                      activeTab === 'reviews'
+                        ? "text-blue-600 border-b-2 border-blue-600"
+                        : "text-gray-500"
+                    )}
+                  >
+                    Đánh giá
+                  </button>
+                </div>
               </div>
-            )}
+
+              {/* Tab content */}
+              {activeTab === 'description' && (
+                <div className="p-4">
+                  <p className="text-gray-700 text-sm">{product.description}</p>
+                  {videoSrc && (
+                    <div className="mt-4">
+                      <YoutubeVideo src={videoSrc} />
+                    </div>
+                  )}
+                </div>
+              )}
+              {activeTab === 'details' && (
+                <div className="p-4">
+                  <p className="text-gray-700 text-sm">Chưa có thông số kĩ thuật</p>
+                </div>
+              )}
+              {activeTab === 'reviews' && (
+                <div className="p-4">
+                  <p className="text-gray-700 text-sm">Chưa có đánh giá</p>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Fixed bottom section for quantity control and buttons */}
-          <div className="flex-shrink-0 border-t bg-white sticky bottom-0">
+          <div className="flex-shrink-0 border-t bg-white sticky bottom-0 z-10">
             <div className="px-4 py-3 flex justify-between items-center border-b">
               <span className="text-sm font-medium">Số lượng</span>
               <QuantityControl

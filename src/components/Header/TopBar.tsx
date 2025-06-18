@@ -1,6 +1,6 @@
 import { isCartOpen, totalCartQuantity } from '@/store/cart';
 import { useStore } from '@nanostores/react';
-import { HeartIcon, LanguagesIcon, MailboxIcon, PhoneIcon, ShoppingCartIcon, UserIcon } from 'lucide-react';
+import { HeartIcon, LanguagesIcon, MailIcon, PhoneIcon, ShoppingCartIcon, UserIcon } from 'lucide-react';
 import CartDrawer from '../Drawer/CartDrawer';
 import { useEffect, useState } from 'react';
 
@@ -10,7 +10,6 @@ const TopBar = () => {
   const [isCheckoutPage, setIsCheckoutPage] = useState(false);
 
   useEffect(() => {
-    // Check if the current route is the checkout page
     setIsCheckoutPage(window.location.pathname === '/checkout');
   }, []);
 
@@ -28,30 +27,32 @@ const TopBar = () => {
 
   return (
     <>
-      <div className="bg-gradient w-full text-white px-2 sm:px-4">
-        <div className="flex flex-wrap justify-between items-center gap-2 sm:gap-4 py-2">
-          <div className="flex items-center gap-2 sm:gap-4">
-            <div className="hidden sm:flex items-center gap-1 sm:gap-2">
-              <MailboxIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="font-semibold text-xs sm:text-base">khongiannhanong@gmail.com</span>
+      <div className="bg-gradient-to-r from-orange-500 to-yellow-300 w-full text-white px-4 sm:px-6 py-1.5">
+        <div className="flex items-center justify-between max-w-7xl mx-auto space-x-4">
+          <div className="flex items-center space-x-4">
+            <div className="hidden md:flex items-center space-x-1.5">
+              <MailIcon className="w-4 h-4" />
+              <span className="text-xs sm:text-sm font-medium">khongiannhanong@gmail.com</span>
             </div>
-            <div className="hidden sm:flex items-center gap-1 sm:gap-2">
-              <PhoneIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="font-semibold text-xs sm:text-base">098 125 0725</span>
+            <div className="flex items-center space-x-1.5">
+              <PhoneIcon className="w-4 h-4" />
+              <span className="text-xs sm:text-sm font-medium">098 125 0725</span>
             </div>
           </div>
-          <div className="flex items-center gap-2 sm:gap-4">
+          <div className="flex items-center space-x-4">
             <LanguagesIcon className="w-4 h-4 sm:w-5 sm:h-5 cursor-pointer hover:text-black" />
             <UserIcon className="w-4 h-4 sm:w-5 sm:h-5 cursor-pointer hover:text-black" />
             <HeartIcon className="w-4 h-4 sm:w-5 sm:h-5 cursor-pointer hover:text-pink-500" />
-            {!isCheckoutPage && <div className="relative" onClick={toggleCart}>
-              <ShoppingCartIcon className="w-4 h-4 sm:w-5 sm:h-5 cursor-pointer hover:text-black" />
-              {$totalQuantity > 0 && (
-                <span className="absolute -top-2 -right-2 bg-primary text-white text-[10px] rounded-full h-4 w-4 flex items-center justify-center">
-                  {$totalQuantity > 99 ? '99+' : $totalQuantity}
-                </span>
-              )}
-            </div>}
+            {!isCheckoutPage && (
+              <div className="relative" onClick={toggleCart}>
+                <ShoppingCartIcon className="w-4 h-4 sm:w-5 sm:h-5 cursor-pointer hover:text-black" />
+                {$totalQuantity > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-primary text-white text-[10px] rounded-full h-4 w-4 flex items-center justify-center">
+                    {$totalQuantity > 99 ? '99+' : $totalQuantity}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
