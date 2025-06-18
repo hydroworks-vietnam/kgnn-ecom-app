@@ -1,4 +1,3 @@
-import { Input } from '@/components/Input/BasicInput';
 import CartItem from '@/components/ui/CartItem';
 import CartSummary from '@/components/ui/CartSummary';
 import PromoCodeInput from '@/components/ui/PromoCodeInput';
@@ -12,6 +11,7 @@ import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import { navigate } from 'astro:transitions/client';
 import { cn } from '@/utils/helpers';
 import orderService from '@/services/orderService';
+import Input from '@/components/Input/BasicInput';
 
 type PaymentMethod = 'BANK' | 'COD' | 'CREDIT_CARD' | 'E_WALLET';
 

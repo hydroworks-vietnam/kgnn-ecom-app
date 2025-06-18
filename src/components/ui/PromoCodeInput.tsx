@@ -1,8 +1,8 @@
 import { promoCodeStore, userRankStore } from "@/store/cart";
 import cartService from "@/services/cartService";
 import { useState } from "react";
-import { Input } from "../Input/BasicInput";
 import { cn } from "@/utils/helpers";
+import Input from "../Input/BasicInput";
 
 const PromoCodeInput = ({ onApplyCode }: { onApplyCode: (isValid: boolean) => void }) => {
   const [$promoCode, setPromoCode] = useState(promoCodeStore.get());
