@@ -78,8 +78,7 @@ const ProductList = () => {
         />
       ) : (
         <DesktopProductList 
-          handleAddToCart={handleAddToCart} 
-          initialCategory={selectedCategory}
+          handleAddToCart={handleAddToCart}
         />
       )}
 

@@ -64,7 +64,6 @@ const DesktopProductList: React.FC<DesktopProductListProps> = ({ handleAddToCart
     }
   };
 
-  // React to selected category/subcategory
   useEffect(() => {
     if (selectedCategory?.id) {
       fetchProductList(selectedCategory.id, selectedSubcategory?.id);
@@ -86,7 +85,6 @@ const DesktopProductList: React.FC<DesktopProductListProps> = ({ handleAddToCart
             <option value={20}>20</option>
             <option value={50}>50</option>
           </select>
-
           <button
             onClick={() => setViewMode('grid')}
             className={viewMode === 'grid' ? 'text-blue-900' : 'text-gray-400'}
@@ -103,9 +101,9 @@ const DesktopProductList: React.FC<DesktopProductListProps> = ({ handleAddToCart
       </div>
 
       {/* Products */}
-      <div className='md:px-12'>
+      <div className="px-4 md:px-12">
         {productsLoading ? (
-          <div className="grid grid-cols-4 space-x-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {skeletonArray.map((_, idx) => (
               <ProductCardSkeleton key={`skeleton-${idx}`} />
             ))}
@@ -116,7 +114,11 @@ const DesktopProductList: React.FC<DesktopProductListProps> = ({ handleAddToCart
           <div className="text-gray-500 text-center py-10">Không có sản phẩm nào</div>
         ) : (
           <div
-            className={viewMode === 'grid' ? 'grid grid-cols-4 space-x-3' : 'flex flex-col gap-6'}
+            className={
+              viewMode === 'grid'
+                ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'
+                : 'flex flex-col gap-6'
+            }
           >
             {products.map((product) => (
               <ProductCardFull
