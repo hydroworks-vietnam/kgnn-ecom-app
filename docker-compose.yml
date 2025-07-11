@@ -4,7 +4,7 @@ services:
     build:
       args:
         - PUBLIC_BACKEND_URL=${PUBLIC_BACKEND_URL}
-    image: kgnn-ecom-app:v1.3.2
+    image: agrispace/kgnn-ecom:1.3.2
     user: "101:101"  # Match Nginx user/group
     environment:
       - PUBLIC_BACKEND_URL=${PUBLIC_BACKEND_URL}

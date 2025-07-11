@@ -6,10 +6,12 @@ RUN apk add --no-cache libc6-compat
 
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
+ARG PUBLIC_BACKEND_URL
+
 ENV PNPM_CONFIG_STORE_DIR=/app/.pnpm-store
-ENV PUBLIC_BACKEND_URL=${PUBLIC_BACKEND_URL}
 ENV NODE_ENV=production
 ENV ASTRO_TELEMETRY_DISABLED=1
+ENV PUBLIC_BACKEND_URL=$PUBLIC_BACKEND_URL
 
 COPY package.json pnpm-lock.yaml ./
 
