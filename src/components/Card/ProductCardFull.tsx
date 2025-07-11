@@ -59,50 +59,46 @@ const ProductCardFull = ({ product, viewMode = 'grid', onAddToCart }: ProductCar
       className="rounded-lg shadow-md hover:shadow-lg cursor-pointer flex flex-col w-full bg-white transition-all duration-300"
       onClick={() => setIsPopupOpen(true)}
     >
-      <div className="relative w-full flex-1 overflow-hidden">
+      <div className="relative w-full overflow-hidden px-2 py-3">
         <SafetyImage
           clazz={cn(
-            isMobile ? "w-full h-32" : "w-full h-full",
-            "rounded-t-lg object-cover transition-opacity duration-300 hover:opacity-90"
+            isMobile ? "w-full h-[150px]" : "w-full h-72",
+            "rounded-lg object-cover transition-opacity duration-300 hover:opacity-90"
           )}
           src={product.images[0]}
         />
       </div>
-      <div className="md:p-2 flex flex-col flex-1 space-y-1 p-2">
+      <div className="md:px-4 flex flex-col flex-1 space-y-1 px-3">
         <h3 className="text-md font-bold text-gray-900 line-clamp-1">{product.name}</h3>
         <p className="text-gray-500 text-sm line-clamp-2">{product.description}</p>
         {isMobile ? (
-          <div className="flex flex-col gap-1">
-            <span className="font-bold text-primary">
-              {formatCurrency(product.unit_price)}
-            </span>
-            <div className="flex justify-end">
-              <QuantityControl
-                quantity={quantity}
-                onIncrease={handleIncrease}
-                onDecrease={handleDecrease}
-                onQuantityChange={handleQuantityChange}
-                size="sm"
-                className="scale-75"  
-              />
-            </div>
-          </div>
+        <>
+          <span className="font-bold text-primary">
+            {formatCurrency(product.unit_price)}
+          </span>
+          <QuantityControl
+            quantity={quantity}
+            onIncrease={handleIncrease}
+            onDecrease={handleDecrease}
+            onQuantityChange={handleQuantityChange}
+            size="sm"
+            className="scale-90 self-end py-2"
+          />
+        </>
         ) : (
-          <div className="flex items-center justify-between">
-            <span className="font-bold text-md text-primary">
-              {formatCurrency(product.unit_price)}
-            </span>
-            <div className="w-full sm:w-auto">
-              <QuantityControl
-                quantity={quantity}
-                onIncrease={handleIncrease}
-                onDecrease={handleDecrease}
-                onQuantityChange={handleQuantityChange}
-                size="sm"
-                className="scale-90 origin-right"
-              />
-            </div>
-          </div>
+        <div className="flex items-center justify-between pb-3">
+          <span className="font-bold text-md text-primary">
+            {formatCurrency(product.unit_price)}
+          </span>
+          <QuantityControl
+            quantity={quantity}
+            onIncrease={handleIncrease}
+            onDecrease={handleDecrease}
+            onQuantityChange={handleQuantityChange}
+            size="sm"
+            className="scale-90"
+          />
+        </div>
         )}
       </div>
       {isPopupOpen &&

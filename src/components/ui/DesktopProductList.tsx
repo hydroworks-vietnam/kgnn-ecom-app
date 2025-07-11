@@ -10,8 +10,8 @@ import {
 } from '@/store/category';
 
 const ProductCardSkeleton = () => (
-  <div className="w-full h-full rounded-lg shadow-md animate-pulse">
-    <div className="bg-gray-200 rounded-t-lg h-48 sm:h-40" />
+  <div className="w-72 h-auto rounded-lg shadow-md animate-pulse">
+    <div className="bg-gray-200 rounded-t-lg aspect-square w-full" />
     <div className="p-3 flex flex-col">
       <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
       <div className="h-3 bg-gray-200 rounded w-full mb-2" />
@@ -23,7 +23,7 @@ const ProductCardSkeleton = () => (
   </div>
 );
 
-const skeletonArray = Array(6).fill(0);
+const skeletonArray = Array(8).fill(0);
 
 interface DesktopProductListProps {
   handleAddToCart: (product: IProduct, quantity: number) => void;

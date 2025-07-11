@@ -100,7 +100,7 @@ const CartDrawer = ({ open, onClose, onContinueShopping }: CartDrawerProps) => {
                   >
                     <Download className={`w-4 h-4 ${isDownloading ? 'animate-pulse' : ''}`} />
                     <span className="text-sm font-medium hidden sm:block">
-                      {isDownloading ? 'Đang lưu...' : 'Lưu'}
+                      {isDownloading ? 'Đang lưu...' : 'Lưu giỏ hàng'}
                     </span>
                   </button>
                 )}

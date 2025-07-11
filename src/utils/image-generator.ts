@@ -6,25 +6,29 @@ const generateCartCanvasImage = async (
   shippingFee = 0
 ) => {
   const pixelRatio = 2;
-  const padding = 24;
+  const padding = 20;
   const itemHeight = 90;
   const imageSize = 80;
   const width = 700;
-  const availableWidth = width - 2 * padding; // Total width for the table (700 - 48 = 652px)
-  const columnGap = 24;
-  const imageColumnWidth = imageSize + columnGap; // Width for the image column (80 + 24 = 104px)
-  const remainingWidth = availableWidth - imageColumnWidth; // Width for the four columns (652 - 104 = 548px)
+  const columnGap = 8;
+
+  const availableWidth = width - 2 * padding;
+  const imageColumnWidth = imageSize + columnGap;
+  const remainingWidth = availableWidth - imageColumnWidth;
+
   const columnWidths = [
-    remainingWidth * 0.20, // Product Name (20% of remaining width)
-    remainingWidth * 0.20, // Quantity (20% of remaining width)
-    remainingWidth * 0.25, // Unit Price (25% of remaining width)
-    remainingWidth * 0.25, // Total (25% of remaining width)
+    remainingWidth * 0.24, // Product Name
+    remainingWidth * 0.13, // Quantity
+    remainingWidth * 0.19, // Original Price
+    remainingWidth * 0.19, // Discount Price
+    remainingWidth * 0.25, // Total
   ];
+
   const textXStart = padding + imageSize + columnGap;
-  const headerHeight = 120; // Height for header
-  const footerHeight = 180; // Height for footer
-  const summaryHeight = 120; // Estimated height for summary rows
-  const height = headerHeight + (cart.length * itemHeight) + summaryHeight + footerHeight + padding * 2; // Dynamic height
+  const headerHeight = 120;
+  const footerHeight = 180;
+  const summaryHeight = 120;
+  const height = headerHeight + (cart.length * itemHeight) + summaryHeight + footerHeight + padding * 2;
 
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
@@ -39,7 +43,6 @@ const generateCartCanvasImage = async (
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, width, height);
 
-  // Header (Center-aligned)
   let y = padding;
   ctx.fillStyle = "#111827";
   ctx.font = "bold 18px Arial";
@@ -48,52 +51,48 @@ const generateCartCanvasImage = async (
   y += 24;
 
   ctx.font = "14px Arial";
-  const address = "ĐC: Tầng 2, số 81 Cách Mạng Tháng 8, phường Bến Thành, quận 1, TP.HCM";
-  ctx.fillText(address, (width - ctx.measureText(address).width) / 2, y);
-  y += 20;
-  const phone = "DT: 0981 250725 Mr Vương Trần";
-  ctx.fillText(phone, (width - ctx.measureText(phone).width) / 2, y);
-  y += 20;
-  const email = "Email: vhbaotram576@gmail.com";
-  ctx.fillText(email, (width - ctx.measureText(email).width) / 2, y);
-  y += 20;
-  const website = "Web: thietbihuycanh.com.vn";
-  ctx.fillText(website, (width - ctx.measureText(website).width) / 2, y);
-  y += 40;
+  const lines = [
+    "ĐC: Tầng 2, số 81 Cách Mạng Tháng 8, phường Bến Thành, quận 1, TP.HCM",
+    "DT: 0981 250725 Mr Vương Trần",
+    "Email: vhbaotram576@gmail.com",
+    "Web: thietbihuycanh.com.vn",
+  ];
+  lines.forEach(line => {
+    ctx.fillText(line, (width - ctx.measureText(line).width) / 2, y);
+    y += 20;
+  });
 
   ctx.font = "bold 16px Arial";
-  ctx.fillText("BẢNG BÁO GIÁ", width / 2 - ctx.measureText("BẢNG BÁO GIÁ").width / 2, y + 3);
-  y += 10;
+  ctx.fillText("BẢNG BÁO GIÁ", (width - ctx.measureText("BẢNG BÁO GIÁ").width) / 2, y + 10);
+  y += 40;
 
-  // Table Headers (Center-aligned)
+  // Headers
   ctx.fillStyle = "#374151";
   ctx.font = "bold 14px Arial";
   const imageHeader = "Hình ảnh";
-  const imageHeaderWidth = ctx.measureText(imageHeader).width;
-  ctx.fillText(imageHeader, padding + (imageSize - imageHeaderWidth) / 2, y + 24);
+  ctx.fillText(imageHeader, padding + (imageSize - ctx.measureText(imageHeader).width) / 2, y);
 
-  const headers = ["Tên sản phẩm", "Số lượng", "Đơn giá", "Tổng"];
+  const headers = ["Tên sản phẩm", "Số lượng", "Giá gốc", "Giá giảm", "Tổng"];
   let headerX = textXStart;
   headers.forEach((header, index) => {
     const headerWidth = ctx.measureText(header).width;
-    const centerX = headerX + (columnWidths[index] - headerWidth) / 2; // Center within the column
-    ctx.fillText(header, centerX, y + 24);
+    ctx.fillText(header, headerX + (columnWidths[index] - headerWidth) / 2, y);
     headerX += columnWidths[index] + columnGap;
   });
-  y += 40;
 
-  // Products (Table with 4 columns, center-aligned)
+  y += 30;
+
+  // Product rows
   for (const item of cart) {
-    const rowStartY = y; // Store the starting Y position for this row
-    let rowHeight = itemHeight; // Default row height
+    const rowStartY = y;
+    let rowHeight = itemHeight;
 
-    // Image (already centered by its container)
+    // Product image
     try {
       const img = await loadProxiedImage(item.product.images[0]);
-      const radius = 8;
-
       ctx.save();
       ctx.beginPath();
+      const radius = 8;
       ctx.moveTo(padding, y);
       ctx.arcTo(padding + imageSize, y, padding + imageSize, y + imageSize, radius);
       ctx.arcTo(padding + imageSize, y + imageSize, padding, y + imageSize, radius);
@@ -111,60 +110,45 @@ const generateCartCanvasImage = async (
       ctx.fillText("No Image", padding + 10, y + 20);
     }
 
-    // Columns: Product Name, Quantity, Unit Price, Total Price (center-aligned)
+    // Columns
     let columnX = textXStart;
-    const total = item.quantity * item.product.unit_price;
+    const discountPrice = item.product.unit_price * 0.9;
+    const total = item.quantity * discountPrice;
 
-    ctx.fillStyle = "#6b7280";
+    // Product name with wrapping
+    ctx.fillStyle = "#F26043"; // primary
     ctx.font = "14px Arial";
-
-    // Product Name - Wrap text if too long
-    if (item.product.name.length > 50) {
-      item.product.name = item.product.name.substring(0, 47) + "..."; // 47 + 3 dots = 50 chars
-    }
-    const maxProductNameWidth = columnWidths[0] - 10; // Leave small margin
-    const lines = wrapText(item.product.name, maxProductNameWidth, ctx);
-
-    // Adjust row height based on number of lines
+    const maxProductNameWidth = columnWidths[0] - 10;
+    const wrapped = wrapText(item.product.name, maxProductNameWidth, ctx);
     const lineHeight = 18;
-    const textHeight = lines.length * lineHeight;
-    if (textHeight > rowHeight - 40) { // 40 is the vertical positioning offset
-      rowHeight = textHeight + 40;
-    }
-    
-    // Calculate vertical center position for the wrapped text
-    const textY = rowStartY + (rowHeight - textHeight) / 2;
-    
-    // Draw each line of the wrapped text
-    lines.forEach((line, index) => {
-      const lineWidth = ctx.measureText(line).width;
-      const lineX = columnX + (columnWidths[0] - lineWidth) / 2;
-      ctx.fillText(line, lineX, textY + index * lineHeight);
+    const textHeight = wrapped.length * lineHeight;
+    if (textHeight + 20 > rowHeight) rowHeight = textHeight + 20;
+    const nameY = rowStartY + (rowHeight - textHeight) / 2;
+    wrapped.forEach((line, i) => {
+      const lineX = columnX + (columnWidths[0] - ctx.measureText(line).width) / 2;
+      ctx.fillText(line, lineX, nameY + i * lineHeight);
     });
-    
+
     columnX += columnWidths[0] + columnGap;
+    ctx.fillStyle = "#6b7280";
+    ctx.font = "13px Arial";
 
-    // Quantity - Vertically center with product name
-    const quantityText = `${item.quantity}`;
-    const quantityWidth = ctx.measureText(quantityText).width;
-    const quantityX = columnX + (columnWidths[1] - quantityWidth) / 2;
-    ctx.fillText(quantityText, quantityX, rowStartY + rowHeight/2);
-    columnX += columnWidths[1] + columnGap;
+    const values = [
+      `${item.quantity}`,
+      `${item.product.unit_price.toLocaleString()} đ`,
+      `${discountPrice.toLocaleString()} đ`,
+      `${total.toLocaleString()} đ`,
+    ];
 
-    // Unit Price - Vertically center with product name
-    const unitPriceText = `${item.product.unit_price.toLocaleString()} đ`;
-    const unitPriceWidth = ctx.measureText(unitPriceText).width;
-    const unitPriceX = columnX + (columnWidths[2] - unitPriceWidth) / 2;
-    ctx.fillText(unitPriceText, unitPriceX, rowStartY + rowHeight/2);
-    columnX += columnWidths[2] + columnGap;
+    for (let i = 0; i < values.length; i++) {
+      const text = values[i];
+      const widthText = ctx.measureText(text).width;
+      const centerX = columnX + (columnWidths[i + 1] - widthText) / 2;
+      ctx.fillText(text, centerX, rowStartY + rowHeight / 2);
+      columnX += columnWidths[i + 1] + columnGap;
+    }
 
-    // Total Price - Vertically center with product name
-    const totalText = `${total.toLocaleString()} đ`;
-    const totalWidth = ctx.measureText(totalText).width;
-    const totalX = columnX + (columnWidths[3] - totalWidth) / 2;
-    ctx.fillText(totalText, totalX, rowStartY + rowHeight/2);
-
-    y += rowHeight; // Use the potentially adjusted row height
+    y += rowHeight;
   }
 
   // Divider
@@ -176,13 +160,12 @@ const generateCartCanvasImage = async (
   ctx.stroke();
   y += 20;
 
-  // Summary Rows
-  const subtotal = cart.reduce((sum, item) => sum + item.quantity * item.product.unit_price, 0);
+  const subtotal = cart.reduce((sum, item) => sum + item.quantity * (item.product.unit_price * 0.9), 0);
   const finalTotal = subtotal - discount + shippingFee;
 
-  const drawSummaryRow = (label: string, value: string, bold = false) => {
-    ctx.fillStyle = "#374151"; // gray-700
+  const drawSummaryRow = (label: string, value: string, bold = false, color = "#374151") => {
     ctx.font = bold ? "bold 16px Arial" : "14px Arial";
+    ctx.fillStyle = color;
     ctx.fillText(label, padding, y);
     ctx.fillText(value, width - padding - ctx.measureText(value).width, y);
     y += 28;
@@ -191,30 +174,26 @@ const generateCartCanvasImage = async (
   drawSummaryRow("Tạm tính", `${subtotal.toLocaleString()} đ`);
   drawSummaryRow("Giảm giá", `${discount.toLocaleString()} đ`);
   drawSummaryRow("Phí vận chuyển", `${shippingFee.toLocaleString()} đ`);
-  drawSummaryRow("Tổng cộng", `${finalTotal.toLocaleString()} đ`, true);
+  drawSummaryRow("Tổng cộng", `${finalTotal.toLocaleString()} đ`, true, "#F26043");
 
-  // Footer
-  ctx.fillStyle = "#111827";
-  ctx.font = "bold 18px Arial";
+  // Footer Notes
+  ctx.fillStyle = "#F26043";
+  ctx.font = "14px Arial";
   y += 10;
+  const notes = [
+    "Ghi chú:",
+    "1. Giá gốc trên chưa bao gồm thuế VAT.",
+    "2. Bảng báo giá này có hiệu lực trong vòng 15 ngày kể từ ngày báo giá.",
+    "3. Vật tư sẽ được lập mẫu kiểm tra trước khi sản xuất.",
+    "4. Giá gốc đã bao gồm công lắp đặt và thi công lắp đặt hoàn chỉnh.",
+    "5. Hết thời gian, nếu không thông báo thì sẽ không được giữ lại đơn hàng.",
+    "6. Mọi ý kiến xin liên hệ Mr Vương Trần 0981 250725.",
+    "Cảm ơn sự hợp tác của Quý Công ty. Trân trọng.",
+  ];
+  notes.forEach((note, i) => ctx.fillText(note, padding, y + i * 16));
 
-  ctx.font = "12px Arial";
-  ctx.fillStyle = "#6b7280";
-  ctx.fillText("Ghi chú:", padding, y);
-  ctx.fillText("1. Đơn giá trên chưa bao gồm thuế VAT.", padding, y + 16);
-  ctx.fillText("2. Bảng báo giá này có hiệu lực trong vòng 15 ngày kể từ ngày báo giá.", padding, y + 32);
-  ctx.fillText("3. Vật tư sẽ được lập mẫu kiểm tra trước khi sản xuất.", padding, y + 48);
-  ctx.fillText("4. Đơn giá đã bao gồm công lắp đặt và thi công lắp đặt hoàn chỉnh.", padding, y + 64);
-  ctx.fillText("5. Hết thời gian, nếu không thông báo thì sẽ không được giữ lại đơn hàng.", padding, y + 80);
-  ctx.fillText("6. Mọi ý kiến xin liên hệ Mr Vương Trần 0981 250725.", padding, y + 96);
-  ctx.fillText("Cảm ơn sự hợp tác của Quý Công ty. Trân trọng.", padding, y + 112);
-
-  // Export with adjusted filename
   const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0"); // Months are 0-based, so +1
-  const date = String(now.getDate()).padStart(2, "0");
-  const formattedDate = `${year}-${month}-${date}`;
+  const formattedDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 
   const dataUrl = canvas.toDataURL("image/png");
   const link = document.createElement("a");
@@ -227,20 +206,16 @@ const loadProxiedImage = (src: string): Promise<HTMLImageElement> => {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = "anonymous";
-
-    const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(src)}`;
     img.onload = () => resolve(img);
     img.onerror = reject;
-    img.src = proxyUrl;
+    img.src = `/api/proxy-image?url=${encodeURIComponent(src)}`;
   });
 };
 
-// Helper function to wrap text
 const wrapText = (text: string, maxWidth: number, ctx: CanvasRenderingContext2D) => {
   const words = text.split(' ');
   const lines = [];
   let currentLine = words[0];
-
   for (let i = 1; i < words.length; i++) {
     const word = words[i];
     const width = ctx.measureText(currentLine + " " + word).width;

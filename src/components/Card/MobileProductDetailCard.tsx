@@ -193,7 +193,7 @@ export default function MobileProductDetailCard({ product, onClose, handleAddToC
           <div className="flex-1 overflow-y-auto">
             <div className="relative pb-4">
               <div className="relative w-full">
-                <div className="relative overflow-hidden">
+                <div className="relative px-1 overflow-hidden">
                   <div className="relative w-full h-64 overflow-hidden rounded-t-md">
                     <SafetyImage
                       src={product.images[currentImageIndex]}
@@ -243,8 +243,8 @@ export default function MobileProductDetailCard({ product, onClose, handleAddToC
                   e.stopPropagation();
                   onClose();
                 }}
-                className="absolute top-1 right-2 bg-red-500 text-white 
-                rounded-full w-8 h-8 flex items-center justify-center z-50"
+                className="absolute top-0 right-1 bg-red-500 text-white 
+                rounded-full w-10 h-10 flex items-center justify-center z-50"
               >
                 <X />
               </button>
