@@ -1,19 +1,29 @@
-# -------- Runtime stage --------
-FROM node:20-alpine AS runner
+FROM node:20-alpine
 
 WORKDIR /app
-ENV NODE_ENV=production
 
-# Enable pnpm
+# Install OS dependencies
+RUN apk add --no-cache libc6-compat
+
+# Enable pnpm via corepack
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# Copy runtime files
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/pnpm-lock.yaml ./
-COPY --from=builder /app/node_modules ./node_modules
+# Copy source files and lockfile
+COPY package.json pnpm-lock.yaml ./
+COPY . .
 
-# Expose Astro SSR port
+# Build environment vars
+ARG PUBLIC_BACKEND_URL
+ENV PUBLIC_BACKEND_URL=${PUBLIC_BACKEND_URL}
+ENV NODE_ENV=production
+ENV ASTRO_TELEMETRY_DISABLED=1
+
+# Install dependencies and build the app
+RUN pnpm install --frozen-lockfile
+RUN pnpm build
+
+# Expose Astro SSR default port
 EXPOSE 4322
 
+# Start the app
 CMD ["pnpm", "start"]
