@@ -67,11 +67,15 @@ const DesktopProductList: React.FC<DesktopProductListProps> = ({ handleAddToCart
   useEffect(() => {
     if (selectedCategory?.id) {
       fetchProductList(selectedCategory.id, selectedSubcategory?.id);
+    } else {
+      setTimeout(() => {
+        setProductsLoading(false);
+      }, 2000);
     }
   }, [selectedCategory?.id, selectedSubcategory?.id]);
 
   return (
-    <div className="pt-4 pb-8">
+    <div className="pt-4 pb-8 h-screen">
       {/* Title + Filters */}
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-xl font-bold">Sản phẩm</h1>
@@ -111,7 +115,7 @@ const DesktopProductList: React.FC<DesktopProductListProps> = ({ handleAddToCart
         ) : productsError ? (
           <div className="bg-red-50 text-red-600 p-4 rounded">{productsError}</div>
         ) : products.length === 0 ? (
-          <div className="text-gray-500 text-center py-10">Không có sản phẩm nào</div>
+          <div className="text-gray-500 text-center py-10"> Tiếc quá chưa có sản phẩm nào phù hợp</div>
         ) : (
           <div
             className={

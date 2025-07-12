@@ -66,31 +66,39 @@ const CategoryHorizontalBar: React.FC<Props> = ({
     <div className="category-sticky sticky top-0 z-40 w-full mb-3">
       <div className="px-4 md:px-[9rem]">
         {/* Parent Category Bar */}
-        <div className="flex items-center space-x-2 overflow-x-auto px-4 py-2 bg-primary">
-          {categories.map((cat) => {
-            const isSelected = selectedCategory?.id === cat.id;
+        {(!categories || categories.length === 0) ? (
+          <div className="flex items-center space-x-2 overflow-x-auto px-4 py-2 bg-primary">
+            <div className="w-full text-white text-sm">
+              Không thể tải danh mục
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center space-x-2 overflow-x-auto px-4 py-2 bg-primary">
+            {categories.map((cat) => {
+              const isSelected = selectedCategory?.id === cat.id;
 
-            return (
-              <div
-                key={cat.id}
-                className={cn(
-                  'flex items-center rounded-full transition-colors duration-200',
-                  isSelected
-                    ? 'bg-white text-primary'
-                    : 'text-white hover:text-primary hover:bg-white'
-                )}
-              >
-                <button
-                  onClick={() => handleCategoryClick(cat)}
-                  className="flex items-center gap-1 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap"
+              return (
+                <div
+                  key={cat.id}
+                  className={cn(
+                    'flex items-center rounded-full transition-colors duration-200',
+                    isSelected
+                      ? 'bg-white text-primary'
+                      : 'text-white hover:text-primary hover:bg-white'
+                  )}
                 >
-                  {cat.name}
-                  {isSelected && <ChevronDown className="w-3 h-3" />}
-                </button>
-              </div>
-            );
-          })}
-        </div>
+                  <button
+                    onClick={() => handleCategoryClick(cat)}
+                    className="flex items-center gap-1 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap"
+                  >
+                    {cat.name}
+                    {isSelected && <ChevronDown className="w-3 h-3" />}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
 
         {/* Subcategory Bar */}
         {activeSubcategories && activeSubcategories.length > 0 && (
