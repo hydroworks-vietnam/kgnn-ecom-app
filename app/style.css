@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-primary: #FF6B35;
+  }
+
+  html,
+  body {
+    font-family: "Inter", ui-sans-serif, system-ui, sans-serif,
+      "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    @apply bg-white;
+  }
+}
+
+@layer components {
+  .primary {
+    @apply text-[#FF6B35];
+  }
+
+  .bg-primary {
+    @apply bg-[#FF6B35];
+  }
+}

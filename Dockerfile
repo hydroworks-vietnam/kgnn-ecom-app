@@ -1,27 +1,22 @@
-FROM node:20-alpine
-
+FROM node:20-alpine AS development-dependencies-env
+COPY . /app
 WORKDIR /app
+RUN npm ci
 
-RUN apk add --no-cache libc6-compat
+FROM node:20-alpine AS production-dependencies-env
+COPY ./package.json package-lock.json /app/
+WORKDIR /app
+RUN npm ci --omit=dev
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
+FROM node:20-alpine AS build-env
+COPY . /app/
+COPY --from=development-dependencies-env /app/node_modules /app/node_modules
+WORKDIR /app
+RUN npm run build
 
-ARG PUBLIC_BACKEND_URL
-
-ENV PNPM_CONFIG_STORE_DIR=/app/.pnpm-store
-ENV COREPACK_HOME=/app/.corepack-cache
-ENV NODE_ENV=production
-ENV ASTRO_TELEMETRY_DISABLED=1
-ENV PUBLIC_BACKEND_URL=$PUBLIC_BACKEND_URL
-
-COPY package.json pnpm-lock.yaml ./
-
-# Use this if lockfile mismatch is suspected:
-RUN pnpm install --no-frozen-lockfile
-
-COPY . .
-
-RUN pnpm build
-
-EXPOSE 4322
-CMD ["pnpm", "start"]
+FROM node:20-alpine
+COPY ./package.json package-lock.json /app/
+COPY --from=production-dependencies-env /app/node_modules /app/node_modules
+COPY --from=build-env /app/build /app/build
+WORKDIR /app
+CMD ["npm", "run", "start"]
