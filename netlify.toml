@@ -4,8 +4,3 @@
 
 [dev]
   command = "pnpm run dev"
-
-[[redirects]]
-  from = "/*"
-  to = "/.netlify/functions/server"
-  status = 200
