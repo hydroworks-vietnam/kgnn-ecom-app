@@ -1,0 +1,11 @@
+[build]
+  command = "pnpm run build"
+  publish = "build/client"
+
+[dev]
+  command = "pnpm run dev"
+
+[[redirects]]
+  from = "/*"
+  to = "/.netlify/functions/server"
+  status = 200
