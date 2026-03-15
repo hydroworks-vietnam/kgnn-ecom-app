@@ -6,57 +6,40 @@ export interface ICategory {
 
 const CATEGORIES: ICategory[] = [
   {
-    id: 'systems',
-    name: 'Hệ thống thủy canh',
+    id: 'thiet-bi',
+    name: 'Thiết Bị Vật Tư Thủy Canh',
     subcategories: [
-      { id: 'nft', name: 'NFT' },
-      { id: 'dwc', name: 'DWC' },
-      { id: 'ebb-flow', name: 'Ebb & Flow' },
+      { id: 'ong-thuy-canh', name: 'Ống thủy canh' },
+      { id: 'phu-kien', name: 'Phụ kiện' },
+      { id: 'may-bom', name: 'Máy bơm' },
+      { id: 'do-luong', name: 'Đo lường' },
+      { id: 'uom-hat', name: 'Ươm hạt' },
     ],
   },
   {
-    id: 'nutrients',
-    name: 'Dinh dưỡng',
+    id: 'mo-hinh',
+    name: 'Mô Hình Trồng Rau Thủy Canh',
     subcategories: [
-      { id: 'general', name: 'General Hydroponics' },
-      { id: 'flora', name: 'Flora Series' },
-      { id: 'maxigro', name: 'Maxigro' },
+      { id: 'ban-thuy-canh', name: 'Bàn thủy canh' },
+      { id: 'nha-kinh', name: 'Nhà kính' },
+      { id: 'tru-thuy-canh', name: 'Trụ thủy canh' },
     ],
   },
   {
-    id: 'growth-media',
-    name: 'Chất trồng',
+    id: 'hat-giong',
+    name: 'Hạt Giống',
     subcategories: [
-      { id: 'rockwool', name: 'Rockwool' },
-      { id: 'expanded-clay', name: 'Đất sét nở' },
-      { id: 'coconut-coir', name: 'Dừa coir' },
+      { id: 'ca-chua', name: 'Cà chua' },
+      { id: 'xa-lach', name: 'Xà lách' },
+      { id: 'cai', name: 'Rau cải' },
+      { id: 'khac', name: 'Khác' },
     ],
   },
   {
-    id: 'lighting',
-    name: 'Đèn trồng',
+    id: 'dung-dich',
+    name: 'Dung Dịch Thủy Canh',
     subcategories: [
-      { id: 'led', name: 'LED' },
-      { id: 'hps', name: 'HPS' },
-      { id: 'mh', name: 'MH' },
-    ],
-  },
-  {
-    id: 'air-water',
-    name: 'Không khí & Nước',
-    subcategories: [
-      { id: 'pumps', name: 'Máy bơm' },
-      { id: 'fans', name: 'Quạt' },
-      { id: 'filters', name: 'Bộ lọc' },
-    ],
-  },
-  {
-    id: 'monitoring',
-    name: 'Giám sát',
-    subcategories: [
-      { id: 'ph-meter', name: 'Đo pH' },
-      { id: 'ec-meter', name: 'Đo EC' },
-      { id: 'thermometer', name: 'Đo nhiệt độ' },
+      { id: 'masterblend', name: 'Masterblend' },
     ],
   },
 ];

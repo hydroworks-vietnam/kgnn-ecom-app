@@ -24,7 +24,7 @@ const MobileProductList = ({ handleAddToCart, onProductClick, initialCategory }:
     const loadData = async () => {
       try {
         const [productsData, categoriesData] = await Promise.all([
-          productService.fetchProducts(currentPage, 12, selectedCategory ? parseInt(selectedCategory) : undefined),
+          productService.fetchProducts(currentPage, 12, selectedCategory || undefined),
           categoryService.fetchCategories(),
         ]);
         setProducts(productsData.products);
