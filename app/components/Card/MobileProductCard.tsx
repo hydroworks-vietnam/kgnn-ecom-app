@@ -61,7 +61,7 @@ const MobileProductCard = ({ product, onAddToCart, onClick }: MobileProductCardP
       </div>
 
       <div className="p-3">
-        <h3 className="text-xs font-semibold text-gray-900 mb-2 line-clamp-2 min-h-[3rem]">
+        <h3 className="text-[11px] leading-tight font-semibold text-gray-900 mb-2 line-clamp-2 min-h-[2.2rem]">
           {product.name}
         </h3>
 
@@ -102,7 +102,7 @@ const MobileProductCard = ({ product, onAddToCart, onClick }: MobileProductCardP
             ) : (
               <>
                 <ShoppingCart className="w-3 h-3" />
-                <span>Giỏ</span>
+                  <span>Thêm</span>
               </>
             )}
           </button>

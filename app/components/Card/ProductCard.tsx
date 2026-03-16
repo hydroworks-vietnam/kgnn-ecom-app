@@ -65,11 +65,11 @@ const ProductCard = ({ product, onAddToCart, onClick }: ProductCardProps) => {
       </div>
 
       <div className="p-5 flex flex-col">
-        <h3 className="text-base font-bold text-gray-900 line-clamp-2 h-14">
+        <h3 className="text-sm font-bold text-gray-900 line-clamp-2 min-h-[2.5rem] mb-1 overflow-hidden">
           {product.name}
         </h3>
 
-        <p className="text-sm text-gray-500 mt-3">{product.unit}</p>
+        <p className="text-xs text-gray-500">Đơn vị: {product.unit}</p>
 
         <p className="text-base font-bold text-primary mt-2">
           {formatCurrency(product.unit_price)}

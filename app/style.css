@@ -4,12 +4,12 @@
 
 @layer base {
   :root {
-    --color-primary: #FF6B35;
+    --color-primary: #ec5b13;
   }
 
   html,
   body {
-    font-family: "Inter", ui-sans-serif, system-ui, sans-serif,
+    font-family: "Public Sans", ui-sans-serif, system-ui, sans-serif,
       "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     @apply bg-white;
   }

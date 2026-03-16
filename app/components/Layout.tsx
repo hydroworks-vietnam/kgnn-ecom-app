@@ -3,6 +3,7 @@ import { isCartOpen } from "@/store/cart";
 import Header from "./Header";
 import PageFooter from "./Footer/PageFooter";
 import FloatingCart from "./Button/FloatingCart";
+import MobileBottomNav from "./MobileBottomNav/MobileBottomNav";
 import { useLocation } from "react-router";
 
 interface LayoutProps {
@@ -22,11 +23,16 @@ const Layout = ({ children }: LayoutProps) => {
   return (
     <div className="flex flex-col min-h-screen bg-white">
       <Header />
-      <main className="flex-1 px-4 md:px-8 lg:px-36 pb-10 overflow-x-hidden">
+      <main className="flex-1 px-4 md:px-8 lg:px-36 pb-20 md:pb-10 overflow-x-hidden">
         {children}
       </main>
       <PageFooter />
-      {shouldShowFloatingCart && <FloatingCart onCartClick={handleCartClick} />}
+      {shouldShowFloatingCart && (
+        <div className="hidden md:block">
+          <FloatingCart onCartClick={handleCartClick} />
+        </div>
+      )}
+      <MobileBottomNav />
     </div>
   );
 };
