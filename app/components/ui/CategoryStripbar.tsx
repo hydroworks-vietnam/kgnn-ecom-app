@@ -54,12 +54,20 @@ export const CategoryStripbar: React.FC<CategoryStripProps> = ({
     };
     return findInTree(categories);
   };
+  
+  const isActiveCategory = (category: ICategory): boolean => {
+    if (category.id === selectedCategory) return true;
+    if (category.subcategories) {
+      return category.subcategories.some(sub => isActiveCategory(sub));
+    }
+    return false;
+  };
 
   const subcategories = expandedCategory ? getSubcategories(expandedCategory) : [];
 
   return (
-    <div className="space-y-4">
-      <div className="relative bg-white rounded-2xl shadow-sm">
+    <div className="shadow-md -mx-4 md:-mx-8 lg:-mx-36 bg-white">
+      <div className="relative">
         {canScrollLeft && (
           <button
             onClick={() => scroll('left')}
@@ -72,20 +80,21 @@ export const CategoryStripbar: React.FC<CategoryStripProps> = ({
         <div
           ref={scrollContainerRef}
           onScroll={checkScroll}
-          className="flex gap-2 overflow-x-auto scrollbar-hide px-12 py-4"
+          className="flex gap-2 overflow-x-auto scrollbar-hide px-4 md:px-8 lg:px-36 py-4"
         >
           {categories.map((category) => (
             <button
               key={category.id}
               onClick={() => {
-                onSelectCategory(category.id);
                 if (category.subcategories && category.subcategories.length > 0) {
-                  setExpandedCategory(
-                    expandedCategory === category.id ? null : category.id
-                  );
+                  setExpandedCategory(category.id);
+                }
+                
+                if (!isActiveCategory(category)) {
+                  onSelectCategory(category.id);
                 }
               }}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg whitespace-nowrap transition-all duration-200 flex-shrink-0 ${selectedCategory === category.id
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg whitespace-nowrap transition-all duration-200 flex-shrink-0 ${isActiveCategory(category)
                   ? 'bg-emerald-100 text-emerald-700 font-semibold'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
@@ -111,15 +120,18 @@ export const CategoryStripbar: React.FC<CategoryStripProps> = ({
         )}
       </div>
 
+      <hr />
+
       {subcategories.length > 0 && (
-        <div className="bg-white rounded-2xl shadow-sm p-4">
+        <div className="bg-white p-4 md:px-8 lg:px-36">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
             {subcategories.map((subcategory) => (
               <button
                 key={subcategory.id}
                 onClick={() => {
-                  onSelectCategory(subcategory.id);
-                  setExpandedCategory(null);
+                  if (selectedCategory !== subcategory.id) {
+                    onSelectCategory(subcategory.id);
+                  }
                 }}
                 className={`px-3 py-2 rounded-lg text-sm transition-all duration-200 ${selectedCategory === subcategory.id
                     ? 'bg-emerald-100 text-emerald-700 font-semibold'

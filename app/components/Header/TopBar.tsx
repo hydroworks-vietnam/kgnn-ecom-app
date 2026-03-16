@@ -8,8 +8,10 @@ const TopBar = () => {
   const $isCartOpen = useStore(isCartOpen);
   const $totalQuantity = useStore(totalCartQuantity);
   const [isCheckoutPage, setIsCheckoutPage] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     setIsCheckoutPage(window.location.pathname === '/checkout');
   }, []);
 
@@ -46,7 +48,7 @@ const TopBar = () => {
             {!isCheckoutPage && (
               <div className="relative" onClick={toggleCart}>
                 <ShoppingCartIcon className="w-4 h-4 sm:w-5 sm:h-5 cursor-pointer hover:text-black" />
-                {$totalQuantity > 0 && (
+                {mounted && $totalQuantity > 0 && (
                   <span className="absolute -top-2 -right-2 bg-primary text-white text-[10px] rounded-full h-4 w-4 flex items-center justify-center">
                     {$totalQuantity > 99 ? '99+' : $totalQuantity}
                   </span>

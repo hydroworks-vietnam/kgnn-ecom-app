@@ -5,6 +5,7 @@ import SafetyImage from '@/components/Image/SafetyImage';
 import { ShoppingCart } from 'lucide-react';
 import QuantityControl from '@/components/ui/QuantityControl';
 import useCartStore from '@/store/cart';
+import Spinner from '../Spinner';
 
 interface ProductCardProps {
   product: IProduct;
@@ -27,7 +28,7 @@ const ProductCard = ({ product, onAddToCart, onClick }: ProductCardProps) => {
     setTimeout(() => {
       setShowPopup(false);
       setIsAdding(false);
-    }, 1000);
+    }, 300);
     onAddToCart(product, quantity);
   };
 
@@ -98,8 +99,14 @@ const ProductCard = ({ product, onAddToCart, onClick }: ProductCardProps) => {
                 : 'bg-primary text-white hover:bg-primary/90'
             }`}
           >
-            <ShoppingCart className="w-4 h-4" />
-            <span>Thêm vào giỏ</span>
+            {isAdding ? (
+              <Spinner />
+            ) : (
+              <>
+                  <ShoppingCart className="w-4 h-4" />
+                  <span>Thêm vào giỏ</span>
+              </>
+            )}
           </button>
         </div>
       </div>

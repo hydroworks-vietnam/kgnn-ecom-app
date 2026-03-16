@@ -30,9 +30,18 @@ export const CategorySidebar: React.FC<CategorySidebarProps> = ({
     setExpandedCategories(newExpanded);
   };
 
+  const isActiveCategory = (category: Category): boolean => {
+    if (category.id === selectedCategory) return true;
+    if (category.subcategories) {
+      return category.subcategories.some(sub => isActiveCategory(sub));
+    }
+    return false;
+  };
+
   const renderCategory = (category: Category, level: number = 0) => {
     const isExpanded = expandedCategories.has(category.id);
     const isSelected = selectedCategory === category.id;
+    const isActive = isActiveCategory(category);
     const hasSubcategories = category.subcategories && category.subcategories.length > 0;
 
     return (
@@ -40,12 +49,14 @@ export const CategorySidebar: React.FC<CategorySidebarProps> = ({
         <div className="flex items-center">
           <button
             onClick={() => {
-              onSelectCategory(category.id);
+              if (!isActive) {
+                onSelectCategory(category.id);
+              }
               if (hasSubcategories) {
                 toggleCategory(category.id);
               }
             }}
-            className={`flex-1 text-left px-4 py-3 rounded-lg transition-all duration-200 ${isSelected
+            className={`flex-1 text-left px-4 py-3 rounded-lg transition-all duration-200 ${isActive
                 ? 'bg-emerald-50 text-emerald-700 font-semibold'
                 : 'text-gray-700 hover:bg-gray-50'
               }`}

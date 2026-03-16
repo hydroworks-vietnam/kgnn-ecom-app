@@ -69,7 +69,11 @@ const DesktopProductList = ({ handleAddToCart, onProductClick }: DesktopProductL
           <CategorySidebar
             categories={categories}
             selectedCategory={selectedCategory}
-            onSelectCategory={setSelectedCategory}
+            onSelectCategory={(id) => {
+              if (id === selectedCategory) return;
+              setSelectedCategory(id);
+              setCurrentPage(1);
+            }}
           />
 
           <div className="flex-1">

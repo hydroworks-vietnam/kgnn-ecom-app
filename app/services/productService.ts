@@ -291,11 +291,11 @@ const PRODUCTS: IProduct[] = [
   },
 ];
 
-export const fetchProducts = async (page: number = 1, limit: number = 12, categoryId?: string): Promise<IProductListResponse> => {
+export const fetchProducts = async (page: number = 1, limit: number = 12, categoryId?: string | string[]): Promise<IProductListResponse> => {
   return new Promise((resolve) => {
     setTimeout(() => {
       const filteredProducts = categoryId 
-        ? PRODUCTS.filter(p => p.category_id === categoryId)
+        ? PRODUCTS.filter(p => Array.isArray(categoryId) ? categoryId.includes(p.category_id) : p.category_id === categoryId)
         : PRODUCTS;
       
       const start = (page - 1) * limit;

@@ -5,6 +5,7 @@ import SafetyImage from '@/components/Image/SafetyImage';
 import { ShoppingCart } from 'lucide-react';
 import QuantityControl from '@/components/ui/QuantityControl';
 import useCartStore from '@/store/cart';
+import Spinner from '../Spinner';
 
 interface MobileProductCardProps {
   product: IProduct;
@@ -27,7 +28,7 @@ const MobileProductCard = ({ product, onAddToCart, onClick }: MobileProductCardP
     setTimeout(() => {
       setShowPopup(false);
       setIsAdding(false);
-    }, 2000);
+    }, 300);
     onAddToCart(product, quantity);
   };
 
@@ -74,8 +75,10 @@ const MobileProductCard = ({ product, onAddToCart, onClick }: MobileProductCardP
           </span>
         </div>
 
-        <div className="flex items-center gap-2 relative">
-          <QuantityControl quantity={quantity} onQuantityChange={handleQuantityChange} />
+        <div className="flex flex-col gap-2 relative">
+          <div className="flex justify-around">
+            <QuantityControl quantity={quantity} onQuantityChange={handleQuantityChange} />
+          </div>
           
           {showPopup && (
             <div className="absolute -top-10 left-1/2 -translate-x-1/2 z-50 animate-in zoom-in-50 duration-300">
@@ -88,21 +91,18 @@ const MobileProductCard = ({ product, onAddToCart, onClick }: MobileProductCardP
           <button
             onClick={handleAddToCart}
             disabled={isAdding || quantity === 0}
-            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg transition-all duration-200 text-xs ${
+            className={`w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg transition-all duration-200 text-xs font-medium ${
               isAdding || quantity === 0
-                ? 'bg-gray-300 cursor-not-allowed'
+              ? 'bg-gray-300 cursor-not-allowed text-gray-500'
                 : 'bg-primary text-white hover:bg-primary/90'
             }`}
           >
             {isAdding ? (
-              <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
+              <Spinner />
             ) : (
               <>
-                <ShoppingCart className="w-3 h-3" />
-                  <span>Thêm</span>
+                  <ShoppingCart className="w-3.5 h-3.5" />
+                  <span>Thêm vào giỏ</span>
               </>
             )}
           </button>
